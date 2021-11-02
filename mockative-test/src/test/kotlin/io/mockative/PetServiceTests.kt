@@ -3,8 +3,9 @@ package io.mockative
 import org.junit.Test
 
 @Mocks(PetStore::class)
-@Mocks(NoiseStore::class)
 class PetServiceTests {
+
+    @Mock private val noiseStore = mock(NoiseStore::class)
 
     @Test
     fun generatesExpectedPetStoreMock() {
