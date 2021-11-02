@@ -65,9 +65,11 @@ kotlin {
             }
         }
 
-        all {
-            languageSettings {
-                optIn("io.mockative.PropertyMocks")
+        withType {
+            if (name.endsWith("Test")) {
+                languageSettings {
+                    optIn("io.mockative.PropertyMocks")
+                }
             }
         }
     }
