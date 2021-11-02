@@ -1,6 +1,8 @@
 package dk.nillerr.mockative
 
+import kotlinx.coroutines.Dispatchers
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 

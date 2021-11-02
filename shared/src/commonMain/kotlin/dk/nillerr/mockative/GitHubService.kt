@@ -1,7 +1,14 @@
 package dk.nillerr.mockative
 
-class GitHubService(private val api: GitHubAPI) {
+import kotlinx.coroutines.withContext
+
+class GitHubService(
+    private val api: GitHubAPI,
+    private val dispatchers: ApplicationDispatchers
+) {
     suspend fun repository(id: String): Repository? {
-        return api.repository(id)
+        return withContext(dispatchers.default) {
+            api.repository(id)
+        }
     }
 }

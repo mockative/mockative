@@ -1,11 +1,12 @@
 package dk.nillerr.mockative
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 class GitHubAPIMethodTests {
+
     @Test
     fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed() = runTest { service, api ->
         // given
@@ -24,8 +25,10 @@ class GitHubAPIMethodTests {
 
     @Mocks(GitHubAPI::class)
     private fun runTest(block: suspend CoroutineScope.(GitHubService, GitHubAPI) -> Unit) = runBlockingTest {
+        val dispatchers = ApplicationDispatchers.Unconfined
+
         val github = mock(GitHubAPI::class)
-        val service = GitHubService(github)
+        val service = GitHubService(github, dispatchers)
         block(service, github).also {
             verify(github)
         }

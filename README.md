@@ -6,7 +6,8 @@ Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Proce
 
 ## Installation
 
-Mockative uses [KSP] to generate mock classes for interfaces, and as such, it requires adding the KSP plugin in addition to adding the runtime library and symbol processor dependencies.
+Mockative uses [KSP] to generate mock classes for interfaces, and as such, it requires adding the
+KSP plugin in addition to adding the runtime library and symbol processor dependencies.
 
 ### build.gradle.kts
 
@@ -32,7 +33,11 @@ dependencies {
 
 ## Testing with Mockative
 
-The recommended way to test with Mockative is to use the `@Mock` annotation, which requires opt-in because it doesn't support object freezing of mocks when passing between threads when testing suspending functions. We provide a [snippet](#coroutineskt) that enables testing coroutines while using the `@Mock` annotation. To opt-in to the `@Mock` annotation add the following to your **build.gradle.kts** file:
+The recommended way to test with Mockative is to use the `@Mock` annotation, which requires opt-in
+because it doesn't support object freezing of mocks when passing between threads when testing
+suspending functions. We provide a [snippet](#coroutineskt) that enables testing coroutines while
+using the `@Mock` annotation. To opt-in to the `@Mock` annotation add the following to your **
+build.gradle.kts** file:
 
 ```kotlin
 kotlin {
@@ -46,19 +51,24 @@ kotlin {
 }
 ```
 
-To mock a given method on an interface a property holding the interface must be annotated with the `@Mock` annotation, and be retrieved using the `mock(KClass<T>)` function:
+To mock a given method on an interface a property holding the interface must be annotated with
+the `@Mock` annotation, and be retrieved using the `mock(KClass<T>)` function:
 
 ```kotlin
 class GitHubServiceTests {
-    @Mock val api = mock(GitHubAPI::class)
+    @Mock
+    val api = mock(GitHubAPI::class)
 }
 ```
 
-Then, using the `given(receiver, block)` function, you can specify a function call, property getter or property setter to stub, and provide an implementation using one of the `then` functions on the expectation builder returned by `given`:
+Then, using the `given(receiver, block)` function, you can specify a function call, property getter
+or property setter to stub, and provide an implementation using one of the `then` functions on the
+expectation builder returned by `given`:
 
 ```kotlin
 class GitHubServiceTests {
-    @Mock val api = mock(GitHubAPI::class)
+    @Mock
+    val api = mock(GitHubAPI::class)
 
     val service = GitHubService(api)
 
@@ -92,11 +102,13 @@ The available `then` functions are:
 
 ### Arguments
 
-You can access the arguments of a call to a mock using the first argument (`Array<Any?>`) in the `then` or `thenSuspend` function:
+You can access the arguments of a call to a mock using the first argument (`Array<Any?>`) in
+the `then` or `thenSuspend` function:
 
 ```kotlin
 class GitHubServiceTests {
-    @Mock val api = mock(GitHubAPI::class)
+    @Mock
+    val api = mock(GitHubAPI::class)
 
     val service = GitHubService(api)
 
@@ -120,7 +132,8 @@ class GitHubServiceTests {
 }
 ```
 
-The use case of this is very limited though, since Mockative doesn't provide any way to match arguments in expectations other than equality.
+The use case of this is very limited though, since Mockative doesn't provide any way to match
+arguments in expectations other than equality.
 
 ## Example
 
@@ -155,7 +168,8 @@ A test for the `GitHubService.repository(String)` method could look like this:
 ```kotlin
 // src/commonTest/kotlin/io/mockative/GitHubServiceTests.kt
 class GitHubServiceTests {
-    @Mock val api = mock(GitHubAPI::class)
+    @Mock
+    val api = mock(GitHubAPI::class)
 
     val service = GitHubService(api)
 
@@ -183,7 +197,8 @@ You can verify that no unmet expectations were left in a mock using the `verify(
 
 ```kotlin
 class GitHubServiceTests {
-    @Mock val api = mock(GitHubApi::class)
+    @Mock
+    val api = mock(GitHubApi::class)
 
     @AfterTest
     fun verifyMocks() {
@@ -194,7 +209,10 @@ class GitHubServiceTests {
 
 ### Testing Coroutines
 
-Object freezing can present a challenge when testing on Kotlin/Native using coroutines. To test coroutines we recommend using the implementations of `runBlockingTest` we've provided below, which supports the use of the `@Mock` annotation on properties in test classes by using `runBlocking` on the current dispatcher / thread on iOS.
+Object freezing can present a challenge when testing on Kotlin/Native using coroutines. To test
+coroutines we recommend using the implementations of `runBlockingTest` we've provided below, which
+supports the use of the `@Mock` annotation on properties in test classes by using `runBlocking` on
+the current dispatcher / thread on iOS.
 
 #### Coroutines.kt
 
@@ -222,7 +240,8 @@ actual fun runBlockingTest(block: suspend CoroutineScope.() -> Unit): dynamic =
 ```kotlin
 // src/commonTest/kotlin/io/mockative/GitHubServiceTests.kt
 class GitHubServiceTests {
-    @Mock val api = mock(GitHubAPI::class)
+    @Mock
+    val api = mock(GitHubAPI::class)
 
     val service = GitHubService(api)
 
@@ -244,40 +263,63 @@ class GitHubServiceTests {
 }
 ```
 
-Additionally, you can use the `thenSuspend(block)` function if the mocked implementation of the function call is itself a suspending function.
+Additionally, you can use the `thenSuspend(block)` function if the mocked implementation of the
+function call is itself a suspending function.
 
 #### Running tests in a separate thread
 
-If you've adopted a strategy of running tests in a separate thread from the thread instantiating the test classes you will run into object freezing issues when using the `@Mock` annotation on properties. While we recommend switching to the implementation of `runBlockingTest` we've provided above, we also provide an alternative to enable mocking using `@Mocks(KClass<*>)` annotations. An example of an idiomatic approach for this kind of testing is presented below:
+If you've adopted a strategy of running tests in a separate thread from the thread instantiating the
+test classes you will run into object freezing issues when using the `@Mock` annotation on
+properties. While we recommend switching to the implementation of `runBlockingTest` we've provided
+above, we also provide an alternative to enable mocking using `@Mocks(KClass<*>)` annotations.
+
+An example of an idiomatic approach for this kind of testing is presented below:
 
 ```kotlin
 // src/commonTest/kotlin/io/mockative/GitHubServiceTests.kt
 class GitHubServiceTests {
     @Test
-    fun givenRepositories_whenFetchingRepositories_thenRepositoriesAreReturned() = test { service, api ->
-        // given
-        val id = "mockative/mockative"
-        val repository = Repository(id, "Mockative")
+    fun givenRepositories_whenFetchingRepositories_thenRepositoriesAreReturned() =
+        test { service, api ->
+            // given
+            val id = "mockative/mockative"
+            val repository = Repository(id, "Mockative")
 
-        given(api) { repository(id) }
-            .thenReturn(repository)
+            given(api) { repository(id) }
+                .thenReturn(repository)
 
-        // when
-        val result = service.repository(id)
+            // when
+            val result = service.repository(id)
 
-        // then
-        assertEquals(repository, result)
-    }
+            // then
+            assertEquals(repository, result)
+        }
 
     @Mocks(GitHubAPI::class)
-    private fun runTest(block: suspend CoroutineScope.(GitHubService, GitHubAPI) -> Unit) = runBlockingTest {
-        val github = mock(GitHubAPI::class)
-        val service = GitHubService(github)
-        block(service, github).also {
-            verify(github)
+    private fun runTest(block: suspend CoroutineScope.(GitHubService, GitHubAPI) -> Unit) =
+        runBlockingTest {
+            val github = mock(GitHubAPI::class)
+            val service = GitHubService(github)
+            block(service, github).also {
+                verify(github)
+            }
         }
-    }
 }
 ```
 
-How you use the `@Mocks(KClass<*>)` annotation is up to you. You can annotate any class or function with it, as all it does is inform the Mockative symbol processor to generate a mock for the specified type. The annotation is repeatable, so you can attach as many mock declarations to a class or function as you need.
+How you use the `@Mocks(KClass<*>)` annotation is up to you. You can annotate any class or function
+with it, as all it does is inform the Mockative symbol processor to generate a mock for the
+specified type. The annotation is repeatable, so you can attach as many mock declarations to a class
+or function as you need.
+
+#### Multithreading
+
+Multithreading is not supported by Mockative when targeting Kotlin/Native due to the nature of how
+Mockative records invocations on expectations, which results in errors due to mocks being frozen
+when crossing thread boundaries. If you're using multiple dispatchers in your code, one way to
+overcome this challenge is by making the dispatchers configurable, and ensuring only a single
+dispatcher is used in tests. Additionally, you may have to resort to the `@Mocks(KClass<*>)`
+approach described above
+in [Running tests in a separate thread](#running-tests-in-a-separate-thread), and ensure the 
+dispatcher you use in the `runBlockingTest` function is the same dispatcher you use all over your 
+application code, thus ensuring state never crosses thread boundaries. 

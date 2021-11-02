@@ -1,7 +1,13 @@
 package dk.nillerr.mockative
 
+/**
+ * Represents an invocation of a member on a mock.
+ *
+ * @param method the name of the invoked member.
+ * @param arguments the arguments passed during invocation of the member.
+ */
 data class Invocation(val method: String, val arguments: List<Any?>) {
-    fun matches(invocation: Invocation): Boolean {
+    internal fun matches(invocation: Invocation): Boolean {
         if (method != invocation.method) {
             return false
         }

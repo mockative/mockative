@@ -30,6 +30,9 @@ annotation class PropertyMocks
 @Repeatable
 annotation class Mock
 
+/**
+ * Enables mocking of the specified type.
+ */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
 @Repeatable

@@ -5,15 +5,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
 /**
- * The base class of a generated mock class
+ * The base class of a generated mock class.
  */
-abstract class Mocked {
+abstract class Mocked<T : Any> {
 
+    /**
+     * Using the unconfined dispatcher for suspending functions ensures we can record the
+     * [Invocation] on the [expectation].
+     */
     private val dispatcher = Dispatchers.Unconfined
     internal val scope = CoroutineScope(dispatcher + SupervisorJob())
 
-    internal var expectations = mutableListOf<Expectation>()
-    internal var expectation: Expectation? = null
+    internal var expectations = mutableListOf<Expectation<T>>()
+    internal var expectation: Expectation<T>? = null
 
     protected fun <R> mockGetter(property: String): R = mock("\$get_$property")
 
@@ -31,17 +35,15 @@ abstract class Mocked {
                 expectations.remove(existingExpectation)
             }
 
-            builder.invocation = invocation
-
-            throw MockingInProgressError()
+            throw MockingInProgressError(invocation)
         } else {
             // This path is called during a call to the method
             val expectation = findExpectation(invocation)
 
             val returnValue = when (val result = resultOf(expectation, invocation)) {
-                is ExpectationResult.Constant -> result.value as R
-                is ExpectationResult.Immediate -> result.block(args) as R
-                is ExpectationResult.Suspended -> result.block(args) as R
+                is ExpectationResult.Constant<T> -> result.value as R
+                is ExpectationResult.Immediate<T> -> result.block.invoke(this as T, args) as R
+                is ExpectationResult.Suspended<T> -> result.block.invoke(this as T, args) as R
             }
 
             expectation.invocations += 1
@@ -62,17 +64,15 @@ abstract class Mocked {
                 expectations.remove(existingExpectation)
             }
 
-            builder.invocation = invocation
-
-            throw MockingInProgressError()
+            throw MockingInProgressError(invocation)
         } else {
             // This path is called during a call to the method
             val expectation = findExpectation(invocation)
 
             val returnValue = when (val result = resultOf(expectation, invocation)) {
-                is ExpectationResult.Constant -> result.value as R
-                is ExpectationResult.Immediate -> result.block(args) as R
-                is ExpectationResult.Suspended -> throw SuspendedExpectationOnNonSuspendingFunctionError(this, invocation)
+                is ExpectationResult.Constant<T> -> result.value as R
+                is ExpectationResult.Immediate<T> -> result.block.invoke(this as T, args) as R
+                is ExpectationResult.Suspended<T> -> throw SuspendedExpectationOnNonSuspendingFunctionError(this, invocation)
             }
 
             expectation.invocations += 1
@@ -81,14 +81,14 @@ abstract class Mocked {
         }
     }
 
-    private fun findExpectation(invocation: Invocation): Expectation {
+    private fun findExpectation(invocation: Invocation): Expectation<T> {
         return findExpectationOrNull(invocation) ?: throw MissingExpectationError(this, invocation)
     }
 
     private fun findExpectationOrNull(invocation: Invocation) =
         expectations.firstOrNull { it.invocation.matches(invocation) }
 
-    private fun resultOf(expectation: Expectation, invocation: Invocation): ExpectationResult {
+    private fun resultOf(expectation: Expectation<T>, invocation: Invocation): ExpectationResult<T> {
         return expectation.result ?: throw MissingExpectationError(this, invocation)
     }
 }

@@ -6,9 +6,19 @@ class NoSuchMockError(type: KClass<*>) : Error(
     """
         A mock for the type ${type.name} was not generated.
         
-            Make sure the property holding the mock is annotated with @Mock:
+            Make sure either the property holding the mock is annotated with @Mock, or a method or class is annotated with @Mocks:
                 @Mock
                 private val myMock = mock(${type.name}::class)
+                
+                ----- or -----
+                
+                private lateinit var myMock: ${type.name}
+                
+                @Mocks
+                @BeforeTest
+                fun setupMocks() {
+                    myMock = mock(${type.name}::class)
+                }
     """.trimIndent()
 )
 
@@ -16,9 +26,19 @@ class GivenNonMockError(receiver: Any) : Error(
     """
         Attempt to stub a non-mock instance of type ${receiver.getClassName()}.
         
-            Make sure the property holding the mock is annotated with @Mock:
+            Make sure either the property holding the mock is annotated with @Mock, or a method or class is annotated with @Mocks:
                 @Mock
                 private val myMock = mock(${receiver.getClassName()}::class)
+                
+                ----- or -----
+                
+                private lateinit var myMock: ${receiver.getClassName()}
+                
+                @Mocks
+                @BeforeTest
+                fun setupMocks() {
+                    myMock = mock(${receiver.getClassName()}::class)
+                }
     """.trimIndent()
 )
 
@@ -26,9 +46,19 @@ class VerifyNonMockError(receiver: Any) : Error(
     """
         Attempt to verify a non-mock instance of type ${receiver.getClassName()}.
         
-            Make sure the property holding the mock is annotated with @Mock:
+            Make sure either the property holding the mock is annotated with @Mock, or a method or class is annotated with @Mocks:
                 @Mock
                 private val myMock = mock(${receiver.getClassName()}::class)
+                
+                ----- or -----
+                
+                private lateinit var myMock: ${receiver.getClassName()}
+                
+                @Mocks
+                @BeforeTest
+                fun setupMocks() {
+                    myMock = mock(${receiver.getClassName()}::class)
+                }
     """.trimIndent()
 )
 

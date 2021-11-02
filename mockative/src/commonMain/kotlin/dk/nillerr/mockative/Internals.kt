@@ -11,4 +11,4 @@ internal fun Any.getClassName() = this::class.simpleName ?: "KClass[${this::clas
  * The exception expected to be thrown by a method while it is being mocked through a call to
  * [given].
  */
-internal class MockingInProgressError : Error()
+internal class MockingInProgressError(val invocation: Invocation) : Error()

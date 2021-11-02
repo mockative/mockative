@@ -1,24 +1,47 @@
 package dk.nillerr.mockative
 
-class ExpectationBuilder<R>(override val instance: Any) : Expectation {
+class ExpectationBuilder<T : Any, R>(override val instance: T) : Expectation<T> {
     override lateinit var invocation: Invocation
 
-    override var result: ExpectationResult? = null
+    override var result: ExpectationResult<T>? = null
     override var invocations: Int = 0
 
+    /**
+     * Stubs the expectation by returning the specified [value].
+     *
+     * @param value the value to return on an invocation of the expectation.
+     */
     fun thenReturn(value: R) {
         result = ExpectationResult.Constant(value)
     }
 
-    fun then(block: (args: Array<out Any?>) -> R) {
+    /**
+     * Stubs the expectation by invoking the specified [block] on invocations.
+     *
+     * @param block the block to invoke on an invocation of the expectation.
+     */
+    fun then(block: T.(args: Array<out Any?>) -> R) {
         result = ExpectationResult.Immediate(block)
     }
 
-    fun thenSuspend(block: suspend (args: Array<out Any?>) -> R) {
+    /**
+     * Stubs the expectation by invoking the specified [block] on invocations.
+     *
+     * @param block the block to invoke on an invocation of the expectation.
+     */
+    fun thenSuspend(block: suspend T.(args: Array<out Any?>) -> R) {
         result = ExpectationResult.Suspended(block)
     }
 
+    /**
+     * Stubs the expectation by throwing the specified [error] on invocations.
+     *
+     * @param error the error to throw on an invocation of the expectation.
+     */
     fun thenThrow(error: Throwable) = then { throw error }
 }
 
-fun ExpectationBuilder<Unit>.thenDoNothing() = thenReturn(Unit)
+/**
+ * Stubs the expectation by returning [Unit] on invocations.
+ */
+fun <T : Any> ExpectationBuilder<T, Unit>.thenDoNothing() = thenReturn(Unit)
