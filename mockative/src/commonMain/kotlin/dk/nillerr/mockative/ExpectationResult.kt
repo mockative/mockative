@@ -1,4 +1,4 @@
-package dk.nillerr.mockative
+package io.mockative
 
 /**
  * Represents the result of an expectation.

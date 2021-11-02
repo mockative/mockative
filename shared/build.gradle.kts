@@ -67,7 +67,7 @@ kotlin {
 
         all {
             languageSettings {
-                optIn("dk.nillerr.mockative.PropertyMocks")
+                optIn("io.mockative.PropertyMocks")
             }
         }
     }

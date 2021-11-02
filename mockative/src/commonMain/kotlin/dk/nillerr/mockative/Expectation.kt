@@ -1,4 +1,4 @@
-package dk.nillerr.mockative
+package io.mockative
 
 interface Expectation<T : Any> {
     val instance: T

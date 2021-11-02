@@ -1,4 +1,4 @@
-package dk.nillerr.mockative
+package io.mockative
 
 /**
  * Represents an invocation of a member on a mock.

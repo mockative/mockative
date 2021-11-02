@@ -1,4 +1,4 @@
-package dk.nillerr.mockative
+package io.mockative
 
 import kotlinx.coroutines.launch
 

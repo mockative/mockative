@@ -1,4 +1,4 @@
-package dk.nillerr.mockative
+package io.mockative
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

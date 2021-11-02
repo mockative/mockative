@@ -1,4 +1,4 @@
-package dk.nillerr.mockative
+package io.mockative
 
 class ExpectationBuilder<T : Any, R>(override val instance: T) : Expectation<T> {
     override lateinit var invocation: Invocation
