@@ -15,3 +15,4 @@ rootProject.name = "Mockative"
 include(":shared")
 include(":mockative")
 include(":mockative-processor")
+include(":mockative-test")

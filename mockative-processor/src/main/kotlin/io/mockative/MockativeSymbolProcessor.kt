@@ -1,11 +1,8 @@
 package io.mockative
 
-import com.google.devtools.ksp.getAnnotationsByType
-import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
 import java.io.OutputStreamWriter
-import kotlin.reflect.KClass
 
 class MockativeSymbolProcessor(
     private val codeGenerator: CodeGenerator,

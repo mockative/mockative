@@ -20,15 +20,10 @@ kotlin {
             resources.srcDir("src/main/resources")
         }
 
-        val jvmTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
-        }
-
         all {
             languageSettings {
                 optIn("com.google.devtools.ksp.KspExperimental")
+                optIn("io.mockative.PropertyMocks")
             }
         }
     }
