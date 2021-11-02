@@ -36,15 +36,17 @@ dependencies {
 The recommended way to test with Mockative is to use the `@Mock` annotation, which requires opt-in
 because it doesn't support object freezing of mocks when passing between threads when testing
 suspending functions. We provide a [snippet](#coroutineskt) that enables testing coroutines while
-using the `@Mock` annotation. To opt-in to the `@Mock` annotation add the following to your **
-build.gradle.kts** file:
+using the `@Mock` annotation. To opt-in to the `@Mock` annotation add the following to your 
+**build.gradle.kts** file:
 
 ```kotlin
 kotlin {
     sourceSets {
-        all {
-            languageSettings {
-                optIn("io.mockative.PropertyMocks")
+        withType {
+            if (name.endsWith("Test")) {
+                languageSettings {
+                    optIn("io.mockative.PropertyMocks")
+                }
             }
         }
     }
