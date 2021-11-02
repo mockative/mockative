@@ -7,6 +7,9 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+version = "1.0.0"
+group = "io.mockative"
+
 kotlin {
     js {
         browser()

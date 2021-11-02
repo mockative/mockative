@@ -11,7 +11,8 @@ pluginManagement {
     }
 }
 
-rootProject.name = "Mockative"
+rootProject.name = "mockative"
+
 include(":shared")
 include(":mockative")
 include(":mockative-processor")
