@@ -1,12 +1,10 @@
 plugins {
     kotlin("multiplatform")
-
-    // Publishing
-    `maven-publish`
+    id("convention.publication")
 }
 
-group = properties["project.group"] as String
-version = properties["project.version"] as String
+group = findProperty("project.group") as String
+version = findProperty("project.version") as String
 
 kotlin {
     jvm()
