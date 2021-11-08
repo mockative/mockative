@@ -30,6 +30,7 @@ class GitHubServiceMocksTest {
         val service = GitHubService(github, dispatchers)
         block(service, github).also {
             verify(github)
+            close(github)
         }
     }
 }

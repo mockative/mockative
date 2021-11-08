@@ -6,9 +6,5 @@ interface Expectation<T : Any> {
     var result: ExpectationResult<T>?
     var invocations: Int
 
-    fun verify() {
-        if (invocations == 0) {
-            throw ExpectationNotMetError(instance, invocation)
-        }
-    }
+    fun close()
 }

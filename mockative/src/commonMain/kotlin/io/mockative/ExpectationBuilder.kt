@@ -1,10 +1,28 @@
 package io.mockative
 
-class ExpectationBuilder<T : Any, R>(override val instance: T) : Expectation<T> {
-    override lateinit var invocation: Invocation
+import io.mockative.concurrency.Confined
 
-    override var result: ExpectationResult<T>? = null
-    override var invocations: Int = 0
+internal class ExpectationBuilderData<T : Any> {
+    lateinit var invocation: Invocation
+
+    var result: ExpectationResult<T>? = null
+    var invocations: Int = 0
+}
+
+class ExpectationBuilder<T : Any, R>(override val instance: T) : Expectation<T> {
+    internal val data = Confined { ExpectationBuilderData<T>() }
+
+    override var invocation: Invocation
+        get() = data { invocation }
+        set(value) = data { invocation = value }
+
+    override var result: ExpectationResult<T>?
+        get() = data { result }
+        set(value) = data { result = value }
+
+    override var invocations: Int
+        get() = data { invocations }
+        set(value) = data { invocations = value }
 
     /**
      * Stubs the expectation by returning the specified [value].
@@ -39,6 +57,10 @@ class ExpectationBuilder<T : Any, R>(override val instance: T) : Expectation<T> 
      * @param error the error to throw on an invocation of the expectation.
      */
     fun thenThrow(error: Throwable) = then { throw error }
+
+    override fun close() {
+        data.close()
+    }
 }
 
 /**
