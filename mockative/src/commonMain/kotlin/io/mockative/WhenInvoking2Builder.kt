@@ -20,12 +20,6 @@ class WhenInvoking2Builder<P1, P2, R>(private val mock: Mockable, private val fu
     }
 
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnyResultBuilder<R> {
-        fun then(block: () -> R) {
-            val expectation = Expectation.Function(function.name, arguments)
-            val stub = BlockingStub(expectation) { block() }
-            mock.addBlockingStub(stub)
-        }
-
         fun then(block: (P1, P2) -> R) {
             val expectation = Expectation.Function(function.name, arguments)
             val stub = BlockingStub(expectation) { args ->
@@ -34,6 +28,6 @@ class WhenInvoking2Builder<P1, P2, R>(private val mock: Mockable, private val fu
             mock.addBlockingStub(stub)
         }
 
-        override fun thenInvoke(block: () -> R) = then(block)
+        override fun thenInvoke(block: () -> R) = then { _, _ -> block() }
     }
 }
