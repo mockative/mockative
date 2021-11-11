@@ -10,7 +10,7 @@ fun <P1, R, F> whenInvoking(instance: Any, function: F): WhenInvoking1Builder<P1
 }
 
 fun <P1, R, F> whenInvoking1(instance: Any, function: F): WhenInvoking1Builder<P1, R> where F : (P1) -> R, F : KFunction<R> {
-    return WhenInvoking1Builder(instance.asMock(), function)
+    return WhenInvoking1Builder(instance.asMockable(), function)
 }
 
 class WhenInvoking1Builder<P1, R>(private val mock: Mockable, private val function: KFunction<R>) {
@@ -28,6 +28,6 @@ class WhenInvoking1Builder<P1, R>(private val mock: Mockable, private val functi
             mock.addBlockingStub(stub)
         }
 
-        override fun then(block: () -> R) = then { _ -> block() }
+        override fun thenInvoke(block: () -> R) = then { block() }
     }
 }

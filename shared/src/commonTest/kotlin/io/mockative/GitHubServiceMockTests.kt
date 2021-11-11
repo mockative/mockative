@@ -11,8 +11,8 @@ class GitHubServiceMockTests {
     private val service = GitHubService(github, ApplicationDispatchers.Unconfined)
 
     @AfterTest
-    fun verifyMocks() {
-        validateMocks()
+    fun validateMocks() {
+        validate(github)
     }
 
     @Test
@@ -21,7 +21,7 @@ class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        givenSuspend(github) { repository(id) }
+        given(github).coroutine { repository(id) }
             .thenReturn(repository)
 
         // when
@@ -37,7 +37,7 @@ class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        given(github) { repository(id) }
+        given(github).coroutine { repository(id) }
             .thenReturn(repository)
 
         // when

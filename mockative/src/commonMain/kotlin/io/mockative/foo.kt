@@ -53,6 +53,9 @@ fun foo(service: DemoService) {
     given(service) { thing("abc") }
         .then { "def" }
 
+    given(service) { thing("abc") }
+        .thenReturn("def")
+
     given(service) { prop() }
         .then { println("given(service) { prop() }") }
 
@@ -65,6 +68,12 @@ fun foo(service: DemoService) {
     given(service) { prop = 2 }
         .then { println("given(service) { prop = 2 }") }
 
-    givenSuspend(service) { asyncThing() }
+    given(service).invocation { prop = 2 }
+        .then { println("given(service).invocation { prop = 2 }") }
+
+    givenCoroutine(service) { asyncThing() }
         .then { println("givenSuspend(service) { asyncThing() }") }
+
+    given(service).coroutine { asyncThing() }
+        .then { println("given(service).coroutine { asyncThing() }") }
 }

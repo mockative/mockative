@@ -19,21 +19,14 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt")
-                implementation("org.jetbrains.kotlinx:atomicfu:0.16.3")
             }
         }
 
-        val iosMain by getting
+        val iosMain by creating
 
         val iosArm64Main by getting {
             dependsOn(iosMain)
         }
-
-//        val iosX64Main by getting {
-//            languageSettings {
-////                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-//            }
-//        }
 
         all {
             languageSettings {

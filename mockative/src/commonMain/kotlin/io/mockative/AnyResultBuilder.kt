@@ -1,11 +1,11 @@
 package io.mockative
 
 interface AnyResultBuilder<R> {
-    fun then(block: () -> R)
+    fun thenInvoke(block: () -> R)
 
-    fun thenReturn(value: R) = then { value }
+    fun thenReturn(value: R) = thenInvoke { value }
+
+    fun thenThrow(error: Error) = thenInvoke { throw error }
 }
 
-interface AnySuspendResultBuilder<R> {
-    fun then(block: suspend () -> R)
-}
+fun AnyResultBuilder<Unit>.thenDoNothing() = thenInvoke { }

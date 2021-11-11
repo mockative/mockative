@@ -10,7 +10,7 @@ fun <P1, P2, R, F> whenInvoking(instance: Any, function: F): WhenInvoking2Builde
 }
 
 fun <P1, P2, R, F> whenInvoking2(instance: Any, function: F): WhenInvoking2Builder<P1, P2, R> where F : (P1, P2) -> R, F : KFunction<R> {
-    return WhenInvoking2Builder(instance.asMock(), function)
+    return WhenInvoking2Builder(instance.asMockable(), function)
 }
 
 class WhenInvoking2Builder<P1, P2, R>(private val mock: Mockable, private val function: KFunction<R>) {
@@ -19,7 +19,7 @@ class WhenInvoking2Builder<P1, P2, R>(private val mock: Mockable, private val fu
         return ResultBuilder(arguments)
     }
 
-    inner class ResultBuilder(private val arguments: ArgumentsMatcher) {
+    inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnyResultBuilder<R> {
         fun then(block: () -> R) {
             val expectation = Expectation.Function(function.name, arguments)
             val stub = BlockingStub(expectation) { block() }
@@ -33,5 +33,7 @@ class WhenInvoking2Builder<P1, P2, R>(private val mock: Mockable, private val fu
             }
             mock.addBlockingStub(stub)
         }
+
+        override fun thenInvoke(block: () -> R) = then(block)
     }
 }

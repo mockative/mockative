@@ -1,6 +1,6 @@
 package io.mockative
 
-import kotlinx.atomicfu.atomic
+import io.mockative.concurrency.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -14,23 +14,68 @@ abstract class Mockable {
 
     private var blockingStubs: List<BlockingStub> by atomic(emptyList())
     private var suspendStubs: List<SuspendStub> by atomic(emptyList())
+    private var verifiedInvocations: Set<Invocation> by atomic(emptySet())
 
     private var isRecording: Boolean by atomic(false)
 
     internal fun addBlockingStub(stub: BlockingStub) {
-        blockingStubs = blockingStubs + stub
+        val stubs = (blockingStubs + stub).toList()
+        blockingStubs = stubs
     }
 
     private fun getBlockingStub(invocation: Invocation): BlockingStub {
-        return blockingStubs.firstOrNull { stub -> stub.expectation.matches(invocation) } ?: throw MissingExpectationError(this, invocation)
+        return getBlockingStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation)
+    }
+
+    private fun getBlockingStubOrNull(invocation: Invocation): BlockingStub? {
+        return blockingStubs.firstOrNull { stub -> stub.expectation.matches(invocation) }
     }
 
     internal fun addSuspendStub(stub: SuspendStub) {
-        suspendStubs = suspendStubs + stub
+        val stubs = (suspendStubs + stub).toList()
+        suspendStubs = stubs
     }
 
     private fun getSuspendStub(invocation: Invocation): SuspendStub {
-        return suspendStubs.firstOrNull { stub -> stub.expectation.matches(invocation) } ?: throw MissingExpectationError(this, invocation)
+        return getSuspendStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation)
+    }
+
+    private fun getSuspendStubOrNull(invocation: Invocation): SuspendStub? {
+        return suspendStubs.firstOrNull { stub -> stub.expectation.matches(invocation) }
+    }
+
+    private val invocations: List<Invocation>
+        get() {
+            val blockingInvocations = blockingStubs.flatMap { it.invocations }
+            val suspendInvocations = suspendStubs.flatMap { it.invocations }
+            return blockingInvocations + suspendInvocations
+        }
+
+    internal fun verify(verifier: Verifier) {
+        val matches = verifier.verify(invocations)
+        verifiedInvocations = verifiedInvocations + matches
+    }
+
+    internal fun confirmVerified() {
+        val verified = verifiedInvocations
+        val unverified = invocations.filterNot { verified.contains(it) }
+        if (unverified.isNotEmpty()) {
+            TODO("One or more invocations were not verified")
+        }
+    }
+
+    internal fun validate() {
+        val unusedBlockingStubs = blockingStubs.filter { it.invocations.isEmpty() }
+        val unusedSuspendStubs = suspendStubs.filter { it.invocations.isEmpty() }
+
+        val unmetBlockingExpectations = unusedBlockingStubs.map { it.expectation }
+        val unmetSuspendExpectations = unusedSuspendStubs.map { it.expectation }
+
+        val unmetExpectations = unmetBlockingExpectations + unmetSuspendExpectations
+
+        if (unmetExpectations.isNotEmpty()) {
+            TODO("One or more expectations were not met")
+        }
     }
 
     /**
@@ -68,7 +113,7 @@ abstract class Mockable {
             isRecording = true
 
             try {
-                block(this as T)
+                block(this@Mockable as T)
             } catch (error: StubbingInProgressError) {
                 invocation = error.invocation
             } finally {

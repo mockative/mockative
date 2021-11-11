@@ -67,9 +67,9 @@ class FunctionWriter(private val writer: Writer) {
 
         writer.append("io.mockative.Mockable.")
         if (function.isSuspending) {
-            writer.append("invoke")
-        } else {
             writer.append("suspend")
+        } else {
+            writer.append("invoke")
         }
 
         writer.append('<')

@@ -5,7 +5,7 @@ import io.mockative.matchers.SpecificArgumentsMatcher
 sealed class Invocation {
     abstract fun toExpectation(): Expectation
 
-    data class Function(val name: String, val arguments: List<Any?>) : Invocation() {
+    class Function(val name: String, val arguments: List<Any?>) : Invocation() {
         override fun toExpectation(): Expectation.Function {
             return Expectation.Function(name, SpecificArgumentsMatcher(arguments.map { eq(it) }))
         }
@@ -15,7 +15,7 @@ sealed class Invocation {
         }
     }
 
-    data class Getter(val name: String) : Invocation() {
+    class Getter(val name: String) : Invocation() {
         override fun toExpectation(): Expectation.Getter {
             return Expectation.Getter(name)
         }
@@ -25,7 +25,7 @@ sealed class Invocation {
         }
     }
 
-    data class Setter(val name: String, val value: Any?) : Invocation() {
+    class Setter(val name: String, val value: Any?) : Invocation() {
         override fun toExpectation(): Expectation {
             return Expectation.Setter(name, eq(value))
         }

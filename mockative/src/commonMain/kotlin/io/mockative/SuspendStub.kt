@@ -1,6 +1,6 @@
 package io.mockative
 
-import kotlinx.atomicfu.atomic
+import io.mockative.concurrency.atomic
 
 internal class SuspendStub(val expectation: Expectation, private val invoke: suspend (Array<Any?>) -> Any?) {
     var invocations: List<Invocation> by atomic(emptyList())

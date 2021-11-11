@@ -12,7 +12,7 @@ class GitHubServiceMocksTest {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        given(api) { repository(id) }
+        given(api).coroutine { repository(id) }
             .thenReturn(repository)
 
         // when
@@ -29,8 +29,7 @@ class GitHubServiceMocksTest {
         val github = mock(GitHubAPI::class)
         val service = GitHubService(github, dispatchers)
         block(service, github).also {
-            verify(github)
-            close(github)
+            validate(github)
         }
     }
 }

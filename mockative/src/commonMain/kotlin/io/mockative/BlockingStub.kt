@@ -1,6 +1,6 @@
 package io.mockative
 
-import kotlinx.atomicfu.atomic
+import io.mockative.concurrency.atomic
 
 internal class BlockingStub(val expectation: Expectation, private val invoke: (Array<Any?>) -> Any?) {
     var invocations: List<Invocation> by atomic(emptyList())
