@@ -65,10 +65,11 @@ class FunctionWriter(private val writer: Writer) {
     private fun appendBody(function: MockDescriptor.Function) {
         writer.append(" = ")
 
+        writer.append("io.mockative.Mockable.")
         if (function.isSuspending) {
-            writer.append("mockSuspend")
+            writer.append("invoke")
         } else {
-            writer.append("mock")
+            writer.append("suspend")
         }
 
         writer.append('<')
@@ -76,18 +77,25 @@ class FunctionWriter(private val writer: Writer) {
         writer.append('>')
 
         writer.append('(')
+        writer.append("this, ")
+        writer.append("io.mockative.Invocation.Function(")
         writer.append('"')
         writer.append(function.name)
         writer.append('"')
 
         if (function.parameters.isNotEmpty()) {
+            writer.append(", listOf<Any?>(")
+
             val arguments = function.parameters
                 .joinToString(", ") { parameter -> parameter.name }
 
-            writer.append(", ")
             writer.append(arguments)
+            writer.append(")")
+        } else {
+            writer.append(", emptyList<Any?>()")
         }
 
+        writer.append(')')
         writer.append(')')
     }
 }

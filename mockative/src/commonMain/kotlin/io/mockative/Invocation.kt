@@ -1,45 +1,37 @@
 package io.mockative
 
-/**
- * Represents an invocation of a member on a mock.
- *
- * @param method the name of the invoked member.
- * @param arguments the arguments passed during invocation of the member.
- */
-data class Invocation(val method: String, val arguments: List<Any?>) {
-    internal fun matches(invocation: Invocation): Boolean {
-        if (method != invocation.method) {
-            return false
+import io.mockative.matchers.SpecificArgumentsMatcher
+
+sealed class Invocation {
+    abstract fun toExpectation(): Expectation
+
+    data class Function(val name: String, val arguments: List<Any?>) : Invocation() {
+        override fun toExpectation(): Expectation.Function {
+            return Expectation.Function(name, SpecificArgumentsMatcher(arguments.map { eq(it) }))
         }
 
-        if (!arguments.containsAll(invocation.arguments)) {
-            return false
-        }
-
-        if (!invocation.arguments.containsAll(arguments)) {
-            return false
-        }
-
-        return true
-    }
-
-    override fun toString(): String {
-        return when {
-            method.startsWith("\$set_") -> toSetterString()
-            method.startsWith("\$get_") -> toGetterString()
-            else -> toFunctionString()
+        override fun toString(): String {
+            return "$name(${arguments.joinToString(", ")})"
         }
     }
 
-    private fun toSetterString(): String {
-        return "${method.removePrefix("\$set_")} = ${arguments.single().toString()}"
+    data class Getter(val name: String) : Invocation() {
+        override fun toExpectation(): Expectation.Getter {
+            return Expectation.Getter(name)
+        }
+
+        override fun toString(): String {
+            return name
+        }
     }
 
-    private fun toGetterString(): String {
-        return method.removePrefix("\$get_")
-    }
+    data class Setter(val name: String, val value: Any?) : Invocation() {
+        override fun toExpectation(): Expectation {
+            return Expectation.Setter(name, eq(value))
+        }
 
-    private fun toFunctionString(): String {
-        return "$method(${arguments.joinToString(", ") { it.toString() }})"
+        override fun toString(): String {
+            return "$name = $value"
+        }
     }
 }

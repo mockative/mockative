@@ -19,6 +19,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt")
+                implementation("org.jetbrains.kotlinx:atomicfu:0.16.3")
             }
         }
 

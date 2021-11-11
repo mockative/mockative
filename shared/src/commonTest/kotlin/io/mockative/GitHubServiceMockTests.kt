@@ -21,7 +21,7 @@ class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        given(github) { repository(id) }
+        givenSuspend(github) { repository(id) }
             .thenReturn(repository)
 
         // when

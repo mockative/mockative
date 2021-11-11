@@ -9,7 +9,7 @@ object MockativeTypes {
         const val name = "io.mockative.Mock"
     }
 
-    object Mocked {
-        const val name = "io.mockative.Mocked"
+    object Mockable {
+        const val name = "io.mockative.Mockable"
     }
 }

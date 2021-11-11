@@ -22,7 +22,7 @@ class NoSuchMockError(type: KClass<*>) : Error(
     """.trimIndent()
 )
 
-class GivenNonMockError(receiver: Any) : Error(
+class StubbingNonMockError(receiver: Any) : Error(
     """
         Attempt to stub a non-mock instance of type ${receiver.getClassName()}.
         

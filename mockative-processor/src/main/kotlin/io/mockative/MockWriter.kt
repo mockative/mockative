@@ -34,10 +34,7 @@ class MockWriter(private val writer: Writer) {
         writer.append("class ")
         writer.append(mock.mockName)
         writer.append(" : ")
-        writer.append(MockativeTypes.Mocked.name)
-        writer.append('<')
-        writer.append(mock.qualifiedName)
-        writer.append('>')
+        writer.append(MockativeTypes.Mockable.name)
         writer.append("(), ")
         writer.append(mock.qualifiedName)
     }
