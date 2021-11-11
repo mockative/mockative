@@ -1,13 +1,13 @@
 package io.mockative
 
-class NoiseStoreMock : io.mockative.Mocked<io.mockative.NoiseStore>(), io.mockative.NoiseStore {
+class NoiseStoreMock : io.mockative.Mockable(), io.mockative.NoiseStore {
     override var noises: kotlin.collections.Map<kotlin.String, kotlin.Function0<kotlin.Unit>>
-        get() = mockGetter("noises")
-        set(value) = mockSetter("noises", value)
+        get() = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Getter("noises"))
+        set(value) = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Setter("noises", value))
     override val readOnlyNoises: kotlin.collections.Map<kotlin.String, kotlin.Function0<kotlin.Unit>>
-        get() = mockGetter("readOnlyNoises")
+        get() = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Getter("readOnlyNoises"))
 
-    override fun addNoise(name: kotlin.String, play: kotlin.Function0<kotlin.Unit>): kotlin.Unit = mock<kotlin.Unit>("addNoise", name, play)
-    override fun clear(): kotlin.Unit = mock<kotlin.Unit>("clear")
-    override fun noise(name: kotlin.String): kotlin.Function0<kotlin.Unit> = mock<kotlin.Function0<kotlin.Unit>>("noise", name)
+    override fun addNoise(name: kotlin.String, play: kotlin.Function0<kotlin.Unit>): kotlin.Unit = io.mockative.Mockable.invoke<kotlin.Unit>(this, io.mockative.Invocation.Function("addNoise", listOf<Any?>(name, play)))
+    override fun clear(): kotlin.Unit = io.mockative.Mockable.invoke<kotlin.Unit>(this, io.mockative.Invocation.Function("clear", emptyList<Any?>()))
+    override fun noise(name: kotlin.String): kotlin.Function0<kotlin.Unit> = io.mockative.Mockable.invoke<kotlin.Function0<kotlin.Unit>>(this, io.mockative.Invocation.Function("noise", listOf<Any?>(name)))
 }

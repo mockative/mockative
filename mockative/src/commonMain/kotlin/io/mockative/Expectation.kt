@@ -17,7 +17,7 @@ sealed class Expectation {
         }
 
         override fun toString(): String {
-            return name
+            return "$name(${arguments})"
         }
     }
 
@@ -29,6 +29,10 @@ sealed class Expectation {
         private fun matches(invocation: Invocation.Getter): Boolean {
             return name == invocation.name
         }
+
+        override fun toString(): String {
+            return name
+        }
     }
 
     data class Setter(val name: String, val value: Matcher<*>) : Expectation() {
@@ -38,6 +42,10 @@ sealed class Expectation {
 
         private fun matches(invocation: Invocation.Setter): Boolean {
             return name == invocation.name && value.matches(invocation.value)
+        }
+
+        override fun toString(): String {
+            return "$name = $value"
         }
     }
 }

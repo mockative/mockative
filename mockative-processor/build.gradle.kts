@@ -23,7 +23,6 @@ kotlin {
         all {
             languageSettings {
                 optIn("com.google.devtools.ksp.KspExperimental")
-                optIn("io.mockative.PropertyMocks")
             }
         }
     }

@@ -1,10 +1,7 @@
 package io.mockative
 
-fun <T : Any, R> givenCoroutine(receiver: T, block: suspend T.() -> R): SuspendResultBuilder<R> {
-    val mock = receiver.asMockable()
-    val invocation = mock.record(block)
-    val expectation = invocation.toExpectation()
-    return SuspendResultBuilder(mock, expectation)
+suspend fun <T : Any, R> givenCoroutine(receiver: T, block: suspend T.() -> R): SuspendResultBuilder<R> {
+    return given(receiver).coroutine(block)
 }
 
 class SuspendResultBuilder<R>(

@@ -4,10 +4,12 @@ class ExactVerifier(
     private val expectation: Expectation,
     private val count: Int
 ) : Verifier {
-    override fun verify(invocations: List<Invocation>): List<Invocation> {
+    override fun verify(instance: Any, invocations: List<Invocation>): List<Invocation> {
         val matchingInvocations = invocations.filter { expectation.matches(it) }
-        if (matchingInvocations.size != count) {
-            TODO("ExactVerification expectation not met")
+
+        val actual = matchingInvocations.size
+        if (actual != count) {
+            throw ExactVerificationError(instance, count, actual, expectation, invocations)
         }
 
         return matchingInvocations

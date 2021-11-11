@@ -26,23 +26,12 @@ class MockativeSymbolProcessor(
 
         val mocks = mutableListOf<KSClassDeclaration>()
 
-        val mocksClassDecs = resolver.getSymbolsWithAnnotation(Mocks::class.qualifiedName!!)
-            .mapNotNull { symbol -> symbol as? KSDeclaration }
-            .flatMap { declaration ->
-                declaration.annotations
-                    .mapNotNull { annotation -> annotation.arguments.firstOrNull { it.name?.asString() == "value" } }
-                    .mapNotNull { argument -> (argument.value as? KSType)?.declaration as? KSClassDeclaration }
-                    .map { classDec -> classDec to declaration.containingFile }
-            }
-
-        val mockClassDecs = resolver.getSymbolsWithAnnotation(Mock::class.qualifiedName!!)
+        resolver.getSymbolsWithAnnotation(Mock::class.qualifiedName!!)
             .mapNotNull { symbol -> symbol as? KSPropertyDeclaration }
             .mapNotNull { property ->
                 (property.type.resolve().declaration as? KSClassDeclaration)
                     ?.let { it to property.containingFile }
             }
-
-        (mocksClassDecs + mockClassDecs)
             .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE }
             .groupBy({ (classDec, _) -> classDec }, { (_, file) -> file })
             .forEach { (classDec, files) ->

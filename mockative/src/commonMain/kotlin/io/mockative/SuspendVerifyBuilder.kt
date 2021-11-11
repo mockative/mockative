@@ -1,9 +1,6 @@
 package io.mockative
 
-class VerifyBuilder<T : Any>(private val receiver: T) {
-    val coroutine: SuspendVerifyBuilder<T>
-        get() = SuspendVerifyBuilder(receiver)
-
+class SuspendVerifyBuilder<T : Any>(private val receiver: T) {
     /**
      * Verifies whether an invocation on the receiver was performed at least and/or most a given
      * number of times.
@@ -11,7 +8,7 @@ class VerifyBuilder<T : Any>(private val receiver: T) {
      * @param least the minimum number of invocations to expect
      * @param most the maximum number of invocations to expect
      */
-    fun <R> at(least: Int? = null, most: Int? = null, block: T.() -> R) {
+    suspend fun <R> at(least: Int? = null, most: Int? = null, block: suspend T.() -> R) {
         verify(block) { expectation -> RangeVerifier(expectation, least, most) }
     }
 
@@ -20,11 +17,11 @@ class VerifyBuilder<T : Any>(private val receiver: T) {
      *
      * @param count the number of invocations to expect
      */
-    fun <R> exactly(count: Int, block: T.() -> R) {
+    suspend fun <R> exactly(count: Int, block: suspend T.() -> R) {
         verify(block) { expectation -> ExactVerifier(expectation, count) }
     }
 
-    private fun <R> verify(block: T.() -> R, verifier: (Expectation) -> Verifier) {
+    private suspend fun <R> verify(block: suspend T.() -> R, verifier: (Expectation) -> Verifier) {
         val mock = receiver.asMockable()
         val invocation = mock.record(block)
         val expectation = invocation.toExpectation()

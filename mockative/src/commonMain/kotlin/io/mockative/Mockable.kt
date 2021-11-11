@@ -4,7 +4,6 @@ import io.mockative.concurrency.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 
 abstract class Mockable {
 
@@ -19,12 +18,11 @@ abstract class Mockable {
     private var isRecording: Boolean by atomic(false)
 
     internal fun addBlockingStub(stub: BlockingStub) {
-        val stubs = (blockingStubs + stub).toList()
-        blockingStubs = stubs
+        blockingStubs = blockingStubs + stub
     }
 
     private fun getBlockingStub(invocation: Invocation): BlockingStub {
-        return getBlockingStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation)
+        return getBlockingStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation, false)
     }
 
     private fun getBlockingStubOrNull(invocation: Invocation): BlockingStub? {
@@ -32,12 +30,11 @@ abstract class Mockable {
     }
 
     internal fun addSuspendStub(stub: SuspendStub) {
-        val stubs = (suspendStubs + stub).toList()
-        suspendStubs = stubs
+        suspendStubs = suspendStubs + stub
     }
 
     private fun getSuspendStub(invocation: Invocation): SuspendStub {
-        return getSuspendStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation)
+        return getSuspendStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation, true)
     }
 
     private fun getSuspendStubOrNull(invocation: Invocation): SuspendStub? {
@@ -51,16 +48,25 @@ abstract class Mockable {
             return blockingInvocations + suspendInvocations
         }
 
+    private val unverifiedInvocations: List<Invocation>
+        get() {
+            val verified = verifiedInvocations
+            return invocations.filterNot { verified.contains(it) }
+        }
+
     internal fun verify(verifier: Verifier) {
-        val matches = verifier.verify(invocations)
+        val unverified = unverifiedInvocations
+        val matches = verifier.verify(this, unverified)
         verifiedInvocations = verifiedInvocations + matches
     }
 
+    /**
+     * @throws UnverifiedInvocationsError the mock contains unverified invocations
+     */
     internal fun confirmVerified() {
-        val verified = verifiedInvocations
-        val unverified = invocations.filterNot { verified.contains(it) }
+        val unverified = unverifiedInvocations
         if (unverified.isNotEmpty()) {
-            TODO("One or more invocations were not verified")
+            throw UnverifiedInvocationsError(this, unverified)
         }
     }
 
@@ -74,7 +80,7 @@ abstract class Mockable {
         val unmetExpectations = unmetBlockingExpectations + unmetSuspendExpectations
 
         if (unmetExpectations.isNotEmpty()) {
-            TODO("One or more expectations were not met")
+            throw MockValidationError(this, unmetExpectations)
         }
     }
 
@@ -100,31 +106,6 @@ abstract class Mockable {
         return invocation!!
     }
 
-    /**
-     * Records the invocation of a single member on this mock.
-     *
-     * @param block the block invoking the member on this mock.
-     * @return the recorded invocation
-     */
-    internal fun <T : Any, R> record(block: suspend T.() -> R): Invocation {
-        var invocation: Invocation? = null
-
-        unconfinedScope.launch {
-            isRecording = true
-
-            try {
-                block(this@Mockable as T)
-            } catch (error: StubbingInProgressError) {
-                invocation = error.invocation
-            } finally {
-                isRecording = false
-            }
-        }
-
-        // The unconfined dispatcher should result in the coroutine running synchronously while recording
-        return invocation!!
-    }
-
     internal fun <R> invoke(invocation: Invocation): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
@@ -133,6 +114,29 @@ abstract class Mockable {
             val result = stub.invoke(invocation)
             return result as R
         }
+    }
+
+    /**
+     * Records the invocation of a single member on this mock.
+     *
+     * @param block the block invoking the member on this mock.
+     * @return the recorded invocation
+     */
+    internal suspend fun <T : Any, R> record(block: suspend T.() -> R): Invocation {
+        var invocation: Invocation? = null
+
+        isRecording = true
+
+        try {
+            block(this as T)
+        } catch (error: StubbingInProgressError) {
+            invocation = error.invocation
+        } finally {
+            isRecording = false
+        }
+
+        // The unconfined dispatcher should result in the coroutine running synchronously while recording
+        return invocation!!
     }
 
     internal suspend fun <R> suspend(invocation: Invocation): R {

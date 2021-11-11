@@ -29,14 +29,6 @@ kotlin {
             kotlin.srcDir("src/test/kotlin")
             resources.srcDir("src/test/resources")
         }
-
-        withType {
-            if (name.endsWith("Test")) {
-                languageSettings {
-                    optIn("io.mockative.PropertyMocks")
-                }
-            }
-        }
     }
 }
 

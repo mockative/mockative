@@ -22,7 +22,7 @@ kotlin {
             }
         }
 
-        val iosMain by creating
+        val iosMain by getting
 
         val iosArm64Main by getting {
             dependsOn(iosMain)

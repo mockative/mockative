@@ -46,4 +46,21 @@ class GitHubServiceMockTests {
         // then
         assertEquals(repository, result)
     }
+
+    @Test
+    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsCalled() = runBlockingTest {
+        // given
+        val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
+        val repository = Repository(id, "Mockative")
+
+        given(github).coroutine { repository(id) }
+            .thenReturn(repository)
+
+        // when
+        service.repository(id)
+
+        // then
+        verify(github).coroutine.exactly(1) { repository(id) }
+        confirmVerified(github)
+    }
 }

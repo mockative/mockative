@@ -67,14 +67,6 @@ kotlin {
                 implementation(kotlin("test-js"))
             }
         }
-
-        withType {
-            if (name.endsWith("Test")) {
-                languageSettings {
-                    optIn("io.mockative.PropertyMocks")
-                }
-            }
-        }
     }
 }
 

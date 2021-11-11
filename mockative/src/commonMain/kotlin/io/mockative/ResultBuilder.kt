@@ -1,10 +1,7 @@
 package io.mockative
 
 fun <T : Any, R> given(receiver: T, block: T.() -> R): ResultBuilder<R> {
-    val mock = receiver.asMockable()
-    val invocation = mock.record(block)
-    val expectation = invocation.toExpectation()
-    return ResultBuilder(mock, expectation)
+    return given(receiver).invocation(block)
 }
 
 class ResultBuilder<R>(

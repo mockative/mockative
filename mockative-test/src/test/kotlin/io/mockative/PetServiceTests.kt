@@ -2,10 +2,10 @@ package io.mockative
 
 import org.junit.Test
 
-@Mocks(PetStore::class)
 class PetServiceTests {
 
-    @Mock private val noiseStore = mock(NoiseStore::class)
+    @Mock val petStore = mock(PetStore::class)
+    @Mock val noiseStore = mock(NoiseStore::class)
 
     @Test
     fun generatesExpectedPetStoreMock() {

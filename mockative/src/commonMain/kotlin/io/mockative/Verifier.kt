@@ -1,5 +1,5 @@
 package io.mockative
 
 interface Verifier {
-    fun verify(invocations: List<Invocation>): List<Invocation>
+    fun verify(instance: Any, invocations: List<Invocation>): List<Invocation>
 }
