@@ -17,23 +17,17 @@ internal class CodeGenerator(outputPath: String) {
         val template = readResourceSource(templateName)
 
         for (count in 3..9) {
-            val tokens: Map<String, String> = createTokens(count)
-
-            val output = tokens.entries
-                .fold(template) { text, (key, value) -> text.replace("#$key#", value) }
-
-            val file = File(outputDir, filename(count))
-            file.writeText(output)
+            generateFile(template, count, filename(count))
         }
     }
 
-    private fun generateFile(template: String, count: Int) {
+    private fun generateFile(template: String, count: Int, filename: String) {
         val tokens: Map<String, String> = createTokens(count)
 
         val output = tokens.entries
             .fold(template) { text, (key, value) -> text.replace("#$key#", value) }
 
-        val file = File(outputDir, "WhenInvoking${count}Builder.kt")
+        val file = File(outputDir, filename)
         file.writeText(output)
     }
 
