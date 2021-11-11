@@ -1,0 +1,33 @@
+package io.mockative
+
+import io.mockative.matchers.ArgumentsMatcher
+import io.mockative.matchers.Matcher
+import io.mockative.matchers.SpecificArgumentsMatcher
+import kotlin.reflect.KFunction
+
+fun <#type-param-list#, R, F> whenInvoking(instance: Any, function: F): WhenInvoking#count#Builder<#type-param-list#, R> where F : (#type-param-list#) -> R, F : KFunction<R> {
+    return whenInvoking#count#(instance, function)
+}
+
+fun <#type-param-list#, R, F> whenInvoking#count#(instance: Any, function: F): WhenInvoking#count#Builder<#type-param-list#, R> where F : (#type-param-list#) -> R, F : KFunction<R> {
+    return WhenInvoking#count#Builder(instance.asMockable(), function)
+}
+
+class WhenInvoking#count#Builder<#type-param-list#, R>(private val mock: Mockable, private val function: KFunction<R>) {
+    fun with(#with.parameters#): ResultBuilder {
+        val arguments = SpecificArgumentsMatcher(listOf(#with.arguments#))
+        return ResultBuilder(arguments)
+    }
+
+    inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnyResultBuilder<R> {
+        fun then(block: (#type-param-list#) -> R) {
+            val expectation = Expectation.Function(function.name, arguments)
+            val stub = BlockingStub(expectation) { args ->
+                block(#then.arguments#)
+            }
+            mock.addBlockingStub(stub)
+        }
+
+        override fun thenInvoke(block: () -> R) = then { #thenInvoke.underscores# -> block() }
+    }
+}

@@ -6,4 +6,6 @@ interface GitHubAPI {
     suspend fun repositories(): List<Repository>
 
     suspend fun repository(id: String): Repository?
+
+    fun thing(with: String, three: Int, arguments: Repository)
 }

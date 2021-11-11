@@ -20,6 +20,8 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt")
             }
+
+            kotlin.srcDirs("$buildDir/generated/mockative-code-generator")
         }
 
         val iosMain by getting
