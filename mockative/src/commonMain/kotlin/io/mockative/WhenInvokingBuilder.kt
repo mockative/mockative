@@ -2,6 +2,7 @@ package io.mockative
 
 import io.mockative.matchers.AnyArgumentsMatcher
 import io.mockative.matchers.ArgumentsMatcher
+import io.mockative.matchers.Matcher
 import io.mockative.matchers.SpecificArgumentsMatcher
 
 fun whenInvoking(instance: Any, function: String): WhenInvokingBuilder<Any?> {
@@ -9,8 +10,8 @@ fun whenInvoking(instance: Any, function: String): WhenInvokingBuilder<Any?> {
 }
 
 class WhenInvokingBuilder<R>(private val mock: Mockable, private val function: String) : AnyResultBuilder<R> {
-    fun with(vararg arguments: Any?): ResultBuilder {
-        val matcher = SpecificArgumentsMatcher(arguments.map { eq(it) })
+    fun with(vararg arguments: Matcher<Any?>): ResultBuilder {
+        val matcher = SpecificArgumentsMatcher(arguments.map { it })
         return ResultBuilder(matcher)
     }
 

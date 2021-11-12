@@ -1,6 +1,5 @@
 package io.mockative
 
-
 /**
  * Verifies whether an invocation on the receiver was performed.
  */

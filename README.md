@@ -33,28 +33,8 @@ dependencies {
 
 ## Testing with Mockative
 
-The recommended way to test with Mockative is to use the `@Mock` annotation, which requires opt-in
-because it doesn't support object freezing of mocks when passing between threads when testing
-suspending functions. We provide a [snippet](#coroutineskt) that enables testing coroutines while
-using the `@Mock` annotation. To opt-in to the `@Mock` annotation add the following to your 
-**build.gradle.kts** file:
-
-```kotlin
-kotlin {
-    sourceSets {
-        withType {
-            if (name.endsWith("Test")) {
-                languageSettings {
-                    optIn("io.mockative.PropertyMocks")
-                }
-            }
-        }
-    }
-}
-```
-
-To mock a given method on an interface a property holding the interface must be annotated with
-the `@Mock` annotation, and be retrieved using the `mock(KClass<T>)` function:
+To mock a given method on an interface, annotate a property holding the interface type with the
+`@Mock` annotation, and assign it to the result of a call to the `<T> mock(KClass<T>)` function:
 
 ```kotlin
 class GitHubServiceTests {
@@ -63,265 +43,166 @@ class GitHubServiceTests {
 }
 ```
 
-Then, using the `given(receiver, block)` function, you can specify a function call, property getter
-or property setter to stub, and provide an implementation using one of the `then` functions on the
-expectation builder returned by `given`:
+Then, to stub a function or property on the mock there is a couple of options:
+
+### Stubbing using Expressions
+
+It is possible to stub a function or property by invoking it through the use of the `<T> given(T)`
+function:
 
 ```kotlin
-class GitHubServiceTests {
-    @Mock
-    val api = mock(GitHubAPI::class)
+// Stub a `suspend` function using `given(mock).coroutine { ... }` 
+given(mock).coroutine { fetchData("mockative/mockative") }
+    .then { data }
 
-    val service = GitHubService(api)
+// Stub a blocking function using `given(mock).invocation { ... }`
+given(mock).invocation { transformData(data) }
+    .then { transformedData }
 
-    @Test
-    fun testRepository() {
-        // given
-        val id = "mockative/mockative"
-        val repository = Repository(id, "Mockative")
+// Stub a property getter using `given(mock).invocation { ... }`
+given(mock).invocation { mockProperty }
+    .then { mockPropertyData }
 
-        given(api) { repository(id) }
-            .thenReturn(repository)
-
-        // when
-        ...
-
-        // then
-        ...
-    }
-}
+// Stub a property setter using `given(mock).invocation { ... }`
+given(mock).invocation { mockProperty = transformedData }
+    .thenDoNothing()
 ```
 
-The available `then` functions are:
+### Stubbing using Callable References
 
-| Function             | Description                                                                                                                  |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `then(block)`        | Invokes the `block` on every call to the expectation.                                                                        |
-| `thenReturn(value)`  | Returns the specified `value` on every call to the expectation.                                                              |
-| `thenSuspend(block)` | Invokes the suspending `block` on every call to the expectation. This function only works when mocking a `suspend` function. |
-| `thenThrow(error)`   | Throws the specified `error` on every call to the expectation.                                                               |
-| `thenDoNothing()`    | A wrapper for `thenReturn(Unit)` when the return type of the expectation is `Unit`.                                          |
-
-### Arguments
-
-You can access the arguments of a call to a mock using the first argument (`Array<Any?>`) in
-the `then` or `thenSuspend` function:
+Callable references allows you to match arguments on something other than equality:
 
 ```kotlin
-class GitHubServiceTests {
-    @Mock
-    val api = mock(GitHubAPI::class)
+// Stub a `suspend` function using `whenSuspending(mock, function)`
+whenSuspending(mock, mock::fetchData)
+    .with(oneOf("mockative/mockative", "mockative/mockative-processor"))
+    .then { data }
 
-    val service = GitHubService(api)
+// Stub a blocking function using `whenInvoking(mock, function)`
+whenInvoking(mock, mock::transformData)
+    .with(any())
+    .then { transformedData }
 
-    @Test
-    fun testCreateRepository() {
-        // given
-        val name = "Mockative"
-        var recordedName: String?
+// Stub a property getter using `whenGetting(mock, property)`
+whenGetting(mock, mock::mockProperty)
+    .then { mockPropertyData }
 
-        given(api) { createRepository(name) }
-            .then { args ->
-                recordedName = args[0] as String
-            }
+// Stub a property setter using `whenSetting(mock, property)`
+whenSetting(mock, mock::mockProperty)
+    .thenDoNothing()
 
-        // when
-        service.createRepository(name)
+// When the function being stubbed has overloads with a different number of arguments, a specific 
+// overload can be selected by appending a number fo the end of the `when` function.
+whenInvoking1(mock, mock::transformData)
+    .with(any())
+    .then { transformedData }
 
-        // then
-        assertEquals(name, recordedName)
-    }
-}
+// When the function being stubbed has overloads with the same number of arguments, but different 
+// types, the type arguments must be specified, or you can use the `when` functions accepting the 
+// name of the function being invoked.
+whenInvoking(mock, "transformData")
+    .with(any<Data>())
+    .then { transformedData }
 ```
 
-The use case of this is very limited though, since Mockative doesn't provide any way to match
-arguments in expectations other than equality.
+### Stubbing implementations
 
-## Example
+Both expressions using `given` and callable references using `when[...]` supports the same API for
+stubbing the implementation, through the use of the `then` functions.
 
-Given the following API:
+| Function                           | Description                                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `then(block: (P1, P..., PN) -> R)` | Invokes the specified block. The arguments passed to the block are the arguments passed to the invocation. |
+| `thenInvoke(block: () -> R)`       | Invokes the specified block.                                                                               |
+| `thenReturn(value: R)`             | Returns the specified value.                                                                               |
+| `thenThrow(throwable: Throwable)`  | Throws the specified exception.                                                                            |
 
-### GitHubAPI.kt
+When the return type of the function or property being stubbed is `Unit`, the following additional then function is available:
+
+| Function          | Description     |
+| ----------------- | --------------- |
+| `thenDoNothing()` | Returns `Unit`. |
+
+The untyped callable references using `<T : Any> whenInvoking(T, String)` and
+`<T : Any> whenSuspending(T, String)` supports the following additional `then` function:
+
+| Function                                   | Description                                                                                                      |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `then(block: (args: Array<Any?>) -> Any?)` | Invokes the specified block. The argument passed to the block is an array of arguments passed to the invocation. |
+
+## Verification (WIP)
+
+Verification of invocations to mocks is supported through the `verifyThat(mock)` API:
+
+### Verification using Expressions
 
 ```kotlin
-// src/commonMain/kotlin/io/mockative/GitHubAPI.kt
-interface GitHubAPI {
-    suspend fun repository(id: String): Repository?
-}
+// Expression (suspend function)
+verifyThat(mock).coroutine { fetchData("mockative/mockative") }
+    .wasNotInvoked()
+
+// Expression (blocking function)
+verifyThat(mock).invocation { transformData(data) }
+    .wasInvoked(atLeast = 1)
+
+// Expression (property getter)
+verifyThat(mock).invocation { mockProperty }
+    .wasInvoked(atLeast = 1, atMost = 6)
+
+// Expression (property setter)
+verifyThat(mock).invocation { mockProperty = transformedData }
+    .wasInvoked(exactly = 9)
 ```
 
-And the following service:
-
-### GitHubService.kt
+### Verification using Callable References
 
 ```kotlin
-// src/commonMain/kotlin/io/mockative/GitHubService.kt
-class GitHubService(private val api: GitHubAPI) {
-    suspend fun repository(id: String): Repository? {
-        return api.repository(id)
-    }
-}
+// Function Reference (suspend function)
+verifyThat(mock).coroutine(mock::fetchData)
+    .with(eq("mockative/mockative"))
+    .wasNotInvoked()
+
+// Function Reference (blocking function)
+verifyThat(mock).function(mock::transformData)
+    .with(any())
+    .wasInvoked(atMost = 3)
+
+// Getter
+verifyThat(mock).getter(mock::mockProperty)
+    .wasInvoked(exactly = 4)
+
+// Setter
+verifyThat(mock).setter(mock::mockProperty)
+    .with(any())
+    .wasInvoked(atLeast = 7)
 ```
 
-A test for the `GitHubService.repository(String)` method could look like this:
-
-### GitHubServiceTests.kt
+## Validation
 
 ```kotlin
-// src/commonTest/kotlin/io/mockative/GitHubServiceTests.kt
-class GitHubServiceTests {
-    @Mock
-    val api = mock(GitHubAPI::class)
+// Verifies that all expectations were verified through a call to `wasInvoked()`
+verifyThat(mock).wasVerified()
 
-    val service = GitHubService(api)
+// Verifies that the mock has no expectations that weren't invoked at least once.
+verifyThat(mock).hasNoUnmetExpectations()
 
-    @Test
-    fun givenRepositories_whenFetchingRepositories_thenRepositoriesAreReturned() {
-        // given
-        val id = "mockative/mockative"
-        val repository = Repository(id, "Mockative")
-
-        given(api) { repository(id) }
-            .thenReturn(repository)
-
-        // when
-        val actual = service.repository(id)
-
-        // then
-        assertEquals(repository, actual)
-    }
-}
+// Helper that combines `wasVerified()` and `hasNoUnmetExpectations()`
+verifyThat(mock).isValid()
 ```
 
-### Verification
+## How does it work?
 
-You can verify that no unmet expectations were left in a mock using the `verify(T)` method.
+At compile time, `mockative-processor` generates a class for each interface type of a property
+annotated with the `@Mock` annotation, as well as a `Mocks.kt` file that looks something like this:
 
 ```kotlin
-class GitHubServiceTests {
-    @Mock
-    val api = mock(GitHubApi::class)
+package io.mockative
 
-    @AfterTest
-    fun verifyMocks() {
-        verify(api)
-    }
-}
+fun mock(type: KClass<GitHubAPI>): GitHubAPI = GitHubAPIMock()
+fun mock(type: KClass<GitHubRepository>): GitHubRepository = GitHubRepositoryMock()
 ```
 
-### Testing Coroutines
-
-Object freezing can present a challenge when testing on Kotlin/Native using coroutines. To test
-coroutines we recommend using the implementations of `runBlockingTest` we've provided below, which
-supports the use of the `@Mock` annotation on properties in test classes by using `runBlocking` on
-the current dispatcher / thread on iOS.
-
-#### Coroutines.kt
-
-```kotlin
-// Common: src/commonTest/kotlin/io/mockative/Coroutines.kt
-expect fun runBlockingTest(block: suspend CoroutineScope.() -> Unit)
-
-// Android / JVM: src/androidTest/kotlin/io/mockative/Coroutines.kt
-actual fun runBlockingTest(block: suspend CoroutineScope.() -> Unit) =
-    runBlocking { block() }
-
-// iOS / macOS: src/iosTest/kotlin/io/mockative/Coroutines.kt
-actual fun runBlockingTest(block: suspend CoroutineScope.() -> Unit) =
-    runBlocking { block() }
-
-// JavaScript: src/jsTest/kotlin/io/mockative/Coroutines.kt
-private val testScope = MainScope()
-
-actual fun runBlockingTest(block: suspend CoroutineScope.() -> Unit): dynamic =
-    testScope.promise { block() }
-```
-
-#### GitHubServiceTests.kt (Coroutines)
-
-```kotlin
-// src/commonTest/kotlin/io/mockative/GitHubServiceTests.kt
-class GitHubServiceTests {
-    @Mock
-    val api = mock(GitHubAPI::class)
-
-    val service = GitHubService(api)
-
-    @Test
-    fun givenRepositories_whenFetchingRepositories_thenRepositoriesAreReturned() = runBlockingTest {
-        // given
-        val id = "mockative/mockative"
-        val repository = Repository(id, "Mockative")
-
-        given(api) { repository(id) }
-            .thenReturn(repository)
-
-        // when
-        val result = service.repository(id)
-
-        // then
-        assertEquals(repository, result)
-    }
-}
-```
-
-Additionally, you can use the `thenSuspend(block)` function if the mocked implementation of the
-function call is itself a suspending function.
-
-#### Running tests in a separate thread
-
-If you've adopted a strategy of running tests in a separate thread from the thread instantiating the
-test classes you will run into object freezing issues when using the `@Mock` annotation on
-properties. While we recommend switching to the implementation of `runBlockingTest` we've provided
-above, we also provide an alternative to enable mocking using `@Mocks(KClass<*>)` annotations.
-
-An example of an idiomatic approach for this kind of testing is presented below:
-
-```kotlin
-// src/commonTest/kotlin/io/mockative/GitHubServiceTests.kt
-class GitHubServiceTests {
-    @Test
-    fun givenRepositories_whenFetchingRepositories_thenRepositoriesAreReturned() =
-        test { service, api ->
-            // given
-            val id = "mockative/mockative"
-            val repository = Repository(id, "Mockative")
-
-            given(api) { repository(id) }
-                .thenReturn(repository)
-
-            // when
-            val result = service.repository(id)
-
-            // then
-            assertEquals(repository, result)
-        }
-
-    @Mocks(GitHubAPI::class)
-    private fun runTest(block: suspend CoroutineScope.(GitHubService, GitHubAPI) -> Unit) =
-        runBlockingTest {
-            val github = mock(GitHubAPI::class)
-            val service = GitHubService(github)
-            block(service, github).also {
-                verify(github)
-            }
-        }
-}
-```
-
-How you use the `@Mocks(KClass<*>)` annotation is up to you. You can annotate any class or function
-with it, as all it does is inform the Mockative symbol processor to generate a mock for the
-specified type. The annotation is repeatable, so you can attach as many mock declarations to a class
-or function as you need.
-
-#### Multithreading
-
-Multithreading is not supported by Mockative when targeting Kotlin/Native due to the nature of how
-Mockative records invocations on expectations, which results in errors due to mocks being frozen
-when crossing thread boundaries. If you're using multiple dispatchers in your code, one way to
-overcome this challenge is by making the dispatchers configurable, and ensuring only a single
-dispatcher is used in tests. Additionally, you may have to resort to the `@Mocks(KClass<*>)`
-approach described above
-in [Running tests in a separate thread](#running-tests-in-a-separate-thread), and ensure the 
-dispatcher you use in the `runBlockingTest` function is the same dispatcher you use all over your 
-application code, thus ensuring state never crosses thread boundaries. 
+Kotlin uses overload resolution to automatically select the most specific `mock(KClass)` function,
+and since the generated functions are in the same namespace as the generic `<T> mock(KClass<T>)`
+function, Kotlin will pick up the overloads without any additional imports required, resulting in a
+smooth developer experience. 

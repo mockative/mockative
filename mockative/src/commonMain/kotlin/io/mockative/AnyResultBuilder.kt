@@ -5,7 +5,7 @@ interface AnyResultBuilder<R> {
 
     fun thenReturn(value: R) = thenInvoke { value }
 
-    fun thenThrow(error: Error) = thenInvoke { throw error }
+    fun thenThrow(throwable: Throwable) = thenInvoke { throw throwable }
 }
 
 fun AnyResultBuilder<Unit>.thenDoNothing() = thenInvoke { }
