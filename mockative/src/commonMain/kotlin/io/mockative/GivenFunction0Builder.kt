@@ -22,3 +22,4 @@ class GivenFunction0Builder<R>(private val mock: Mockable, private val function:
         override fun thenInvoke(block: () -> R) = then { block() }
     }
 }
+
