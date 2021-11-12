@@ -8,8 +8,7 @@ version = findProperty("project.version") as String
 
 kotlin {
     jvm()
-    iosX64("ios")
-    iosArm64()
+    ios()
     js {
         browser()
         nodejs()
@@ -24,16 +23,19 @@ kotlin {
             kotlin.srcDirs("$buildDir/generated/mockative-code-generator")
         }
 
-        val iosMain by getting
-
-        val iosArm64Main by getting {
-            dependsOn(iosMain)
-        }
-
         all {
             languageSettings {
                 optIn("kotlin.RequiresOptIn")
             }
         }
+    }
+}
+
+afterEvaluate {
+    val compilation = kotlin.targets["metadata"].compilations["iosMain"]
+    compilation.compileKotlinTask.doFirst {
+        compilation.compileDependencyFiles = files(
+            compilation.compileDependencyFiles.filterNot { it.absolutePath.endsWith("klib/common/stdlib") }
+        )
     }
 }
