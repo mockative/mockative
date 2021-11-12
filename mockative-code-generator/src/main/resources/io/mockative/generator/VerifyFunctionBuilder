@@ -1,0 +1,11 @@
+package io.mockative
+
+import io.mockative.matchers.Matcher
+import io.mockative.matchers.SpecificArgumentsMatcher
+
+class VerifyFunction#count#Builder<#type-param-list#>(private val receiver: Mockable, private val function: String) {
+    fun with(#with.parameters#): Verification {
+        val matcher = SpecificArgumentsMatcher(listOf(#with.arguments#))
+        return Verification(receiver, Expectation.Function(function, matcher))
+    }
+}

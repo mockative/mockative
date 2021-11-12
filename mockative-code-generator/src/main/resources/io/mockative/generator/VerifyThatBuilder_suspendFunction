@@ -1,0 +1,2 @@
+    fun <#type-param-list#, R, F> suspendFunction(function: F): VerifyFunction#count#Builder<#type-param-list#> where F : suspend (#type-param-list#) -> R, F : KFunction<R> = VerifyFunction#count#Builder(receiver.asMockable(), function.name)
+    fun <#type-param-list#, R, F> suspendFunction(function: F, type: KFunction#count#<#type-param-list#>): VerifyFunction#count#Builder<#type-param-list#> where F : suspend (#type-param-list#) -> R, F : KFunction<R> = VerifyFunction#count#Builder(receiver.asMockable(), function.name)

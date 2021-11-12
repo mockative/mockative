@@ -1,0 +1,44 @@
+package io.mockative
+
+import io.mockative.matchers.Matcher
+import io.mockative.matchers.SpecificArgumentsMatcher
+import kotlin.reflect.KFunction
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KProperty
+
+class VerifyThatBuilder<T : Any>(private val receiver: T) {
+    fun <R> invocation(block: T.() -> R): Verification {
+        val mock = receiver.asMockable()
+        val invocation = mock.record(block)
+        val expectation = invocation.toExpectation()
+        return Verification(mock, expectation)
+    }
+
+    suspend fun <R> coroutine(block: suspend T.() -> R): Verification {
+        val mock = receiver.asMockable()
+        val invocation = mock.record(block)
+        val expectation = invocation.toExpectation()
+        return Verification(mock, expectation)
+    }
+
+    fun <V> getter(property: KProperty<V>): Verification = Verification(receiver.asMockable(), Expectation.Getter(property.name))
+    fun getter(name: String): Verification = Verification(receiver.asMockable(), Expectation.Getter(name))
+
+    fun <V> setter(property: KMutableProperty<V>): VerifyThatSetterBuilder<V> = VerifyThatSetterBuilder(receiver.asMockable(), property.name)
+    fun setter(name: String): VerifyThatSetterBuilder<Any?> = VerifyThatSetterBuilder(receiver.asMockable(), name)
+
+
+    fun function(function: String): VerifyFunctionBuilder = VerifyFunctionBuilder(receiver.asMockable(), function)
+
+    fun <R, F> function(function: F): Verification where F : () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
+    fun <R, F> function(function: F, type: KFunction0): Verification where F : () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
+
+#functions#
+
+    fun suspendFunction(function: String): VerifyFunctionBuilder = VerifyFunctionBuilder(receiver.asMockable(), function)
+
+    fun <R, F> suspendFunction(function: F): Verification where F : suspend () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
+    fun <R, F> suspendFunction(function: F, type: KFunction0): Verification where F : suspend () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
+
+#suspend-functions#
+}
