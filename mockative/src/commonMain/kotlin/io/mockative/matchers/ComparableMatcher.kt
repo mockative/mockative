@@ -8,6 +8,7 @@ class ComparableMatcher<T : Comparable<T>>(
     private val operator: String,
     private val comparison: (T, T) -> Boolean
 ) : Matcher<T> {
+    @Suppress("UNCHECKED_CAST")
     override fun matches(value: Any?): Boolean {
         return type.isInstance(value) && comparison(value as T, operand)
     }

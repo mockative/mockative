@@ -12,6 +12,7 @@ class WhenSettingBuilder<V>(private val mock: Mockable, private val property: KP
         return ResultBuilder(value)
     }
 
+    @Suppress("UNCHECKED_CAST")
     inner class ResultBuilder(private val value: Matcher<*>) : AnyResultBuilder<Unit> {
         fun then(block: (V) -> Unit) {
             val expectation = Expectation.Setter(property.name, value)

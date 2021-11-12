@@ -1,5 +1,7 @@
 package io.mockative
 
+import io.mockative.concurrency.AtomicList
+import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,14 +13,20 @@ abstract class Mockable {
 
     private val unconfinedScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
 
-    private var blockingStubs: List<BlockingStub> by atomic(emptyList())
-    private var suspendStubs: List<SuspendStub> by atomic(emptyList())
-    private var verifiedInvocations: Set<Invocation> by atomic(emptySet())
+    private var blockingStubs = AtomicList<BlockingStub>()
+    private var suspendStubs = AtomicList<SuspendStub>()
+    private var verifiedInvocations = AtomicSet<Invocation>()
 
     private var isRecording: Boolean by atomic(false)
 
+    internal fun reset() {
+        blockingStubs.clear()
+        suspendStubs.clear()
+        verifiedInvocations.clear()
+    }
+
     internal fun addBlockingStub(stub: BlockingStub) {
-        blockingStubs = blockingStubs + stub
+        blockingStubs.add(stub)
     }
 
     private fun getBlockingStub(invocation: Invocation): BlockingStub {
@@ -30,7 +38,7 @@ abstract class Mockable {
     }
 
     internal fun addSuspendStub(stub: SuspendStub) {
-        suspendStubs = suspendStubs + stub
+        suspendStubs.add(stub)
     }
 
     private fun getSuspendStub(invocation: Invocation): SuspendStub {
@@ -57,7 +65,7 @@ abstract class Mockable {
     internal fun verify(verifier: Verifier) {
         val unverified = unverifiedInvocations
         val matches = verifier.verify(this, unverified)
-        verifiedInvocations = verifiedInvocations + matches
+        verifiedInvocations.addAll(matches)
     }
 
     /**
@@ -90,6 +98,7 @@ abstract class Mockable {
      * @param block the block invoking the member on this mock.
      * @return the recorded invocation
      */
+    @Suppress("UNCHECKED_CAST")
     internal fun <T : Any, R> record(block: T.() -> R): Invocation {
         var invocation: Invocation? = null
 
@@ -106,6 +115,7 @@ abstract class Mockable {
         return invocation!!
     }
 
+    @Suppress("UNCHECKED_CAST")
     internal fun <R> invoke(invocation: Invocation): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
@@ -122,6 +132,7 @@ abstract class Mockable {
      * @param block the block invoking the member on this mock.
      * @return the recorded invocation
      */
+    @Suppress("UNCHECKED_CAST")
     internal suspend fun <T : Any, R> record(block: suspend T.() -> R): Invocation {
         var invocation: Invocation? = null
 
@@ -139,6 +150,7 @@ abstract class Mockable {
         return invocation!!
     }
 
+    @Suppress("UNCHECKED_CAST")
     internal suspend fun <R> suspend(invocation: Invocation): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
@@ -147,11 +159,6 @@ abstract class Mockable {
             val result = stub.invoke(invocation)
             return result as R
         }
-    }
-
-    internal fun reset() {
-        blockingStubs = emptyList()
-        suspendStubs = emptyList()
     }
 
     companion object {

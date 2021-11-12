@@ -19,6 +19,7 @@ class WhenInvoking2Builder<P1, P2, R>(private val mock: Mockable, private val fu
         return ResultBuilder(arguments)
     }
 
+    @Suppress("UNCHECKED_CAST")
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnyResultBuilder<R> {
         fun then(block: (P1, P2) -> R) {
             val expectation = Expectation.Function(function.name, arguments)

@@ -19,6 +19,7 @@ class WhenSuspending1Builder<P1, R>(private val mock: Mockable, private val func
         return ResultBuilder(arguments)
     }
 
+    @Suppress("UNCHECKED_CAST")
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnySuspendResultBuilder<R> {
         fun then(block: suspend (P1) -> R) {
             val expectation = Expectation.Function(function.name, arguments)

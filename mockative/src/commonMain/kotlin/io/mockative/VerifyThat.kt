@@ -6,18 +6,19 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
 class VerifyThatBuilder<T : Any>(private val receiver: T) {
-    suspend fun <R> coroutine(block: suspend T.() -> R): Verification<T, R> = TODO()
     fun <R> invocation(block: T.() -> R): Verification<T, R> = TODO()
 
-    fun suspendFunction(function: String): Verification<T, Any?> = TODO()
-    fun <R, F> suspendFunction(function: F): Verification<T, R> where F : suspend () -> R, F : KFunction<R> = TODO()
-    fun <P1, R, F> suspendFunction(function: F): VerifyThatWith1Builder<P1, T, R> where F : suspend (P1) -> R, F : KFunction<R> = TODO()
-    fun <P1, P2, R, F> suspendFunction(function: F): VerifyThatWith2Builder<P1, P2, T, R> where F : suspend (P1, P2) -> R, F : KFunction<R> = TODO()
+    suspend fun <R> coroutine(block: suspend T.() -> R): Verification<T, R> = TODO()
 
     fun function(function: String): VerifyThatWithBuilder<T, Any?> = TODO()
     fun <R, F> function(function: F): Verification<T, R> where F : () -> R, F : KFunction<R> = TODO()
     fun <P1, R, F> function(function: F): VerifyThatWith1Builder<P1, T, R> where F : (P1) -> R, F : KFunction<R> = TODO()
     fun <P1, P2, R, F> function(function: F): VerifyThatWith2Builder<P1, P2, T, R> where F : (P1, P2) -> R, F : KFunction<R> = TODO()
+
+    fun suspendFunction(function: String): Verification<T, Any?> = TODO()
+    fun <R, F> suspendFunction(function: F): Verification<T, R> where F : suspend () -> R, F : KFunction<R> = TODO()
+    fun <P1, R, F> suspendFunction(function: F): VerifyThatWith1Builder<P1, T, R> where F : suspend (P1) -> R, F : KFunction<R> = TODO()
+    fun <P1, P2, R, F> suspendFunction(function: F): VerifyThatWith2Builder<P1, P2, T, R> where F : suspend (P1, P2) -> R, F : KFunction<R> = TODO()
 
     fun <V> getter(getter: KProperty<V>): Verification<T, V> = TODO()
 
@@ -70,31 +71,49 @@ interface DemoService {
 }
 
 suspend fun demo(service: DemoService) {
-    verifyThat(service).function("transformData")
-        .with(any<String>(), any<Int>())
-        .wasNotInvoked()
-
-    verifyThat(service).function(service::transformData)
-        .with(any())
-        .wasNotInvoked()
-
-    verifyThat(service).invocation { transformData("abc") }
-        .wasInvoked()
-
-    verifyThat(service).coroutine { refreshData() }
-        .wasNotInvoked()
-
-    verifyThat(service).suspendFunction(service::refreshData)
-        .wasInvoked(exactly = 8)
-
-    verifyThat(service).suspendFunction(service::fetchData)
-        .with(any(), oneOf("a", "b", "c"))
-        .wasInvoked(atMost = 9)
-
-    verifyThat(service).getter(service::mutableProperty)
-        .wasInvoked(atLeast = 5)
-
-    verifyThat(service).setter(service::mutableProperty)
-        .with(eq("abc"))
-        .wasInvoked(exactly = 1)
+//    given(service).invocation { service.transformData("abc") }
+//        .thenReturn("abc")
+//
+//    given(service).coroutine { service.refreshData() }
+//        .thenDoNothing()
+//
+//    given(service).function(service::transformData)
+//        .whenInvokedWith(any())
+//        .thenReturn("abc")
+//
+//    given(service).getter(service::mutableProperty)
+//        .whenInvoked()
+//        .thenReturn("abc")
+//
+//    given(service).setter(service::mutableProperty)
+//        .whenInvokedWith(any())
+//        .thenReturn("abc")
+//
+//    verifyThat(service).invocation { transformData("abc") }
+//        .wasInvoked()
+//
+//    verifyThat(service).coroutine { refreshData() }
+//        .wasNotInvoked()
+//
+//    verifyThat(service).function("transformData")
+//        .with(any<String>(), any<Int>())
+//        .wasNotInvoked()
+//
+//    verifyThat(service).function(service::transformData)
+//        .with(any())
+//        .wasNotInvoked()
+//
+//    verifyThat(service).suspendFunction(service::refreshData)
+//        .wasInvoked(exactly = 8)
+//
+//    verifyThat(service).suspendFunction(service::fetchData)
+//        .with(any(), oneOf("a", "b", "c"))
+//        .wasInvoked(atMost = 9)
+//
+//    verifyThat(service).getter(service::mutableProperty)
+//        .wasInvoked(atLeast = 5)
+//
+//    verifyThat(service).setter(service::mutableProperty)
+//        .with(eq("abc"))
+//        .wasInvoked(exactly = 1)
 }

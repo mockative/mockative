@@ -28,6 +28,7 @@ class WhenSuspending2Builder<P1, P2, R>(
         return ResultBuilder(arguments)
     }
 
+    @Suppress("UNCHECKED_CAST")
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) :
         AnySuspendResultBuilder<R> {
         fun then(block: suspend (P1, P2) -> R) {

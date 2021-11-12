@@ -19,6 +19,7 @@ class WhenInvoking#count#Builder<#type-param-list#, R>(private val mock: Mockabl
         return ResultBuilder(arguments)
     }
 
+    @Suppress("UNCHECKED_CAST")
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnyResultBuilder<R> {
         fun then(block: (#type-param-list#) -> R) {
             val expectation = Expectation.Function(function.name, arguments)

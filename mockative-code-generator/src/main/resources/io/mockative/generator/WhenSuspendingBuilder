@@ -19,6 +19,7 @@ class WhenSuspending#count#Builder<#type-param-list#, R>(private val mock: Mocka
         return ResultBuilder(arguments)
     }
 
+    @Suppress("UNCHECKED_CAST")
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) :
         AnySuspendResultBuilder<R> {
         fun then(block: suspend (#type-param-list#) -> R) {
