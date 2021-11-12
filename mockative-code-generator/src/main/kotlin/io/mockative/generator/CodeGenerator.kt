@@ -11,9 +11,11 @@ internal class CodeGenerator(outputPath: String) {
 
         generateFiles("GivenFunctionBuilder") { count -> "GivenFunction${count}Builder.kt"}
         generateFiles("GivenSuspendFunctionBuilder") { count -> "GivenSuspendFunction${count}Builder.kt"}
+        generateFiles("VerifyFunctionBuilder") { count -> "VerifyFunction${count}Builder.kt"}
 
-        generateGeneratedGivenBuilder()
         generateKFunctions()
+        generateGivenBuilder()
+        generateVerifyThatBuilder()
     }
 
     private fun generateKFunctions() {
@@ -32,7 +34,28 @@ internal class CodeGenerator(outputPath: String) {
         file.writeText(output)
     }
 
-    private fun generateGeneratedGivenBuilder() {
+    private fun generateVerifyThatBuilder() {
+        val template = readResourceSource("VerifyThatBuilder")
+
+        val functionTemplate = readResourceSource("VerifyThatBuilder_function")
+        val suspendFunctionTemplate = readResourceSource("VerifyThatBuilder_suspendFunction")
+
+        val functions = StringBuilder()
+        val suspendFunctions = StringBuilder()
+        for (count in 1..9) {
+            functions.appendLine(replaceTokens(count, functionTemplate))
+            suspendFunctions.appendLine(replaceTokens(count, suspendFunctionTemplate))
+        }
+
+        val output = template
+            .replace("#functions#", functions.toString())
+            .replace("#suspend-functions#", suspendFunctions.toString())
+
+        val file = File(outputDir, "VerifyThatBuilder.kt")
+        file.writeText(output)
+    }
+
+    private fun generateGivenBuilder() {
         val template = readResourceSource("GivenBuilder")
 
         val functionTemplate = readResourceSource("GivenBuilder_function")

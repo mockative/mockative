@@ -51,13 +51,13 @@ It is possible to stub a function or property by invoking it through the use of 
 function:
 
 ```kotlin
-// Stub a `suspend` function 
-given(mock).coroutine { fetchData("mockative/mockative") }
-    .then { data }
-
 // Stub a blocking function
 given(mock).invocation { transformData(data) }
     .then { transformedData }
+
+// Stub a `suspend` function 
+given(mock).coroutine { fetchData("mockative/mockative") }
+    .then { data }
 
 // Stub a property getter
 given(mock).invocation { mockProperty }
@@ -73,15 +73,15 @@ given(mock).invocation { mockProperty = transformedData }
 Callable references allows you to match arguments on something other than equality:
 
 ```kotlin
-// Stub a `suspend` function
-given(mock).suspendFunction(mock::fetchData)
-    .whenInvokedWith(oneOf("mockative/mockative", "mockative/mockative-processor"))
-    .then { data }
-
 // Stub a blocking function
 given(mock).function(mock::transformData)
     .whenInvokedWith(any())
     .then { transformedData }
+
+// Stub a `suspend` function
+given(mock).suspendFunction(mock::fetchData)
+    .whenInvokedWith(oneOf("mockative/mockative", "mockative/mockative-processor"))
+    .then { data }
 
 // Stub a property getter
 given(mock).getter(mock::mockProperty)
