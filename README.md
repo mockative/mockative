@@ -16,18 +16,29 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+// See: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/mockative/Mockative")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+        }
+    }
+}
+
 kotlin {
     sourceSets {
         val commonTest by getting {
             dependencies {
-                implementation("io.mockative:mockative:1.0.0")
+                implementation("io.mockative:mockative:1.0.0-SNAPSHOT")
             }
         }
     }
 }
 
 dependencies {
-    ksp(implementation("io.mockative:mockative-processor:1.0.0"))
+    ksp(implementation("io.mockative:mockative-processor:1.0.0-SNAPSHOT"))
 }
 ```
 
