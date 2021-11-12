@@ -186,14 +186,11 @@ verifyThat(mock).setter(mock::mockProperty)
 ## Validation
 
 ```kotlin
-// Verifies that all expectations were verified through a call to `wasInvoked()`
+// Verifies that all expectations were verified through a call to `wasInvoked()`.
 verifyThat(mock).wasVerified()
 
 // Verifies that the mock has no expectations that weren't invoked at least once.
 verifyThat(mock).hasNoUnmetExpectations()
-
-// Helper that combines `wasVerified()` and `hasNoUnmetExpectations()`
-verifyThat(mock).isValid()
 ```
 
 ## How does it work?
