@@ -1,0 +1,2 @@
+@Suppress("unused") class KFunction#count#<#type-param-list#>
+@Suppress("unused") inline fun <#reified-type-param-list#> fun#count#() = KFunction#count#<#type-param-list#>()

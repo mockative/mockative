@@ -1,0 +1,2 @@
+    fun <#type-param-list#, R, F> function(function: F): GivenFunction#count#Builder<#type-param-list#, R> where F : (#type-param-list#) -> R, F : KFunction<R> = GivenFunction#count#Builder(receiver.asMockable(), function)
+    fun <#type-param-list#, R, F> function(function: F, @Suppress("unused") type: KFunction#count#<#type-param-list#>): GivenFunction#count#Builder<#type-param-list#, R> where F : (#type-param-list#) -> R, F : KFunction<R> = GivenFunction#count#Builder(receiver.asMockable(), function)

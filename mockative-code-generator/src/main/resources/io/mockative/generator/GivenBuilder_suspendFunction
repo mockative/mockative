@@ -1,0 +1,2 @@
+    fun <#type-param-list#, R, F> suspendFunction(function: F): GivenSuspendFunction#count#Builder<#type-param-list#, R> where F : suspend (#type-param-list#) -> R, F : KFunction<R> = GivenSuspendFunction#count#Builder(receiver.asMockable(), function)
+    fun <#type-param-list#, R, F> suspendFunction(function: F, @Suppress("unused") type: KFunction#count#<#type-param-list#>): GivenSuspendFunction#count#Builder<#type-param-list#, R> where F : suspend (#type-param-list#) -> R, F : KFunction<R> = GivenSuspendFunction#count#Builder(receiver.asMockable(), function)

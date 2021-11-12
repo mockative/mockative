@@ -1,0 +1,32 @@
+package io.mockative
+
+import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty
+import kotlin.reflect.KMutableProperty
+
+class GivenBuilder<T : Any>(private val receiver: T) {
+    suspend fun <R> coroutine(block: suspend T.() -> R): SuspendResultBuilder<R> {
+        val mock = receiver.asMockable()
+        val invocation = mock.record(block)
+        val expectation = invocation.toExpectation()
+        return SuspendResultBuilder(mock, expectation)
+    }
+
+    fun <R> invocation(block: T.() -> R): ResultBuilder<R> {
+        val mock = receiver.asMockable()
+        val invocation = mock.record(block)
+        val expectation = invocation.toExpectation()
+        return ResultBuilder(mock, expectation)
+    }
+
+    fun <V> getter(property: KProperty<V>): GivenFunction0Builder<V> = TODO()
+    fun <V> setter(property: KMutableProperty<V>): GivenFunction1Builder<V, Unit> = TODO()
+
+    fun <R, F> function(function: F): GivenFunction0Builder<R> where F : () -> R, F : KFunction<R> = GivenFunction0Builder(receiver.asMockable(), function)
+    fun <R, F> function(function: F, @Suppress("unused") type: KFunction0): GivenFunction0Builder<R> where F : () -> R, F : KFunction<R> = GivenFunction0Builder(receiver.asMockable(), function)
+#functions#
+
+    fun <R, F> suspendFunction(function: F): GivenSuspendFunction0Builder<R> where F : suspend () -> R, F : KFunction<R> = GivenSuspendFunction0Builder(receiver.asMockable(), function)
+    fun <R, F> suspendFunction(function: F, @Suppress("unused") type: KFunction0): GivenSuspendFunction0Builder<R> where F : suspend () -> R, F : KFunction<R> = GivenSuspendFunction0Builder(receiver.asMockable(), function)
+#suspend-functions#
+}

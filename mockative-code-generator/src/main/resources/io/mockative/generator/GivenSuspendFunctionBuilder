@@ -1,0 +1,26 @@
+package io.mockative
+
+import io.mockative.matchers.ArgumentsMatcher
+import io.mockative.matchers.Matcher
+import io.mockative.matchers.SpecificArgumentsMatcher
+import kotlin.reflect.KFunction
+
+class GivenSuspendFunction#count#Builder<#type-param-list#, R>(private val mock: Mockable, private val function: KFunction<R>) {
+    fun whenInvokedWith(#with.parameters#): ResultBuilder {
+        val arguments = SpecificArgumentsMatcher(listOf(#with.arguments#))
+        return ResultBuilder(arguments)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnySuspendResultBuilder<R> {
+        fun then(block: suspend (#type-param-list#) -> R) {
+            val expectation = Expectation.Function(function.name, arguments)
+            val stub = SuspendStub(expectation) { args ->
+                block(#then.arguments#)
+            }
+            mock.addSuspendStub(stub)
+        }
+
+        override fun thenInvoke(block: suspend () -> R) = then { #thenInvoke.underscores# -> block() }
+    }
+}
