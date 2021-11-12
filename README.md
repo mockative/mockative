@@ -51,19 +51,19 @@ It is possible to stub a function or property by invoking it through the use of 
 function:
 
 ```kotlin
-// Stub a `suspend` function using `given(mock).coroutine { ... }` 
+// Stub a `suspend` function 
 given(mock).coroutine { fetchData("mockative/mockative") }
     .then { data }
 
-// Stub a blocking function using `given(mock).invocation { ... }`
+// Stub a blocking function
 given(mock).invocation { transformData(data) }
     .then { transformedData }
 
-// Stub a property getter using `given(mock).invocation { ... }`
+// Stub a property getter
 given(mock).invocation { mockProperty }
     .then { mockPropertyData }
 
-// Stub a property setter using `given(mock).invocation { ... }`
+// Stub a property setter
 given(mock).invocation { mockProperty = transformedData }
     .thenDoNothing()
 ```
@@ -73,35 +73,41 @@ given(mock).invocation { mockProperty = transformedData }
 Callable references allows you to match arguments on something other than equality:
 
 ```kotlin
-// Stub a `suspend` function using `whenSuspending(mock, function)`
-whenSuspending(mock, mock::fetchData)
-    .with(oneOf("mockative/mockative", "mockative/mockative-processor"))
+// Stub a `suspend` function
+given(mock).suspendFunction(mock::fetchData)
+    .whenInvokedWith(oneOf("mockative/mockative", "mockative/mockative-processor"))
     .then { data }
 
-// Stub a blocking function using `whenInvoking(mock, function)`
-whenInvoking(mock, mock::transformData)
-    .with(any())
+// Stub a blocking function
+given(mock).function(mock::transformData)
+    .whenInvokedWith(any())
     .then { transformedData }
 
-// Stub a property getter using `whenGetting(mock, property)`
-whenGetting(mock, mock::mockProperty)
+// Stub a property getter
+given(mock).getter(mock::mockProperty)
+    .whenInvoked()
     .then { mockPropertyData }
 
-// Stub a property setter using `whenSetting(mock, property)`
-whenSetting(mock, mock::mockProperty)
+// Stub a property setter
+given(mock).setter(mock::mockProperty)
+    .whenInvokedWith(any())
     .thenDoNothing()
 
 // When the function being stubbed has overloads with a different number of arguments, a specific 
-// overload can be selected by appending a number fo the end of the `when` function.
-whenInvoking1(mock, mock::transformData)
-    .with(any())
+// overload can be selected using one of the `fun[0-9]` functions. 
+given(mock).function(mock::transformData, fun0())
+    .whenInvokedWith(any())
     .then { transformedData }
 
 // When the function being stubbed has overloads with the same number of arguments, but different 
-// types, the type arguments must be specified, or you can use the `when` functions accepting the 
-// name of the function being invoked.
-whenInvoking(mock, "transformData")
-    .with(any<Data>())
+// types, the type arguments must be specified using one of the `fun[0-9]` functions.
+given(mock).function(mock::transformData, fun2<Data, String>())
+    .whenInvokedWith(any(), any())
+    .then { transformedData }
+
+// Additionally, you can stub functions and properties by their name.
+given(mock).function("transformData")
+    .whenInvokedWith(any<Data>())
     .then { transformedData }
 ```
 
