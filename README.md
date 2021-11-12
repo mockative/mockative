@@ -149,15 +149,15 @@ verifyThat(mock).coroutine { fetchData("mockative/mockative") }
 
 // Expression (blocking function)
 verifyThat(mock).invocation { transformData(data) }
-    .wasInvoked(atLeast = 1)
+    .wasInvoked(atLeast = 1.time)
 
 // Expression (property getter)
 verifyThat(mock).invocation { mockProperty }
-    .wasInvoked(atLeast = 1, atMost = 6)
+    .wasInvoked(atLeast = once, atMost = 6.times)
 
 // Expression (property setter)
 verifyThat(mock).invocation { mockProperty = transformedData }
-    .wasInvoked(exactly = 9)
+    .wasInvoked(exactly = 9.times)
 ```
 
 ### Verification using Callable References
@@ -171,16 +171,16 @@ verifyThat(mock).coroutine(mock::fetchData)
 // Function Reference (blocking function)
 verifyThat(mock).function(mock::transformData)
     .with(any())
-    .wasInvoked(atMost = 3)
+    .wasInvoked(atMost = 3.times)
 
 // Getter
 verifyThat(mock).getter(mock::mockProperty)
-    .wasInvoked(exactly = 4)
+    .wasInvoked(exactly = 4.times)
 
 // Setter
 verifyThat(mock).setter(mock::mockProperty)
     .with(any())
-    .wasInvoked(atLeast = 7)
+    .wasInvoked(atLeast = 7.times)
 ```
 
 ## Validation

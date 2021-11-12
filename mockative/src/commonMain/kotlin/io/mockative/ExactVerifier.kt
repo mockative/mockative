@@ -1,6 +1,6 @@
 package io.mockative
 
-class ExactVerifier(
+internal class ExactVerifier(
     private val expectation: Expectation,
     private val count: Int
 ) : Verifier {

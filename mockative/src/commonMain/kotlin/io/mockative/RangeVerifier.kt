@@ -1,6 +1,6 @@
 package io.mockative
 
-class RangeVerifier(
+internal class RangeVerifier(
     private val expectation: Expectation,
     private val atLeast: Int?,
     private val atMost: Int?

@@ -78,7 +78,7 @@ abstract class Mockable {
         }
     }
 
-    internal fun validate() {
+    internal fun verifyNoUnmetExpectations() {
         val unusedBlockingStubs = blockingStubs.filter { it.invocations.isEmpty() }
         val unusedSuspendStubs = suspendStubs.filter { it.invocations.isEmpty() }
 

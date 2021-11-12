@@ -12,7 +12,7 @@ class GitHubServiceMockTests {
 
     @AfterTest
     fun validateMocks() {
-        validate(github)
+        verifyThat(github).hasNoUnmetExpectations()
     }
 
     @Test
@@ -60,7 +60,9 @@ class GitHubServiceMockTests {
         service.repository(id)
 
         // then
-        verify(github).coroutine.exactly(1) { repository(id) }
-        confirmVerified(github)
+        verifyThat(github).coroutine { repository(id) }
+            .wasInvoked(exactly = once)
+
+        verifyThat(github).wasVerified()
     }
 }

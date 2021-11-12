@@ -1,6 +1,5 @@
 package io.mockative
 
-import io.mockative.matchers.Matcher
 import io.mockative.matchers.SpecificArgumentsMatcher
 import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
@@ -34,11 +33,13 @@ class VerifyThatBuilder<T : Any>(private val receiver: T) {
     fun <R, F> function(function: F, type: KFunction0): Verification where F : () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
 
 #functions#
-
     fun suspendFunction(function: String): VerifyFunctionBuilder = VerifyFunctionBuilder(receiver.asMockable(), function)
 
     fun <R, F> suspendFunction(function: F): Verification where F : suspend () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
     fun <R, F> suspendFunction(function: F, type: KFunction0): Verification where F : suspend () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
 
 #suspend-functions#
+    fun wasVerified() = receiver.asMockable().confirmVerified()
+
+    fun hasNoUnmetExpectations() = receiver.asMockable().verifyNoUnmetExpectations()
 }
