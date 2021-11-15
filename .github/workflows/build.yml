@@ -25,6 +25,9 @@ jobs:
       with:
         java-version: 16
 
+    - name: Run Code Generator
+      run: ./gradlew :mockative-code-generator:run
+
     - name: Run tests with Gradle
       run: ./gradlew allTests
 
