@@ -58,17 +58,18 @@ Then, to stub a function or property on the mock there is a couple of options:
 
 ### Stubbing using Expressions
 
-It is possible to stub a function or property by invoking it through the use of the `<T> given(T)`
-function:
+It is possible to stub a function or property by invoking it through the use of either
+the `<R> invocation(T.() -> R)` or `<R> coroutine(T.() -> R)` function available from
+the `<T> given(T)` function:
 
 ```kotlin
+// Stub a `suspend` function
+given(mock).coroutine { fetchData("mockative/mockative") }
+    .then { data }
+
 // Stub a blocking function
 given(mock).invocation { transformData(data) }
     .then { transformedData }
-
-// Stub a `suspend` function 
-given(mock).coroutine { fetchData("mockative/mockative") }
-    .then { data }
 
 // Stub a property getter
 given(mock).invocation { mockProperty }
@@ -84,15 +85,15 @@ given(mock).invocation { mockProperty = transformedData }
 Callable references allows you to match arguments on something other than equality:
 
 ```kotlin
-// Stub a blocking function
-given(mock).function(mock::transformData)
-    .whenInvokedWith(any())
-    .then { transformedData }
-
 // Stub a `suspend` function
 given(mock).suspendFunction(mock::fetchData)
     .whenInvokedWith(oneOf("mockative/mockative", "mockative/mockative-processor"))
     .then { data }
+
+// Stub a blocking function
+given(mock).function(mock::transformData)
+    .whenInvokedWith(any())
+    .then { transformedData }
 
 // Stub a property getter
 given(mock).getter(mock::mockProperty)
@@ -101,22 +102,23 @@ given(mock).getter(mock::mockProperty)
 
 // Stub a property setter
 given(mock).setter(mock::mockProperty)
-    .whenInvokedWith(any())
+    .whenInvokedWith(matching { it.name == "foo" })
     .thenDoNothing()
 
-// When the function being stubbed has overloads with a different number of arguments, a specific 
-// overload can be selected using one of the `fun[0-9]` functions. 
+// When the function being stubbed has overloads with a different number of arguments, a specific
+// overload can be selected using one of the `fun[0-9]` functions.
 given(mock).function(mock::transformData, fun0())
     .whenInvokedWith(any())
     .then { transformedData }
 
-// When the function being stubbed has overloads with the same number of arguments, but different 
+// When the function being stubbed has overloads with the same number of arguments, but different
 // types, the type arguments must be specified using one of the `fun[0-9]` functions.
 given(mock).function(mock::transformData, fun2<Data, String>())
     .whenInvokedWith(any(), any())
     .then { transformedData }
 
-// Additionally, you can stub functions and properties by their name.
+// Additionally, you can stub functions and properties by their name, but in this case you'll
+// need to provide type information for the matchers.
 given(mock).function("transformData")
     .whenInvokedWith(any<Data>())
     .then { transformedData }
@@ -134,7 +136,8 @@ stubbing the implementation, through the use of the `then` functions.
 | `thenReturn(value: R)`             | Returns the specified value.                                                                               |
 | `thenThrow(throwable: Throwable)`  | Throws the specified exception.                                                                            |
 
-When the return type of the function or property being stubbed is `Unit`, the following additional then function is available:
+When the return type of the function or property being stubbed is `Unit`, the following additional
+then function is available:
 
 | Function          | Description     |
 | ----------------- | --------------- |
@@ -219,4 +222,4 @@ fun mock(type: KClass<GitHubRepository>): GitHubRepository = GitHubRepositoryMoc
 Kotlin uses overload resolution to automatically select the most specific `mock(KClass)` function,
 and since the generated functions are in the same namespace as the generic `<T> mock(KClass<T>)`
 function, Kotlin will pick up the overloads without any additional imports required, resulting in a
-smooth developer experience. 
+smooth developer experience.

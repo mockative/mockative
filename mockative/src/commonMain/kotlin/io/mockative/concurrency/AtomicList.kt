@@ -1,5 +1,8 @@
 package io.mockative.concurrency
 
+/**
+ * An atomic, thread-sharable generic ordered collection of elements.
+ */
 internal class AtomicList<E> : List<E> {
     private val ref: AtomicRef<List<E>> = AtomicRef(emptyList())
 

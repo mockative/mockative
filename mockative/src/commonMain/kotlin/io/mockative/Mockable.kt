@@ -3,15 +3,10 @@ package io.mockative
 import io.mockative.concurrency.AtomicList
 import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 
 abstract class Mockable {
 
     private class StubbingInProgressError(val invocation: Invocation) : Error()
-
-    private val unconfinedScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
 
     private var blockingStubs = AtomicList<BlockingStub>()
     private var suspendStubs = AtomicList<SuspendStub>()
@@ -116,7 +111,7 @@ abstract class Mockable {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <R> invoke(invocation: Invocation): R {
+    internal open fun <R> invoke(invocation: Invocation): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
         } else {

@@ -1,5 +1,9 @@
 package io.mockative.concurrency
 
+/**
+ * An atomic, thread-sharable generic unordered collection of elements that does not support
+ * duplicate elements.
+ */
 internal class AtomicSet<E> : Set<E> {
     private val ref: AtomicRef<Set<E>> = AtomicRef(emptySet())
 

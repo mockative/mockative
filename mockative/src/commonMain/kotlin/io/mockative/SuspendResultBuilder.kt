@@ -1,9 +1,5 @@
 package io.mockative
 
-suspend fun <T : Any, R> givenCoroutine(receiver: T, block: suspend T.() -> R): SuspendResultBuilder<R> {
-    return given(receiver).coroutine(block)
-}
-
 class SuspendResultBuilder<R>(
     private val mock: Mockable,
     private val expectation: Expectation
