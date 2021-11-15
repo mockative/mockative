@@ -5,23 +5,27 @@ import kotlin.reflect.KClass
 abstract class MockativeError(message: String) : Error(message)
 
 class NoSuchMockError(type: KClass<*>) : MockativeError(
-    """
-        A mock for the type ${type.name} was not generated.
-        
-            Make sure the property holding the mock is annotated with @Mock:
-                @Mock
-                private val myMock = mock(${type.name}::class)
-    """.trimIndent()
+    buildString {
+        appendLine("A mock for the type ${type.name} was not generated.")
+        appendLine()
+        appendLine(1, "Make sure the property holding the mock is annotated with @Mock:")
+        appendLine()
+        appendLine(2, "@Mock")
+        appendLine(2, "private val myMock = mock(${type.name}::class)")
+        appendLine()
+    }
 )
 
 class ReceiverNotMockedError(receiver: Any) : MockativeError(
-    """
-        Attempt to perform operation a non-mock instance of type ${receiver.getClassName()}.
-        
-            Make sure the property holding the mock is annotated with @Mock:
-                @Mock
-                private val myMock = mock(${receiver.getClassName()}::class)
-    """.trimIndent()
+    buildString {
+        appendLine("Attempt to perform operation a non-mock instance of type ${receiver.getClassName()}.")
+        appendLine()
+        appendLine(1, "Make sure the property holding the mock is annotated with @Mock:")
+        appendLine()
+        appendLine(2, "@Mock")
+        appendLine(2, "private val myMock = mock(${receiver.getClassName()}::class)")
+        appendLine()
+    }
 )
 
 class ExactVerificationError(
@@ -113,20 +117,23 @@ class MockValidationError(instance: Any, expectations: List<Expectation>) : Mock
         expectations.forEach { expectation ->
             appendLine(2, "$expectation")
         }
+
+        appendLine()
     }
 )
 
 class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean) : MockativeError(
-    """
-        A function was called without a matching expectation.
-        
-            An expectation was not given on the function:
-                ${instance.getClassName()}.$invocation
-                
-            Set up an expectation using:
-                given(instance)${if (isSuspend) ".coroutine" else ""} { $invocation }
-                    .then { ... }
-    """.trimIndent()
+    buildString {
+        appendLine("A function was called without a matching expectation.")
+        appendLine()
+        appendLine(1, "An expectation was not given on the function:")
+        appendLine(2, "${instance.getClassName()}.$invocation")
+        appendLine()
+        appendLine(1, "Set up an expectation using:")
+        appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ""} { $invocation }")
+        appendLine(3, ".then { ... }")
+        appendLine()
+    }
 )
 
 private inline fun buildString(block: Appendable.() -> Unit): String {
@@ -135,7 +142,7 @@ private inline fun buildString(block: Appendable.() -> Unit): String {
 
 private fun Appendable.appendIndentation(level: Int) {
     for (i in 0 until level) {
-        append(' ')
+        append("    ")
     }
 }
 
