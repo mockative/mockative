@@ -39,7 +39,7 @@ class VerifyThatBuilder<T : Any>(private val receiver: T) {
     fun <R, F> suspendFunction(function: F, type: KFunction0): Verification where F : suspend () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
 
 #suspend-functions#
-    fun wasVerified() = receiver.asMockable().confirmVerified()
+    fun hasNoUnverifiedExpectations() = receiver.asMockable().confirmVerified()
 
     fun hasNoUnmetExpectations() = receiver.asMockable().verifyNoUnmetExpectations()
 }

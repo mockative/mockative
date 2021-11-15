@@ -16,14 +16,10 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-// See: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/mockative/Mockative")
-        credentials {
-            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
-        }
+        // Currently only snapshots are available through GitHub Package Registry
+        url = uri("https://maven.pkg.github.com/mockative/mockative")
     }
 }
 
@@ -152,25 +148,25 @@ The untyped callable references using `<T : Any> whenInvoking(T, String)` and
 
 ## Verification (WIP)
 
-Verification of invocations to mocks is supported through the `verifyThat(mock)` API:
+Verification of invocations to mocks is supported through the `verify(mock)` API:
 
 ### Verification using Expressions
 
 ```kotlin
 // Expression (suspend function)
-verifyThat(mock).coroutine { fetchData("mockative/mockative") }
+verify(mock).coroutine { fetchData("mockative/mockative") }
     .wasNotInvoked()
 
 // Expression (blocking function)
-verifyThat(mock).invocation { transformData(data) }
+verify(mock).invocation { transformData(data) }
     .wasInvoked(atLeast = 1.time)
 
 // Expression (property getter)
-verifyThat(mock).invocation { mockProperty }
+verify(mock).invocation { mockProperty }
     .wasInvoked(atLeast = once, atMost = 6.times)
 
 // Expression (property setter)
-verifyThat(mock).invocation { mockProperty = transformedData }
+verify(mock).invocation { mockProperty = transformedData }
     .wasInvoked(exactly = 9.times)
 ```
 
@@ -178,21 +174,21 @@ verifyThat(mock).invocation { mockProperty = transformedData }
 
 ```kotlin
 // Function Reference (suspend function)
-verifyThat(mock).coroutine(mock::fetchData)
+verify(mock).coroutine(mock::fetchData)
     .with(eq("mockative/mockative"))
     .wasNotInvoked()
 
 // Function Reference (blocking function)
-verifyThat(mock).function(mock::transformData)
+verify(mock).function(mock::transformData)
     .with(any())
     .wasInvoked(atMost = 3.times)
 
 // Getter
-verifyThat(mock).getter(mock::mockProperty)
+verify(mock).getter(mock::mockProperty)
     .wasInvoked(exactly = 4.times)
 
 // Setter
-verifyThat(mock).setter(mock::mockProperty)
+verify(mock).setter(mock::mockProperty)
     .with(any())
     .wasInvoked(atLeast = 7.times)
 ```
@@ -200,11 +196,11 @@ verifyThat(mock).setter(mock::mockProperty)
 ## Validation
 
 ```kotlin
-// Verifies that all expectations were verified through a call to `wasInvoked()`.
-verifyThat(mock).wasVerified()
+// Verifies that all expectations were verified through a call to `verify(mock).wasInvoked()`.
+verify(mock).hasNoUnverifiedExpectations()
 
 // Verifies that the mock has no expectations that weren't invoked at least once.
-verifyThat(mock).hasNoUnmetExpectations()
+verify(mock).hasNoUnmetExpectations()
 ```
 
 ## How does it work?
