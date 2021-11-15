@@ -2,7 +2,7 @@ package io.mockative.concurrency
 
 import kotlin.reflect.KProperty
 
-class AtomicRef<T>(value: T) {
+internal class AtomicRef<T>(value: T) {
     private val ref = AtomicReference(value)
 
     var value: T

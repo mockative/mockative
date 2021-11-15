@@ -2,43 +2,25 @@ package io.mockative
 
 import kotlin.reflect.KClass
 
-class NoSuchMockError(type: KClass<*>) : Error(
+abstract class MockativeError(message: String) : Error(message)
+
+class NoSuchMockError(type: KClass<*>) : MockativeError(
     """
         A mock for the type ${type.name} was not generated.
         
-            Make sure either the property holding the mock is annotated with @Mock, or a method or class is annotated with @Mocks:
+            Make sure the property holding the mock is annotated with @Mock:
                 @Mock
                 private val myMock = mock(${type.name}::class)
-                
-                ----- or -----
-                
-                private lateinit var myMock: ${type.name}
-                
-                @Mocks
-                @BeforeTest
-                fun setupMocks() {
-                    myMock = mock(${type.name}::class)
-                }
     """.trimIndent()
 )
 
-class ReceiverNotMockedError(receiver: Any) : Error(
+class ReceiverNotMockedError(receiver: Any) : MockativeError(
     """
         Attempt to perform operation a non-mock instance of type ${receiver.getClassName()}.
         
-            Make sure either the property holding the mock is annotated with @Mock, or a method or class is annotated with @Mocks:
+            Make sure the property holding the mock is annotated with @Mock:
                 @Mock
                 private val myMock = mock(${receiver.getClassName()}::class)
-                
-                ----- or -----
-                
-                private lateinit var myMock: ${receiver.getClassName()}
-                
-                @Mocks
-                @BeforeTest
-                fun setupMocks() {
-                    myMock = mock(${receiver.getClassName()}::class)
-                }
     """.trimIndent()
 )
 
@@ -48,26 +30,24 @@ class ExactVerificationError(
     actual: Int,
     expectation: Expectation,
     invocations: List<Invocation>
-) : AssertionError(
-    StringBuilder()
-        .run {
-            appendLine("A mock of type ${instance.getClassName()} was not invoked the expected number of times.")
-            appendLine()
-            appendLine(1, "Expected $expected invocations of $expectation")
-            appendLine(1, "Actual: $actual")
-            appendLine()
+) : MockativeError(
+    buildString {
+        appendLine("A mock of type ${instance.getClassName()} was not invoked the expected number of times.")
+        appendLine()
+        appendLine(1, "Expected $expected invocations of $expectation")
+        appendLine(1, "Actual: $actual")
+        appendLine()
 
-            if (invocations.isEmpty()) {
-                appendLine(2, "No invocation on the mock were recorded.")
-            } else {
-                invocations.forEach { invocation ->
-                    appendLine(2, "$invocation")
-                }
+        if (invocations.isEmpty()) {
+            appendLine(2, "No invocation on the mock were recorded.")
+        } else {
+            invocations.forEach { invocation ->
+                appendLine(2, "$invocation")
             }
-
-            appendLine()
         }
-        .toString()
+
+        appendLine()
+    }
 )
 
 class RangeVerificationError(
@@ -77,83 +57,66 @@ class RangeVerificationError(
     actual: Int,
     expectation: Expectation,
     invocations: List<Invocation>
-) : AssertionError(
-    StringBuilder()
-        .run {
-            appendLine("A mock of type ${instance.getClassName()} was not invoked the expected number of times.")
-            appendLine()
+) : MockativeError(
+    buildString {
+        appendLine("A mock of type ${instance.getClassName()} was not invoked the expected number of times.")
+        appendLine()
 
-            val expected = when {
-                atLeast != null && atMost != null -> "at least $atLeast and at most $atMost "
-                atLeast != null -> "at least $atLeast "
-                atMost != null -> "at most $atMost "
-                else -> "at least 1"
-            }
-
-            appendLine(1, "Expected ${expected}invocations of $expectation")
-            appendLine(1, "Actual: $actual")
-            appendLine()
-
-            if (invocations.isEmpty()) {
-                appendLine(2, "No invocation on the mock were recorded.")
-            } else {
-                invocations.forEach { invocation ->
-                    appendLine(2, "$invocation")
-                }
-            }
-
-            appendLine()
+        val expected = when {
+            atLeast != null && atMost != null -> "at least $atLeast and at most $atMost "
+            atLeast != null -> "at least $atLeast "
+            atMost != null -> "at most $atMost "
+            else -> "at least 1"
         }
-        .toString()
-)
 
-fun StringBuilder.appendIndentation(level: Int) {
-    for (i in 0 until level) {
-        append(' ')
-    }
-}
+        appendLine(1, "Expected ${expected}invocations of $expectation")
+        appendLine(1, "Actual: $actual")
+        appendLine()
 
-fun StringBuilder.appendLine(indentation: Int, value: String) {
-    appendIndentation(indentation)
-    appendLine(value)
-}
-
-class UnverifiedInvocationsError(instance: Any, invocations: List<Invocation>) : AssertionError(
-    StringBuilder()
-        .run {
-            appendLine(0, "A mock contains unverified invocations.")
-            appendLine()
-            appendLine(
-                1,
-                "The following invocations on the type ${instance.getClassName()} were not verified:"
-            )
-            appendLine()
-
+        if (invocations.isEmpty()) {
+            appendLine(2, "No invocation on the mock were recorded.")
+        } else {
             invocations.forEach { invocation ->
                 appendLine(2, "$invocation")
             }
-
-            appendLine()
         }
-        .toString()
+
+        appendLine()
+    }
 )
 
-class MockValidationError(instance: Any, expectations: List<Expectation>) : AssertionError(
-    StringBuilder()
-        .run {
-            appendLine("Validation of mock failed.")
-            appendLine()
-            appendLine(1, "The following expectations on the type ${instance.getClassName()} were not met.")
-            appendLine()
+class UnverifiedInvocationsError(instance: Any, invocations: List<Invocation>) : MockativeError(
+    buildString {
+        appendLine(0, "A mock contains unverified invocations.")
+        appendLine()
+        appendLine(
+            1,
+            "The following invocations on the type ${instance.getClassName()} were not verified:"
+        )
+        appendLine()
 
-            expectations.forEach { expectation ->
-                appendLine(2, "$expectation")
-            }
+        invocations.forEach { invocation ->
+            appendLine(2, "$invocation")
         }
-        .toString()
+
+        appendLine()
+    }
 )
 
-class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean) : AssertionError(
+class MockValidationError(instance: Any, expectations: List<Expectation>) : MockativeError(
+    buildString {
+        appendLine("Validation of mock failed.")
+        appendLine()
+        appendLine(1, "The following expectations on the type ${instance.getClassName()} were not met.")
+        appendLine()
+
+        expectations.forEach { expectation ->
+            appendLine(2, "$expectation")
+        }
+    }
+)
+
+class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean) : MockativeError(
     """
         A function was called without a matching expectation.
         
@@ -165,3 +128,18 @@ class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: 
                     .then { ... }
     """.trimIndent()
 )
+
+private inline fun buildString(block: Appendable.() -> Unit): String {
+    return StringBuilder().also { block(it) }.toString()
+}
+
+private fun Appendable.appendIndentation(level: Int) {
+    for (i in 0 until level) {
+        append(' ')
+    }
+}
+
+private fun Appendable.appendLine(indentation: Int, value: String) {
+    appendIndentation(indentation)
+    appendLine(value)
+}
