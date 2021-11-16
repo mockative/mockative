@@ -3,7 +3,7 @@ package io.mockative
 import io.mockative.concurrency.AtomicList
 
 internal class BlockingStub(val expectation: Expectation, private val invoke: (Array<Any?>) -> Any?) {
-    var invocations = AtomicList<Invocation>()
+    val invocations = AtomicList<Invocation>()
 
     fun invoke(invocation: Invocation): Any? {
         val arguments = when (invocation) {

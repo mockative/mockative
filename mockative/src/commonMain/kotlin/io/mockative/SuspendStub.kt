@@ -3,7 +3,7 @@ package io.mockative
 import io.mockative.concurrency.AtomicList
 
 internal class SuspendStub(val expectation: Expectation, private val invoke: suspend (Array<Any?>) -> Any?) {
-    var invocations = AtomicList<Invocation>()
+    val invocations = AtomicList<Invocation>()
 
     suspend fun invoke(invocation: Invocation): Any? {
         val arguments = when (invocation) {

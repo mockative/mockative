@@ -12,7 +12,7 @@ class NoSuchMockError(type: KClass<*>) : MockativeError(
         appendLine()
         appendLine(2, "@Mock")
         appendLine(2, "private val myMock = mock(${type.name}::class)")
-        appendLine()
+        appendLine(1, "")
     }
 )
 
@@ -24,7 +24,7 @@ class ReceiverNotMockedError(receiver: Any) : MockativeError(
         appendLine()
         appendLine(2, "@Mock")
         appendLine(2, "private val myMock = mock(${receiver.getClassName()}::class)")
-        appendLine()
+        appendLine(1, "")
     }
 )
 
@@ -50,7 +50,7 @@ class ExactVerificationError(
             }
         }
 
-        appendLine()
+        appendLine(1, "")
     }
 )
 
@@ -85,7 +85,7 @@ class RangeVerificationError(
             }
         }
 
-        appendLine()
+        appendLine(1, "")
     }
 )
 
@@ -103,11 +103,11 @@ class UnverifiedInvocationsError(instance: Any, invocations: List<Invocation>) :
             appendLine(2, "$invocation")
         }
 
-        appendLine()
+        appendLine(1, "")
     }
 )
 
-class MockValidationError(instance: Any, expectations: List<Expectation>) : MockativeError(
+class MockValidationError(instance: Any, expectations: List<Expectation>, invocations: List<Invocation>) : MockativeError(
     buildString {
         appendLine("Validation of mock failed.")
         appendLine()
@@ -119,6 +119,15 @@ class MockValidationError(instance: Any, expectations: List<Expectation>) : Mock
         }
 
         appendLine()
+
+        appendLine(1, "The following invocations were recorded:")
+        appendLine()
+
+        invocations.forEach { invocation ->
+            appendLine(2, "$invocation")
+        }
+
+        appendLine(1, "")
     }
 )
 
@@ -132,7 +141,7 @@ class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: 
         appendLine(1, "Set up an expectation using:")
         appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ""} { $invocation }")
         appendLine(3, ".then { ... }")
-        appendLine()
+        appendLine(1, "")
     }
 )
 

@@ -8,9 +8,9 @@ abstract class Mockable {
 
     private class StubbingInProgressError(val invocation: Invocation) : Error()
 
-    private var blockingStubs = AtomicList<BlockingStub>()
-    private var suspendStubs = AtomicList<SuspendStub>()
-    private var verifiedInvocations = AtomicSet<Invocation>()
+    private val blockingStubs = AtomicList<BlockingStub>()
+    private val suspendStubs = AtomicList<SuspendStub>()
+    private val verifiedInvocations = AtomicSet<Invocation>()
 
     private var isRecording: Boolean by atomic(false)
 
@@ -83,7 +83,7 @@ abstract class Mockable {
         val unmetExpectations = unmetBlockingExpectations + unmetSuspendExpectations
 
         if (unmetExpectations.isNotEmpty()) {
-            throw MockValidationError(this, unmetExpectations)
+            throw MockValidationError(this, unmetExpectations, invocations)
         }
     }
 
