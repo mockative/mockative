@@ -1,5 +1,7 @@
 # Mockative
 
+![Maven Central](https://img.shields.io/maven-central/v/io.mockative/mockative)
+
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 
 [ksp]: https://github.com/google/ksp
@@ -17,24 +19,21 @@ plugins {
 }
 
 repositories {
-    maven {
-        // Currently only snapshots are available through GitHub Package Registry
-        url = uri("https://maven.pkg.github.com/mockative/mockative")
-    }
+    mavenCentral()
 }
 
 kotlin {
     sourceSets {
         val commonTest by getting {
             dependencies {
-                implementation("io.mockative:mockative:1.0.0-SNAPSHOT")
+                implementation("io.mockative:mockative:1.0.0")
             }
         }
     }
 }
 
 dependencies {
-    ksp(implementation("io.mockative:mockative-processor:1.0.0-SNAPSHOT"))
+    ksp(implementation("io.mockative:mockative-processor:1.0.0"))
 }
 ```
 
