@@ -3,6 +3,7 @@ package io.mockative
 import io.mockative.concurrency.AtomicList
 import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
+import io.mockative.matchers.AnyArgumentsMatcher
 
 abstract class Mockable {
 
@@ -27,8 +28,8 @@ abstract class Mockable {
     private fun getBlockingStub(invocation: Invocation): BlockingStub {
         return getBlockingStubOrNull(invocation)
             ?: getSuspendStubOrNull(invocation)
-                ?.let { throw InvalidExpectationError(this, invocation, false) }
-            ?: throw MissingExpectationError(this, invocation, false)
+                ?.let { throw InvalidExpectationError(this, invocation, false, expectations) }
+            ?: throw MissingExpectationError(this, invocation, false, expectations)
     }
 
     private fun getBlockingStubOrNull(invocation: Invocation): BlockingStub? {
@@ -39,11 +40,14 @@ abstract class Mockable {
         suspendStubs.add(stub)
     }
 
+    private val expectations: List<Expectation>
+        get() = suspendStubs.map { it.expectation } + blockingStubs.map { it.expectation }
+
     private fun getSuspendStub(invocation: Invocation): SuspendStub {
         return getSuspendStubOrNull(invocation)
             ?: getBlockingStubOrNull(invocation)
-                ?.let { throw InvalidExpectationError(this, invocation, true) }
-            ?: throw MissingExpectationError(this, invocation, true)
+                ?.let { throw InvalidExpectationError(this, invocation, true, expectations) }
+            ?: throw MissingExpectationError(this, invocation, true, expectations)
     }
 
     private fun getSuspendStubOrNull(invocation: Invocation): SuspendStub? {

@@ -1,9 +1,18 @@
 package io.mockative
 
 import io.mockative.matchers.*
+import kotlin.reflect.KClass
+
+inline fun <reified T> anything(): AnythingMatcher<T> {
+    return AnythingMatcher()
+}
 
 inline fun <reified T> any(): AnyMatcher<T> {
     return AnyMatcher(T::class)
+}
+
+fun <R : Any, T : R> anyInstanceOf(type: KClass<T>): AnyMatcher<R> {
+    return AnyMatcher(type)
 }
 
 inline fun <reified T> eq(value: T): EqualsMatcher<T> {

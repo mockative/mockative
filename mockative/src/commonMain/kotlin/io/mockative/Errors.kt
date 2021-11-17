@@ -131,7 +131,7 @@ class MockValidationError(instance: Any, expectations: List<Expectation>, invoca
     }
 )
 
-class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean) : MockativeError(
+class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeError(
     buildString {
         appendLine("A function was called without a matching expectation.")
         appendLine()
@@ -142,10 +142,15 @@ class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: 
         appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ".invocation"} { $invocation }")
         appendLine(3, ".then { ... }")
         appendLine(1, "")
+        appendLine(1, "The following expectations were configured on the mock:")
+        expectations.forEach {
+            appendLine(2, "$it")
+        }
+        appendLine(1, "")
     }
 )
 
-class InvalidExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean) : MockativeError(
+class InvalidExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeError(
     buildString {
         appendLine("A function was called without a matching expectation.")
         appendLine()
@@ -160,6 +165,11 @@ class InvalidExpectationError(instance: Any, invocation: Invocation, isSuspend: 
         appendLine(1, "Set up an expectation using:")
         appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ".invocation"} { $invocation }")
         appendLine(3, ".then { ... }")
+        appendLine(1, "")
+        appendLine(1, "The following expectations were configured on the mock:")
+        expectations.forEach {
+            appendLine(2, "$it")
+        }
         appendLine(1, "")
     }
 )
