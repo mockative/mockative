@@ -25,7 +25,10 @@ abstract class Mockable {
     }
 
     private fun getBlockingStub(invocation: Invocation): BlockingStub {
-        return getBlockingStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation, false)
+        return getBlockingStubOrNull(invocation)
+            ?: getSuspendStubOrNull(invocation)
+                ?.let { throw InvalidExpectationError(this, invocation, false) }
+            ?: throw MissingExpectationError(this, invocation, false)
     }
 
     private fun getBlockingStubOrNull(invocation: Invocation): BlockingStub? {
@@ -37,7 +40,10 @@ abstract class Mockable {
     }
 
     private fun getSuspendStub(invocation: Invocation): SuspendStub {
-        return getSuspendStubOrNull(invocation) ?: throw MissingExpectationError(this, invocation, true)
+        return getSuspendStubOrNull(invocation)
+            ?: getBlockingStubOrNull(invocation)
+                ?.let { throw InvalidExpectationError(this, invocation, true) }
+            ?: throw MissingExpectationError(this, invocation, true)
     }
 
     private fun getSuspendStubOrNull(invocation: Invocation): SuspendStub? {

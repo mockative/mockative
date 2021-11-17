@@ -139,7 +139,26 @@ class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: 
         appendLine(2, "${instance.getClassName()}.$invocation")
         appendLine()
         appendLine(1, "Set up an expectation using:")
-        appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ""} { $invocation }")
+        appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ".invocation"} { $invocation }")
+        appendLine(3, ".then { ... }")
+        appendLine(1, "")
+    }
+)
+
+class InvalidExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean) : MockativeError(
+    buildString {
+        appendLine("A function was called without a matching expectation.")
+        appendLine()
+        appendLine(
+            1,
+            "A ${if (isSuspend) "blocking" else "coroutine"} stub was expected, but a " +
+                    "${if (isSuspend) "coroutine" else "blocking"} stub was configured on the " +
+                    "function:"
+        )
+        appendLine(2, "${instance.getClassName()}.$invocation")
+        appendLine()
+        appendLine(1, "Set up an expectation using:")
+        appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ".invocation"} { $invocation }")
         appendLine(3, ".then { ... }")
         appendLine(1, "")
     }
