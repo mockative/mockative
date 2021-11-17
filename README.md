@@ -37,6 +37,26 @@ dependencies {
 }
 ```
 
+## Installation for JVM projects
+
+### build.gradle.kts
+
+```kotlin
+plugins {
+    id("com.google.devtools.ksp")
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation("io.mockative:mockative-jvm:1.0.0")
+    
+    ksp(implementation("io.mockative:mockative-processor-jvm:1.0.0"))
+}
+```
+
 ## Testing with Mockative
 
 To mock a given method on an interface, annotate a property holding the interface type with the

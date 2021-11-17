@@ -61,7 +61,7 @@ publishing {
 
             pom {
                 name.set("Mockative")
-                description.set("Mocking framework for Kotlin/Native and Kotlin Multiplatform")
+                description.set("Mocking framework for Kotlin, Kotlin/Native and Kotlin Multiplatform")
                 url.set("http://mockative.io")
 
                 licenses {
