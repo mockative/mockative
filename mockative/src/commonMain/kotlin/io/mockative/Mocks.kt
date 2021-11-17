@@ -8,8 +8,8 @@ import kotlin.reflect.KClass
  *
  * This specific function is never actually called when Mockative is used correctly, because the
  * Mockative Kotlin Symbol Processor will generate a more specific overload of this function in the
- * same package and file name, accepting the specific type of the mock, which overload resolution
- * results in the compiler using instead.
+ * same package with the file name `GeneratedMocks.kt`, accepting the specific type of the mock,
+ * which overload resolution results in the compiler using instead.
  *
  * @param type the type to mock
  * @return an instance of the mocked type

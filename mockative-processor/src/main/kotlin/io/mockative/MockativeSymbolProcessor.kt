@@ -58,11 +58,11 @@ class MockativeSymbolProcessor(
             }
 
         if (mocks.isNotEmpty()) {
-            debug("Writing Mocks.kt file")
+            debug("Writing GeneratedMocks.kt file")
 
             // Create mock(KClass) functions
             val sources = mocks.mapNotNull { it.containingFile }.toTypedArray()
-            val mocksFile = codeGenerator.createNewFile(Dependencies(true, *sources), "io.mockative", "Mocks")
+            val mocksFile = codeGenerator.createNewFile(Dependencies(true, *sources), "io.mockative", "GeneratedMocks")
             val mocksWriter = OutputStreamWriter(mocksFile)
             mocksWriter.appendLine("package io.mockative")
             mocksWriter.appendLine()
@@ -74,7 +74,7 @@ class MockativeSymbolProcessor(
 
             mocksWriter.flush()
 
-            debug("${mocks.count()} mocks written to Mocks.kt file")
+            debug("${mocks.count()} mocks written to GeneratedMocks.kt file")
 
             info("Finished generating ${mocks.count()} mocks")
         }

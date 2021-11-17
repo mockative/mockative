@@ -19,7 +19,7 @@ class PetServiceTests {
 
     @Test
     fun generatesExpectedMockFunctions() {
-        assertGenerated("Mocks.kt")
+        assertGenerated("GeneratedMocks.kt")
     }
 
 }

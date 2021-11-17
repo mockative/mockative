@@ -205,7 +205,8 @@ verify(mock).hasNoUnmetExpectations()
 ## How does it work?
 
 At compile time, `mockative-processor` generates a class for each interface type of a property
-annotated with the `@Mock` annotation, as well as a `Mocks.kt` file that looks something like this:
+annotated with the `@Mock` annotation, as well as a `GeneratedMocks.kt` file that looks something 
+like this:
 
 ```kotlin
 package io.mockative

@@ -46,12 +46,16 @@ kotlin {
             }
         }
 
-        val androidMain by getting
-        val androidTest by getting {
+        val androidAndroidTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
             }
+        }
+
+        val androidMain by getting
+        val androidTest by getting {
+            dependsOn(androidAndroidTest)
         }
 
         val iosMain by getting
@@ -76,6 +80,18 @@ android {
     defaultConfig {
         minSdk = 21
         targetSdk = 31
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+
+        testOptions {
+            execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        }
+    }
+
+    dependencies {
+        androidTestImplementation("androidx.test:runner:1.4.0")
+        androidTestUtil("androidx.test:orchestrator:1.4.0")
     }
 }
 
