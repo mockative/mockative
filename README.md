@@ -165,7 +165,7 @@ The untyped callable references using `<T : Any> whenInvoking(T, String)` and
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `then(block: (args: Array<Any?>) -> Any?)` | Invokes the specified block. The argument passed to the block is an array of arguments passed to the invocation. |
 
-## Verification (WIP)
+## Verification
 
 Verification of invocations to mocks is supported through the `verify(mock)` API:
 
@@ -221,21 +221,3 @@ verify(mock).hasNoUnverifiedExpectations()
 // Verifies that the mock has no expectations that weren't invoked at least once.
 verify(mock).hasNoUnmetExpectations()
 ```
-
-## How does it work?
-
-At compile time, `mockative-processor` generates a class for each interface type of a property
-annotated with the `@Mock` annotation, as well as a `GeneratedMocks.kt` file that looks something 
-like this:
-
-```kotlin
-package io.mockative
-
-fun mock(type: KClass<GitHubAPI>): GitHubAPI = GitHubAPIMock()
-fun mock(type: KClass<GitHubRepository>): GitHubRepository = GitHubRepositoryMock()
-```
-
-Kotlin uses overload resolution to automatically select the most specific `mock(KClass)` function,
-and since the generated functions are in the same namespace as the generic `<T> mock(KClass<T>)`
-function, Kotlin will pick up the overloads without any additional imports required, resulting in a
-smooth developer experience.
