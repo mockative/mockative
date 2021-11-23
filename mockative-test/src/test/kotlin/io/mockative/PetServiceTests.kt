@@ -4,7 +4,7 @@ import org.junit.Test
 
 class PetServiceTests {
 
-    @Mock val petStore = mock(PetStore::class)
+    @Mock val petStore = mock(PetStore::class) as PetStore<String>
     @Mock val noiseStore = mock(NoiseStore::class)
 
     @Test

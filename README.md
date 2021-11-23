@@ -165,6 +165,19 @@ The untyped callable references using `<T : Any> whenInvoking(T, String)` and
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `then(block: (args: Array<Any?>) -> Any?)` | Invokes the specified block. The argument passed to the block is an array of arguments passed to the invocation. |
 
+## Generic Types
+
+When mocking a generic type, the value returned by `<T> mock(KClass<T>)` must be type-cast to the 
+desired type:
+
+```kotlin
+class GenericTypeTest {
+    @Suppress("UNCHECKED_CAST")
+    @Mock
+    val list = mock(List::class) as List<String>
+}
+```
+
 ## Verification
 
 Verification of invocations to mocks is supported through the `verify(mock)` API:

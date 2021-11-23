@@ -67,9 +67,26 @@ class MockativeSymbolProcessor(
             mocksWriter.appendLine("package io.mockative")
             mocksWriter.appendLine()
 
-            mocks.forEach {
-                val typeName = it.qualifiedName!!.asString()
-                mocksWriter.appendLine("internal fun mock(@Suppress(\"UNUSED_PARAMETER\") type: kotlin.reflect.KClass<$typeName>): $typeName = ${typeName}Mock()")
+            mocks.forEach { mock ->
+                val className = mock.qualifiedName!!.asString()
+
+                val typeParameters = if (mock.typeParameters.isNotEmpty()) {
+                    "<${mock.typeParameters.joinToString(", "){ it.bounds.firstOrNull()?.resolveUsageSyntax() ?: "Any?" }}>"
+                } else {
+                    ""
+                }
+
+                val wildcardTypeParameters = if (mock.typeParameters.isNotEmpty()) {
+                    "<${mock.typeParameters.joinToString(", ") { "*" }}>"
+                } else {
+                    ""
+                }
+
+                val kClassName = "$className$wildcardTypeParameters"
+                val typeName = "$className$typeParameters"
+                val mockName = "${className}Mock$typeParameters"
+
+                mocksWriter.appendLine("internal fun mock(@Suppress(\"UNUSED_PARAMETER\") type: kotlin.reflect.KClass<$kClassName>): $typeName = $mockName()")
             }
 
             mocksWriter.flush()

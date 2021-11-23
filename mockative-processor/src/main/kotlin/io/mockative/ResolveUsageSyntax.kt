@@ -1,9 +1,6 @@
 package io.mockative
 
-import com.google.devtools.ksp.symbol.KSCallableReference
-import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSTypeReference
-import com.google.devtools.ksp.symbol.KSValueParameter
+import com.google.devtools.ksp.symbol.*
 
 fun KSTypeReference.resolveUsageSyntax(): String {
     return when (val element = element) {
@@ -13,10 +10,15 @@ fun KSTypeReference.resolveUsageSyntax(): String {
 }
 
 private fun KSType.resolveUsageSyntax(): String {
-    val qualifiedName = declaration.qualifiedName!!.asString()
-    val typeArguments = if (arguments.isEmpty()) "" else "<${arguments.joinToString(", ") { it.type!!.resolveUsageSyntax() }}>"
-    val nullability = if (isMarkedNullable) "?" else ""
-    return "$qualifiedName$typeArguments$nullability"
+    return when (val declaration = declaration) {
+        is KSTypeParameter -> declaration.name.asString()
+        else -> {
+            val qualifiedName = declaration.qualifiedName!!.asString()
+            val typeArguments = if (arguments.isEmpty()) "" else "<${arguments.joinToString(", ") { it.type!!.resolveUsageSyntax() }}>"
+            val nullability = if (isMarkedNullable) "?" else ""
+            return "$qualifiedName$typeArguments$nullability"
+        }
+    }
 }
 
 private fun KSCallableReference.resolveUsageSyntax(): String {
