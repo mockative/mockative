@@ -1,6 +1,6 @@
 # Mockative
 
-![Maven Central](https://img.shields.io/maven-central/v/io.mockative/mockative)
+[![Maven Central](https://img.shields.io/maven-central/v/io.mockative/mockative)](https://search.maven.org/artifact/io.mockative/mockative)
 
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 
