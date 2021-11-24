@@ -4,8 +4,8 @@ import org.junit.Test
 
 class PetServiceTests {
 
-    @Mock val petStore = mock(PetStore::class) as PetStore<String>
-    @Mock val noiseStore = mock(NoiseStore::class)
+    @Mock val petStore = mock(classOf<PetStore<String>>())
+    @Mock val noiseStore = mock(classOf<NoiseStore>())
 
     @Test
     fun generatesExpectedPetStoreMock() {

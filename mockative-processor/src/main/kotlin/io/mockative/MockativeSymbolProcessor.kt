@@ -68,25 +68,31 @@ class MockativeSymbolProcessor(
             mocksWriter.appendLine()
 
             mocks.forEach { mock ->
+                // TODO Extract GeneratedMocks.kt generation into separate file
                 val className = mock.qualifiedName!!.asString()
 
-                val typeParameters = if (mock.typeParameters.isNotEmpty()) {
-                    "<${mock.typeParameters.joinToString(", "){ it.bounds.firstOrNull()?.resolveUsageSyntax() ?: "Any?" }}>"
+                val typeParameterBounds = if (mock.typeParameters.isNotEmpty()) {
+                    mock.typeParameters
+                        .flatMap { typeParam ->
+                            typeParam.bounds
+                                .map { bound -> "where ${typeParam.name.asString()} : ${bound.resolveUsageSyntax()}" }
+                        }
+                        .joinToString(" ")
                 } else {
                     ""
                 }
 
-                val wildcardTypeParameters = if (mock.typeParameters.isNotEmpty()) {
-                    "<${mock.typeParameters.joinToString(", ") { "*" }}>"
+                val typeParameterList = if (mock.typeParameters.isNotEmpty()) {
+                    "<${mock.typeParameters.joinToString(", "){ it.name.asString() }}>"
                 } else {
                     ""
                 }
 
-                val kClassName = "$className$wildcardTypeParameters"
-                val typeName = "$className$typeParameters"
-                val mockName = "${className}Mock$typeParameters"
+                val kClassName = "$className$typeParameterList"
+                val typeName = "$className$typeParameterList"
+                val mockName = "${className}Mock$typeParameterList"
 
-                mocksWriter.appendLine("internal fun mock(@Suppress(\"UNUSED_PARAMETER\") type: kotlin.reflect.KClass<$kClassName>): $typeName = $mockName()")
+                mocksWriter.appendLine("internal fun${if (typeParameterList.isEmpty()) "" else " $typeParameterList"} mock(@Suppress(\"UNUSED_PARAMETER\") type: kotlin.reflect.KClass<$kClassName>): $typeName${if (typeParameterBounds.isEmpty()) "" else " $typeParameterBounds"} = $mockName()")
             }
 
             mocksWriter.flush()
