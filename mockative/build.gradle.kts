@@ -8,7 +8,11 @@ version = findProperty("project.version") as String
 
 kotlin {
     jvm()
-    ios()
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
     js {
         browser()
         nodejs()
@@ -22,6 +26,15 @@ kotlin {
 
             kotlin.srcDirs("$buildDir/generated/mockative-code-generator")
         }
+
+        val nativeMain by creating { dependsOn(commonMain) }
+
+        val darwinMain by creating { dependsOn(nativeMain) }
+
+        val iosMain by creating { dependsOn(darwinMain) }
+        val iosX64Main by getting { dependsOn(iosMain) }
+        val iosArm64Main by getting { dependsOn(iosMain) }
+        val iosSimulatorArm64Main by getting { dependsOn(iosMain) }
 
         all {
             languageSettings {
