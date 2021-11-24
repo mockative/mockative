@@ -1,12 +1,21 @@
 # Mockative
 
+[ksp]: https://github.com/google/ksp
+
 [![Maven Central](https://img.shields.io/maven-central/v/io.mockative/mockative)](https://search.maven.org/artifact/io.mockative/mockative)
 
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
+Notable features include:
 
-[ksp]: https://github.com/google/ksp
+- Effortless multi-threading when using coroutines (
+  see [Coroutines.kt](shared/src/commonTest/kotlin/io/mockative/Coroutines.kt))
+- Concise, non-intrusive, type-safe API
+- Mocking of **interfaces only**
+- Supports both [expression](#stubbing-using-expressions)
+  and [matcher](#stubbing-using-callable-references) based stubbing
+  and [verification](#verification)
 
-## Installation
+## Installation for Multiplatform projects
 
 Mockative uses [KSP] to generate mock classes for interfaces, and as such, it requires adding the
 KSP plugin in addition to adding the runtime library and symbol processor dependencies.
@@ -34,26 +43,6 @@ kotlin {
 
 dependencies {
     ksp(implementation("io.mockative:mockative-processor:1.0.4"))
-}
-```
-
-## Installation for JVM projects
-
-### build.gradle.kts
-
-```kotlin
-plugins {
-    id("com.google.devtools.ksp")
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testImplementation("io.mockative:mockative-jvm:1.0.4")
-    
-    ksp(implementation("io.mockative:mockative-processor-jvm:1.0.4"))
 }
 ```
 
@@ -167,7 +156,7 @@ The untyped callable references using `<T : Any> whenInvoking(T, String)` and
 
 ## Generic Types
 
-When mocking a generic type, use the `<T> classOf(): KClass<T>` function to retain the type 
+When mocking a generic type, use the `<T> classOf(): KClass<T>` function to retain the type
 arguments when passed to the `<T> mock(KClass<T>)` function.
 
 ```kotlin
