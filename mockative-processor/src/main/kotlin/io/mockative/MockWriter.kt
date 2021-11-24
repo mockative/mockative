@@ -9,6 +9,7 @@ class MockWriter(private val writer: Writer) {
         writer.appendLine()
 
         appendDeclaration(mock)
+        appendGenericConstraints(mock)
 
         writer.append(" {")
         writer.appendLine()
@@ -18,6 +19,17 @@ class MockWriter(private val writer: Writer) {
         appendFunctions(mock)
 
         writer.append('}')
+    }
+
+    private fun appendGenericConstraints(mock: MockDescriptor) {
+        val genericConstraints = mock.typeParameters
+            .flatMap { typeParameter -> typeParameter.bounds.map { bound -> typeParameter to bound } }
+            .joinToString(", ") { (typeParameter, bound) -> "${typeParameter.name} : $bound" }
+
+        if (genericConstraints.isNotEmpty()) {
+            writer.append(" where ")
+            writer.append(genericConstraints)
+        }
     }
 
     private fun appendPackage(mock: MockDescriptor) {
@@ -33,10 +45,24 @@ class MockWriter(private val writer: Writer) {
 
         writer.append("class ")
         writer.append(mock.mockName)
+
+        val typeParameters = mock.typeParameters
+        if (typeParameters.isNotEmpty()) {
+            writer.append('<')
+            writer.append(typeParameters.joinToString(", ") { it.name })
+            writer.append('>')
+        }
+
         writer.append(" : ")
         writer.append(MockativeTypes.Mockable.name)
         writer.append("(), ")
         writer.append(mock.qualifiedName)
+
+        if (typeParameters.isNotEmpty()) {
+            writer.append('<')
+            writer.append(typeParameters.joinToString(", ") { it.name })
+            writer.append('>')
+        }
     }
 
     private fun appendProperties(mock: MockDescriptor) {

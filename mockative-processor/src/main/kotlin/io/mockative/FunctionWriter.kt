@@ -29,6 +29,15 @@ class FunctionWriter(private val writer: Writer) {
 
     private fun appendStandardSyntax(function: MockDescriptor.Function) {
         writer.append(" fun ")
+
+        val typeParameters = function.typeParameters
+        if (typeParameters.isNotEmpty()) {
+            writer.append('<')
+            writer.append(typeParameters.joinToString(", ") { it.name })
+            writer.append('>')
+            writer.append(' ')
+        }
+
         writer.append(function.name)
     }
 

@@ -13,6 +13,7 @@ data class MockDescriptor(
     val name: String,
     val qualifiedName: String,
     val visibility: String?,
+    val typeParameters: List<TypeParameter>,
 
     val mockName: String,
 
@@ -37,13 +38,13 @@ data class MockDescriptor(
             val name: String,
             val type: String
         )
-
-        data class TypeParameter(
-            val name: String,
-            val variance: String,
-            val bounds: List<String>
-        )
     }
+
+    data class TypeParameter(
+        val name: String,
+        val variance: String,
+        val bounds: List<String>
+    )
 }
 
 fun createMockDescriptor(declaration: KSClassDeclaration): MockDescriptor {
@@ -60,6 +61,9 @@ fun createMockDescriptor(declaration: KSClassDeclaration): MockDescriptor {
         modifiers.contains(Modifier.PUBLIC) -> null
         else -> null
     }
+
+    val typeParameters = declaration.typeParameters
+        .map { createTypeParameter(it) }
 
     val mockName = "${name}Mock"
 
@@ -78,6 +82,7 @@ fun createMockDescriptor(declaration: KSClassDeclaration): MockDescriptor {
         name = name,
         qualifiedName = qualifiedName,
         visibility = visibility,
+        typeParameters = typeParameters,
         mockName = mockName,
         properties = properties,
         functions = functions
@@ -112,14 +117,14 @@ fun createFunction(declaration: KSFunctionDeclaration): MockDescriptor.Function 
     )
 }
 
-fun createTypeParameter(declaration: KSTypeParameter): MockDescriptor.Function.TypeParameter {
+fun createTypeParameter(declaration: KSTypeParameter): MockDescriptor.TypeParameter {
     val name = declaration.name.asString()
     val variance = declaration.variance.label
     val bounds = declaration.bounds
         .map { bound -> bound.resolveUsageSyntax() }
         .toList()
 
-    return MockDescriptor.Function.TypeParameter(name = name, variance = variance, bounds = bounds)
+    return MockDescriptor.TypeParameter(name = name, variance = variance, bounds = bounds)
 }
 
 fun createParameter(declaration: KSValueParameter): MockDescriptor.Function.Parameter {

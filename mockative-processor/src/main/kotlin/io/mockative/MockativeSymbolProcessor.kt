@@ -67,9 +67,32 @@ class MockativeSymbolProcessor(
             mocksWriter.appendLine("package io.mockative")
             mocksWriter.appendLine()
 
-            mocks.forEach {
-                val typeName = it.qualifiedName!!.asString()
-                mocksWriter.appendLine("internal fun mock(@Suppress(\"UNUSED_PARAMETER\") type: kotlin.reflect.KClass<$typeName>): $typeName = ${typeName}Mock()")
+            mocks.forEach { mock ->
+                // TODO Extract GeneratedMocks.kt generation into separate file
+                val className = mock.qualifiedName!!.asString()
+
+                val typeParameterBounds = if (mock.typeParameters.isNotEmpty()) {
+                    mock.typeParameters
+                        .flatMap { typeParam ->
+                            typeParam.bounds
+                                .map { bound -> "where ${typeParam.name.asString()} : ${bound.resolveUsageSyntax()}" }
+                        }
+                        .joinToString(" ")
+                } else {
+                    ""
+                }
+
+                val typeParameterList = if (mock.typeParameters.isNotEmpty()) {
+                    "<${mock.typeParameters.joinToString(", "){ it.name.asString() }}>"
+                } else {
+                    ""
+                }
+
+                val kClassName = "$className$typeParameterList"
+                val typeName = "$className$typeParameterList"
+                val mockName = "${className}Mock$typeParameterList"
+
+                mocksWriter.appendLine("internal fun${if (typeParameterList.isEmpty()) "" else " $typeParameterList"} mock(@Suppress(\"UNUSED_PARAMETER\") type: kotlin.reflect.KClass<$kClassName>): $typeName${if (typeParameterBounds.isEmpty()) "" else " $typeParameterBounds"} = $mockName()")
             }
 
             mocksWriter.flush()

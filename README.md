@@ -65,7 +65,7 @@ To mock a given method on an interface, annotate a property holding the interfac
 ```kotlin
 class GitHubServiceTests {
     @Mock
-    val api = mock(GitHubAPI::class)
+    val api = mock(classOf<GitHubAPI>())
 }
 ```
 
@@ -164,6 +164,18 @@ The untyped callable references using `<T : Any> whenInvoking(T, String)` and
 | Function                                   | Description                                                                                                      |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `then(block: (args: Array<Any?>) -> Any?)` | Invokes the specified block. The argument passed to the block is an array of arguments passed to the invocation. |
+
+## Generic Types
+
+When mocking a generic type, use the `<T> classOf(): KClass<T>` function to retain the type 
+arguments when passed to the `<T> mock(KClass<T>)` function.
+
+```kotlin
+class GenericTypeTest {
+    @Mock
+    val list = mock(classOf<List<String>>())
+}
+```
 
 ## Verification
 
