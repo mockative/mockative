@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 
 class GitHubServiceMockTests {
 
-    @Mock val github = mock(GitHubAPI::class)
+    @Mock val github = mock(classOf<GitHubAPI>())
 
     private val service = GitHubService(github, ApplicationDispatchers.Unconfined)
 
