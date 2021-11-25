@@ -14,6 +14,7 @@ class MockativeSymbolProcessor(
 
     private val isDebugLogEnabled: Boolean = options["mockative.logging"]?.lowercase() == "debug"
     private val isInfoLogEnabled: Boolean = isDebugLogEnabled || options["mockative.logging"]?.lowercase() == "info"
+    private val stubsUnitByDefault: Boolean = options["mockative.stubsUnitByDefault"].toBoolean()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         debug("Starting")
@@ -50,7 +51,7 @@ class MockativeSymbolProcessor(
                 val dependencies = Dependencies(true, *sources)
                 val os = codeGenerator.createNewFile(dependencies, mock.packageName, mock.mockName)
                 val writer = OutputStreamWriter(os)
-                val mockWriter = MockWriter(writer)
+                val mockWriter = MockWriter(writer, stubsUnitByDefault)
                 mockWriter.appendMock(mock)
                 writer.flush()
 

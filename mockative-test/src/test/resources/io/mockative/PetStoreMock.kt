@@ -1,6 +1,6 @@
 package io.mockative
 
-class PetStoreMock<T> : io.mockative.Mockable(), io.mockative.PetStore<T> where T : kotlin.CharSequence {
+class PetStoreMock<T> : io.mockative.Mockable(stubsUnitByDefault = true), io.mockative.PetStore<T> where T : kotlin.CharSequence {
     override var pets: kotlin.collections.Map<kotlin.String, kotlin.Function0<kotlin.Unit>>
         get() = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Getter("pets"))
         set(value) = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Setter("pets", value))

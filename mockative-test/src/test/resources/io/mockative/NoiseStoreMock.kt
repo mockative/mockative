@@ -1,6 +1,6 @@
 package io.mockative
 
-class NoiseStoreMock : io.mockative.Mockable(), io.mockative.NoiseStore {
+class NoiseStoreMock : io.mockative.Mockable(stubsUnitByDefault = true), io.mockative.NoiseStore {
     override var noises: kotlin.collections.Map<kotlin.String, kotlin.Function0<kotlin.Unit>>
         get() = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Getter("noises"))
         set(value) = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Setter("noises", value))

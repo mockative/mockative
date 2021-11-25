@@ -3,9 +3,8 @@ package io.mockative
 import io.mockative.concurrency.AtomicList
 import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
-import io.mockative.matchers.AnyArgumentsMatcher
 
-abstract class Mockable {
+abstract class Mockable(stubsUnitByDefault: Boolean) {
 
     private class StubbingInProgressError(val invocation: Invocation) : Error()
 
@@ -14,6 +13,8 @@ abstract class Mockable {
     private val verifiedInvocations = AtomicSet<Invocation>()
 
     private var isRecording: Boolean by atomic(false)
+
+    internal var stubsUnitsByDefault: Boolean by atomic(stubsUnitByDefault)
 
     internal fun reset() {
         blockingStubs.clear()
@@ -25,11 +26,14 @@ abstract class Mockable {
         blockingStubs.add(stub)
     }
 
-    private fun getBlockingStub(invocation: Invocation): BlockingStub {
-        return getBlockingStubOrNull(invocation)
-            ?: getSuspendStubOrNull(invocation)
+    private fun getBlockingStub(invocation: Invocation, returnsUnit: Boolean): BlockingStub {
+        return getBlockingStubOrNull(invocation) ?: if (returnsUnit && stubsUnitsByDefault) {
+            BlockingStub(invocation.toOpenExpectation()) { }.also { addBlockingStub(it) }
+        } else {
+            getSuspendStubOrNull(invocation)
                 ?.let { throw InvalidExpectationError(this, invocation, false, expectations) }
-            ?: throw MissingExpectationError(this, invocation, false, expectations)
+                ?: throw MissingExpectationError(this, invocation, false, expectations)
+        }
     }
 
     private fun getBlockingStubOrNull(invocation: Invocation): BlockingStub? {
@@ -43,11 +47,14 @@ abstract class Mockable {
     private val expectations: List<Expectation>
         get() = suspendStubs.map { it.expectation } + blockingStubs.map { it.expectation }
 
-    private fun getSuspendStub(invocation: Invocation): SuspendStub {
-        return getSuspendStubOrNull(invocation)
-            ?: getBlockingStubOrNull(invocation)
+    private fun getSuspendStub(invocation: Invocation, returnsUnit: Boolean): SuspendStub {
+        return getSuspendStubOrNull(invocation) ?: if (returnsUnit && stubsUnitsByDefault) {
+            SuspendStub(invocation.toOpenExpectation()) { }.also { addSuspendStub(it) }
+        } else {
+            getBlockingStubOrNull(invocation)
                 ?.let { throw InvalidExpectationError(this, invocation, true, expectations) }
-            ?: throw MissingExpectationError(this, invocation, true, expectations)
+                ?: throw MissingExpectationError(this, invocation, true, expectations)
+        }
     }
 
     private fun getSuspendStubOrNull(invocation: Invocation): SuspendStub? {
@@ -121,11 +128,11 @@ abstract class Mockable {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal open fun <R> invoke(invocation: Invocation): R {
+    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
         } else {
-            val stub = getBlockingStub(invocation)
+            val stub = getBlockingStub(invocation, returnsUnit)
             val result = stub.invoke(invocation)
             return result as R
         }
@@ -156,19 +163,23 @@ abstract class Mockable {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal suspend fun <R> suspend(invocation: Invocation): R {
+    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
         } else {
-            val stub = getSuspendStub(invocation)
+            val stub = getSuspendStub(invocation, returnsUnit)
             val result = stub.invoke(invocation)
             return result as R
         }
     }
 
     companion object {
-        fun <R> invoke(mock: Mockable, invocation: Invocation): R = mock.invoke(invocation)
+        inline fun <reified R> invoke(mock: Mockable, invocation: Invocation): R = invoke(mock, invocation, R::class == Unit::class)
 
-        suspend fun <R> suspend(mock: Mockable, invocation: Invocation): R = mock.suspend(invocation)
+        fun <R> invoke(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.invoke(invocation, returnsUnit)
+
+        suspend inline fun <reified R> suspend(mock: Mockable, invocation: Invocation): R = suspend(mock, invocation, R::class == Unit::class)
+
+        suspend fun <R> suspend(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.suspend(invocation, returnsUnit)
     }
 }

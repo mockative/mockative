@@ -7,20 +7,22 @@
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 Notable features include:
 
-- Effortless multi-threading when using coroutines (
-  see [Coroutines.kt](shared/src/commonTest/kotlin/io/mockative/Coroutines.kt))
+- Effortless multi-threading when using coroutines (see 
+  [Coroutines.kt](shared/src/commonTest/kotlin/io/mockative/Coroutines.kt))
 - Concise, non-intrusive, type-safe API
 - Mocking of **interfaces only**
 - Supports both [expression](#stubbing-using-expressions)
   and [matcher](#stubbing-using-callable-references) based stubbing
   and [verification](#verification)
+- Supports [implicit stubbing](#implicit-stubbing-of-functions-returning-unit) of functions 
+  returning `Unit` 
 
 ## Installation for Multiplatform projects
 
 Mockative uses [KSP] to generate mock classes for interfaces, and as such, it requires adding the
 KSP plugin in addition to adding the runtime library and symbol processor dependencies.
 
-### build.gradle.kts
+**build.gradle.kts**
 
 ```kotlin
 plugins {
@@ -153,6 +155,40 @@ following additional `then` function:
 | Function                                   | Description                                                                                                      |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `then(block: (args: Array<Any?>) -> Any?)` | Invokes the specified block. The argument passed to the block is an array of arguments passed to the invocation. |
+
+### Implicit stubbing of functions returning Unit
+
+An experimental API has been added as opt-in for stubbing functions returning `Unit` by default, 
+based on the idea that such functions are more typically used for verification than stubbing, and 
+are trivially stubbed automatically.
+
+You can opt-in to this behaviour on the project level through your **build.gradle.kts** file:
+
+**build.gradle.kts**
+
+```kotlin
+ksp {
+    arg("mockative.stubsUnitByDefault", "true")
+}
+```
+
+Alternatively, you can opt-in (or opt-out if you've opted in on the project level), using the 
+`configure(mock, block)` function either inline:
+
+```kotlin
+@Mock val api = configure(mock(classOf<GitHubAPI>())) { stubsUnitByDefault = true }
+```
+
+Or as needed:
+
+```kotlin
+@Mock val api = mock(classOf<GitHubAPI>())
+
+@Test
+fun test() {
+    configure(api) { stubsUnitByDefault = true }
+}
+```
 
 ## Generic Types
 

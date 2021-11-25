@@ -2,7 +2,7 @@ package io.mockative
 
 import java.io.Writer
 
-class MockWriter(private val writer: Writer) {
+class MockWriter(private val writer: Writer, private val stubsUnitByDefault: Boolean) {
     fun appendMock(mock: MockDescriptor) {
         appendPackage(mock)
         writer.appendLine()
@@ -55,7 +55,7 @@ class MockWriter(private val writer: Writer) {
 
         writer.append(" : ")
         writer.append(MockativeTypes.Mockable.name)
-        writer.append("(), ")
+        writer.append("(stubsUnitByDefault = $stubsUnitByDefault), ")
         writer.append(mock.qualifiedName)
 
         if (typeParameters.isNotEmpty()) {

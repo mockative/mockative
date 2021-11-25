@@ -101,4 +101,5 @@ dependencies {
 
 ksp {
     arg("mockative.logging", "debug")
+    arg("mockative.stubsUnitByDefault", "true")
 }

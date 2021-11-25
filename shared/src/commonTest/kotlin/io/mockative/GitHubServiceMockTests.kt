@@ -6,13 +6,26 @@ import kotlin.test.assertEquals
 
 class GitHubServiceMockTests {
 
-    @Mock val github = mock(GitHubAPI::class)
+    @Mock val github = mock(classOf<GitHubAPI>())
 
     private val service = GitHubService(github, ApplicationDispatchers.Unconfined)
 
     @AfterTest
     fun validateMocks() {
         verify(github).hasNoUnmetExpectations()
+    }
+
+    @Test
+    fun whenCallingCreate_thenCreateIsCalled() = runBlockingTest {
+        // given
+        val repository = Repository(id = "mockative/mockative", name = "Mockative")
+
+        // when
+        service.create(repository)
+
+        // then
+        verify(github).coroutine { create(repository) }
+            .wasInvoked(exactly = once)
     }
 
     @Test

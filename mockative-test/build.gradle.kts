@@ -35,3 +35,8 @@ kotlin {
 dependencies {
     ksp(project(":mockative-processor"))
 }
+
+ksp {
+    arg("mockative.logging", "debug")
+    arg("mockative.stubsUnitByDefault", "true")
+}
