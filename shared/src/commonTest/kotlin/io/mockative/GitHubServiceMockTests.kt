@@ -16,6 +16,19 @@ class GitHubServiceMockTests {
     }
 
     @Test
+    fun whenCallingCreate_thenCreateIsCalled() = runBlockingTest {
+        // given
+        val repository = Repository(id = "mockative/mockative", name = "Mockative")
+
+        // when
+        service.create(repository)
+
+        // then
+        verify(github).coroutine { create(repository) }
+            .wasInvoked(exactly = once)
+    }
+
+    @Test
     fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed() = runBlockingTest {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"

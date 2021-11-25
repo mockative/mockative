@@ -4,7 +4,7 @@ import io.mockative.concurrency.AtomicList
 import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
 
-abstract class Mockable {
+abstract class Mockable(stubsUnitByDefault: Boolean) {
 
     private class StubbingInProgressError(val invocation: Invocation) : Error()
 
@@ -13,7 +13,7 @@ abstract class Mockable {
     private val verifiedInvocations = AtomicSet<Invocation>()
 
     private var isRecording: Boolean by atomic(false)
-    private var stubsUnitsByDefault: Boolean by atomic(true)
+    private var stubsUnitsByDefault: Boolean by atomic(stubsUnitByDefault)
 
     internal fun reset() {
         blockingStubs.clear()
