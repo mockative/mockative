@@ -130,8 +130,8 @@ given(mock).function("transformData")
 
 ### Stubbing implementations
 
-Both expressions using `given` and callable references using `when[...]` supports the same API for
-stubbing the implementation, through the use of the `then` functions.
+Both expressions and callable references supports the same API for stubbing the implementation, 
+through the use of the `then` functions.
 
 | Function                           | Description                                                                                                |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -147,8 +147,8 @@ then function is available:
 | ----------------- | --------------- |
 | `thenDoNothing()` | Returns `Unit`. |
 
-The untyped callable references using `<T : Any> whenInvoking(T, String)` and
-`<T : Any> whenSuspending(T, String)` supports the following additional `then` function:
+The untyped callable references using `function(String)` and `suspendFunction(String)` supports the 
+following additional `then` function:
 
 | Function                                   | Description                                                                                                      |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
