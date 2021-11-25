@@ -13,7 +13,8 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     private val verifiedInvocations = AtomicSet<Invocation>()
 
     private var isRecording: Boolean by atomic(false)
-    private var stubsUnitsByDefault: Boolean by atomic(stubsUnitByDefault)
+
+    internal var stubsUnitsByDefault: Boolean by atomic(stubsUnitByDefault)
 
     internal fun reset() {
         blockingStubs.clear()
