@@ -11,7 +11,7 @@ class NoSuchMockError(type: KClass<*>) : MockativeError(
         appendLine(1, "Make sure the property holding the mock is annotated with @Mock:")
         appendLine()
         appendLine(2, "@Mock")
-        appendLine(2, "private val myMock = mock(${type.name}::class)")
+        appendLine(2, "private val myMock = mock(classOf<${type.name}>())")
         appendLine(1, "")
     }
 )
@@ -23,7 +23,7 @@ class ReceiverNotMockedError(receiver: Any) : MockativeError(
         appendLine(1, "Make sure the property holding the mock is annotated with @Mock:")
         appendLine()
         appendLine(2, "@Mock")
-        appendLine(2, "private val myMock = mock(${receiver.getClassName()}::class)")
+        appendLine(2, "private val myMock = mock(classOf<${receiver.getClassName()}>())")
         appendLine(1, "")
     }
 )
