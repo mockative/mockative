@@ -1,33 +1,45 @@
-name: All tests
+name: Build
 
 on:
+  pull_request:
   push:
     branches:
       - main
 
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process
+
 jobs:
-  tests:
-    runs-on: ubuntu-latest
+  test-on-macos:
+    runs-on: macos-11
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_13.2.app/Contents/Developer
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - uses: actions/cache@v2
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.konan
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-    - name: Set up JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: 16
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 16
 
-    - name: Run Code Generator
-      run: ./gradlew :mockative-code-generator:run
+      - name: Initialize Gradle
+        run: ./gradlew
 
-    - name: Run tests with Gradle
-      run: ./gradlew allTests
+      - name: Run code generator
+        run: ./gradlew :mockative-code-generator:run
+
+      - name: Run tests with Gradle
+        run: ./gradlew allTests
 
