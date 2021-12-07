@@ -20,6 +20,13 @@ class MockativeSymbolProcessor(
         debug("Starting")
 
         if (processed) {
+            debug("Skipped: Already Processed")
+            return emptyList()
+        }
+
+        val annotatedSymbols = resolver.getSymbolsWithAnnotation(Mock::class.qualifiedName!!).toList()
+        if (annotatedSymbols.isEmpty()) {
+            debug("Skipped: No annotated symbols returned")
             return emptyList()
         }
 
@@ -27,7 +34,7 @@ class MockativeSymbolProcessor(
 
         val mocks = mutableListOf<KSClassDeclaration>()
 
-        resolver.getSymbolsWithAnnotation(Mock::class.qualifiedName!!)
+        annotatedSymbols
             .mapNotNull { symbol -> symbol as? KSPropertyDeclaration }
             .mapNotNull { property ->
                 (property.type.resolve().declaration as? KSClassDeclaration)
@@ -62,8 +69,8 @@ class MockativeSymbolProcessor(
             debug("Writing GeneratedMocks.kt file")
 
             // Create mock(KClass) functions
-            val sources = mocks.mapNotNull { it.containingFile }.toTypedArray()
-            val mocksFile = codeGenerator.createNewFile(Dependencies(true, *sources), "io.mockative", "GeneratedMocks")
+            val sources = resolver.getAllFiles().toList().toTypedArray()
+            val mocksFile = codeGenerator.createNewFile(Dependencies(false, *sources), "io.mockative", "GeneratedMocks")
             val mocksWriter = OutputStreamWriter(mocksFile)
             mocksWriter.appendLine("package io.mockative")
             mocksWriter.appendLine()
