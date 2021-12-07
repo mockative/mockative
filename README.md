@@ -37,14 +37,14 @@ kotlin {
     sourceSets {
         val commonTest by getting {
             dependencies {
-                implementation("io.mockative:mockative:1.0.6")
+                implementation("io.mockative:mockative:1.0.7")
             }
         }
     }
 }
 
 dependencies {
-    ksp("io.mockative:mockative-processor:1.0.6")
+    ksp("io.mockative:mockative-processor:1.0.7")
 }
 ```
 

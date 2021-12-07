@@ -96,7 +96,8 @@ android {
 }
 
 dependencies {
-    ksp(project(":mockative-processor"))
+//    ksp(project(":mockative-processor"))
+    ksp("io.mockative:mockative-processor:1.0.7")
 }
 
 ksp {
