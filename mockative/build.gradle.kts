@@ -45,10 +45,11 @@ kotlin {
 }
 
 afterEvaluate {
-    val compilation = kotlin.targets["metadata"].compilations["iosMain"]
-    compilation.compileKotlinTask.doFirst {
-        compilation.compileDependencyFiles = files(
-            compilation.compileDependencyFiles.filterNot { it.absolutePath.endsWith("klib/common/stdlib") }
-        )
+    kotlin.targets["metadata"].compilations.forEach { compilation ->
+        compilation.compileKotlinTask.doFirst {
+            compilation.compileDependencyFiles = files(
+                compilation.compileDependencyFiles.filterNot { it.absolutePath.endsWith("klib/common/stdlib") }
+            )
+        }
     }
 }
