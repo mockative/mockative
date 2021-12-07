@@ -44,7 +44,7 @@ kotlin {
 }
 
 dependencies {
-    ksp(implementation("io.mockative:mockative-processor:1.0.6"))
+    ksp("io.mockative:mockative-processor:1.0.6")
 }
 ```
 
