@@ -1,0 +1,130 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  release:
+    types: [ created ]
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process
+  SONATYPE_BASE_URL: https://s01.oss.sonatype.org/service/local/
+
+jobs:
+  create-staging-repository:
+    runs-on: ubuntu-latest
+    name: Create staging repository
+    outputs:
+      repository-id: ${{ steps.create.outputs.repository_id }}
+    steps:
+      - id: create
+        name: Create staging repository
+        uses: nexus-actions/create-nexus-staging-repo@v1.1
+        with:
+          username: ${{ secrets.SONATYPE_USERNAME }}
+          password: ${{ secrets.SONATYPE_PASSWORD }}
+          staging_profile_id: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+          base_url: ${{ env.SONATYPE_BASE_URL }}
+          description: Created by Release (Create staging repository) for mockative/mockative
+
+  publish-on-macos:
+    runs-on: macos-11
+    needs:
+      - create-staging-repository
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_13.2.app/Contents/Developer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.konan
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 16
+
+      - name: Initialize Gradle
+        run: ./gradlew
+
+      - name: Run code generator
+        run: ./gradlew :mockative-code-generator:run
+
+      - name: Publish
+        shell: bash
+        run: |
+          ./gradlew publishAllPublicationsToSonatypeRepository \
+            -Psigning.key='${{ secrets.SIGNING_KEY }}' \
+            -Psigning.keyId='${{ secrets.SIGNING_KEY_ID }}' \
+            -Psigning.password='${{ secrets.SIGNING_PASSWORD }}' \
+            -Psonatype.username='${{ secrets.SONATYPE_USERNAME }}' \
+            -Psonatype.password='${{ secrets.SONATYPE_PASSWORD }}' \
+            -Psonatype.repository='${{ needs.create-staging-repository.outputs.repository-id }}'
+
+  macos-host-check:
+    name: Check on macOS
+    runs-on: macos-11
+    needs:
+      - create-staging-repository
+      - publish-on-macos
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.konan
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 16
+
+      - name: Check
+        run: |
+          ./gradlew :tools:check-publication:build \
+            -Pcheck_publication \
+            -Psonatype.username='${{ secrets.SONATYPE_USERNAME }}' \
+            -Psonatype.password='${{ secrets.SONATYPE_PASSWORD }}' \
+            -Psonatype.repository='${{ needs.create-staging-repository.outputs.repository-id }}'
+
+  close-staging-repository:
+    runs-on: ubuntu-latest
+    needs:
+      - create-staging-repository
+      - macos-host-check
+    if: ${{ always() && needs.create-staging-repository.result == 'success' }}
+    steps:
+      - name: Discard
+        if: ${{ needs.macos-host-check.result != 'success' }}
+        uses: nexus-actions/drop-nexus-staging-repo@v1
+        with:
+          username: ${{ secrets.SONATYPE_USERNAME }}
+          password: ${{ secrets.SONATYPE_PASSWORD }}
+          base_url: ${{ env.SONATYPE_BASE_URL }}
+          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
+
+      - name: Close
+        if: ${{ needs.macos-host-check.result == 'success' }}
+        uses: nexus-actions/release-nexus-staging-repo@v1.2
+        with:
+          username: ${{ secrets.SONATYPE_USERNAME }}
+          password: ${{ secrets.SONATYPE_PASSWORD }}
+          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
+          base_url: ${{ env.SONATYPE_BASE_URL }}
+          close_only: true

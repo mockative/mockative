@@ -6,19 +6,24 @@ plugins {
 }
 
 val props = Properties().apply {
+    // Load `gradle.properties`, environment variables and command-line arguments
+    project.properties.forEach { (key, value) ->
+        if (value != null) {
+            this[key] = value
+        }
+    }
+
     // Load `local.properties`
     loadFile(project.rootProject.file("local.properties"), required = false)
 
     // Load environment variables
-    loadEnv("gpr.user", "GPR_USER")
-    loadEnv("gpr.key", "GPR_KEY")
-
     loadEnv("signing.keyId", "SIGNING_KEY_ID")
     loadEnv("signing.key", "SIGNING_KEY")
     loadEnv("signing.password", "SIGNING_PASSWORD")
 
-    loadEnv("ossrh.username", "OSSRH_USERNAME")
-    loadEnv("ossrh.password", "OSSRH_PASSWORD")
+    loadEnv("sonatype.username", "SONATYPE_USERNAME")
+    loadEnv("sonatype.password", "SONATYPE_PASSWORD")
+    loadEnv("sonatype.repository", "SONATYPE_REPOSITORY")
 }
 
 val javadocJar by tasks.registering(Jar::class) {
@@ -28,20 +33,14 @@ val javadocJar by tasks.registering(Jar::class) {
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/mockative/mockative")
-            credentials {
-                username = props.getProperty("gpr.user")
-                password = props.getProperty("gpr.key")
-            }
-        }
-
-        maven {
             name = "Sonatype"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+            url = props.getProperty("sonatype.repository")
+                ?.let { uri("https://s01.oss.sonatype.org/service/local/staging/deployByRepositoryId/$it") }
+                ?: uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+
             credentials {
-                username = props.getProperty("ossrh.username")
-                password = props.getProperty("ossrh.password")
+                username = props.getProperty("sonatype.username")
+                password = props.getProperty("sonatype.password")
             }
         }
 
@@ -49,8 +48,8 @@ publishing {
             name = "SonatypeSnapshot"
             url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
             credentials {
-                username = props.getProperty("ossrh.username")
-                password = props.getProperty("ossrh.password")
+                username = props.getProperty("sonatype.username")
+                password = props.getProperty("sonatype.password")
             }
         }
     }
