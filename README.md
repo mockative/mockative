@@ -7,15 +7,15 @@
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 Notable features include:
 
-- Effortless multi-threading when using coroutines (see 
+- Effortless multi-threading when using coroutines (see
   [Coroutines.kt](shared/src/commonTest/kotlin/io/mockative/Coroutines.kt))
 - Concise, non-intrusive, type-safe API
 - Mocking of **interfaces only**
 - Supports both [expression](#stubbing-using-expressions)
   and [matcher](#stubbing-using-callable-references) based stubbing
   and [verification](#verification)
-- Supports [implicit stubbing](#implicit-stubbing-of-functions-returning-unit) of functions 
-  returning `Unit` 
+- Supports [implicit stubbing](#implicit-stubbing-of-functions-returning-unit) of functions
+  returning `Unit`
 
 ## Installation for Multiplatform projects
 
@@ -37,14 +37,14 @@ kotlin {
     sourceSets {
         val commonTest by getting {
             dependencies {
-                implementation("io.mockative:mockative:1.0.7")
+                implementation("io.mockative:mockative:1.1.0")
             }
         }
     }
 }
 
 dependencies {
-    ksp("io.mockative:mockative-processor:1.0.7")
+    ksp("io.mockative:mockative-processor:1.1.0")
 }
 ```
 
@@ -132,7 +132,7 @@ given(mock).function("transformData")
 
 ### Stubbing implementations
 
-Both expressions and callable references supports the same API for stubbing the implementation, 
+Both expressions and callable references supports the same API for stubbing the implementation,
 through the use of the `then` functions.
 
 | Function                           | Description                                                                                                |
@@ -149,7 +149,7 @@ then function is available:
 | ----------------- | --------------- |
 | `thenDoNothing()` | Returns `Unit`. |
 
-The untyped callable references using `function(String)` and `suspendFunction(String)` supports the 
+The untyped callable references using `function(String)` and `suspendFunction(String)` supports the
 following additional `then` function:
 
 | Function                                   | Description                                                                                                      |
@@ -158,8 +158,8 @@ following additional `then` function:
 
 ### Implicit stubbing of functions returning Unit
 
-An experimental API has been added as opt-in for stubbing functions returning `Unit` by default, 
-based on the idea that such functions are more typically used for verification than stubbing, and 
+An experimental API has been added as opt-in for stubbing functions returning `Unit` by default,
+based on the idea that such functions are more typically used for verification than stubbing, and
 are trivially stubbed automatically.
 
 You can opt-in to this behaviour on the project level through your **build.gradle.kts** file:
@@ -172,7 +172,7 @@ ksp {
 }
 ```
 
-Alternatively, you can opt-in (or opt-out if you've opted in on the project level), using the 
+Alternatively, you can opt-in (or opt-out if you've opted in on the project level), using the
 `configure(mock, block)` function either inline:
 
 ```kotlin
