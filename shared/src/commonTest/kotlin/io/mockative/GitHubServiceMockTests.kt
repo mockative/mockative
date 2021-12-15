@@ -25,7 +25,7 @@ class GitHubServiceMockTests {
 
         // then
         verify(github).coroutine { create(repository) }
-            .wasInvoked(exactly = once)
+            .wasInvoked(atLeast = once)
     }
 
     @Test
