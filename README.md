@@ -230,7 +230,7 @@ verify(mock).invocation { mockProperty = transformedData }
 
 ```kotlin
 // Function Reference (suspend function)
-verify(mock).coroutine(mock::fetchData)
+verify(mock).suspendFunction(mock::fetchData)
     .with(eq("mockative/mockative"))
     .wasNotInvoked()
 
