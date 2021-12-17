@@ -3,6 +3,7 @@ package io.mockative
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class GitHubServiceMockTests {
 
@@ -77,5 +78,23 @@ class GitHubServiceMockTests {
             .wasInvoked(exactly = once)
 
         verify(github).hasNoUnverifiedExpectations()
+    }
+
+    @Test
+    fun givenSetupOfSuspendingCommandToThrow_whenCallingCommand_thenMockIsCalled() = runBlockingTest {
+        // given
+        val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
+
+        given(github).coroutine { repository(id) }
+            .thenThrow(Error("Expected exception"))
+
+        // when
+        val actual = runCatching { service.repository(id) }
+
+        // then
+        assertNotNull(actual.exceptionOrNull())
+
+        verify(github).coroutine { repository(id) }
+            .wasInvoked(exactly = once)
     }
 }

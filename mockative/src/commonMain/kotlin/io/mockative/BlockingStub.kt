@@ -12,8 +12,10 @@ internal class BlockingStub(val expectation: Expectation, private val invoke: (A
             is Invocation.Setter -> arrayOf(invocation.value)
         }
 
-        val result = invoke(arguments)
-        invocations.add(invocation)
-        return result
+        try {
+            return invoke(arguments)
+        } finally {
+            invocations.add(invocation)
+        }
     }
 }
