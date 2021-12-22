@@ -105,6 +105,8 @@ class FunctionWriter(private val writer: Writer) {
         }
 
         writer.append(')')
+        writer.append(", ")
+        writer.append(if (function.returnType == "kotlin.Unit") "true" else "false")
         writer.append(')')
     }
 }

@@ -174,11 +174,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     companion object {
-        inline fun <reified R> invoke(mock: Mockable, invocation: Invocation): R = invoke(mock, invocation, R::class == Unit::class)
-
         fun <R> invoke(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.invoke(invocation, returnsUnit)
-
-        suspend inline fun <reified R> suspend(mock: Mockable, invocation: Invocation): R = suspend(mock, invocation, R::class == Unit::class)
 
         suspend fun <R> suspend(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.suspend(invocation, returnsUnit)
     }
