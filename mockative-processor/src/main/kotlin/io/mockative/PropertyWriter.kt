@@ -43,11 +43,18 @@ class PropertyWriter(private val writer: Writer) {
     }
 
     private fun appendGetter(property: MockDescriptor.Property) {
-        writer.append("get() = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Getter(\"${property.name}\"))")
+        writer.append("get() = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Getter(")
+        writer.append('"')
+        writer.append(property.name)
+        writer.append('"')
+        writer.append(')')
+        writer.append(", ")
+        writer.append(if (property.type == "kotlin.Unit") "true" else "false")
+        writer.append(')')
     }
 
     private fun appendSetter(property: MockDescriptor.Property) {
-        writer.append("set(value) = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Setter(\"${property.name}\", value))")
+        writer.append("set(value) = io.mockative.Mockable.invoke(this, io.mockative.Invocation.Setter(\"${property.name}\", value), true)")
     }
 
     private fun appendName(property: MockDescriptor.Property) {

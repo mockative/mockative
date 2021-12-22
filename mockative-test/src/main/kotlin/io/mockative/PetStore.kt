@@ -11,4 +11,6 @@ interface PetStore<T : CharSequence> {
     fun <P : Number> generic(type: T, pet: P): CharSequence
 
     fun clear()
+
+    fun <R> call(function: Any.() -> R): R
 }
