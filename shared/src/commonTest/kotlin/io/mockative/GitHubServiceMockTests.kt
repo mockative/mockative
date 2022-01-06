@@ -1,9 +1,6 @@
 package io.mockative
 
-import kotlin.test.AfterTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 class GitHubServiceMockTests {
 
@@ -93,6 +90,36 @@ class GitHubServiceMockTests {
 
         // then
         assertNotNull(actual.exceptionOrNull())
+
+        verify(github).coroutine { repository(id) }
+            .wasInvoked(exactly = once)
+    }
+
+    @Test
+    fun testStubOverrides() = runBlockingTest {
+        // given
+        val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
+        val mockative = Repository(id, "Mockative")
+
+        given(github).coroutine { repository(id) }
+            .thenReturn(mockative)
+
+        val firstRepository = service.repository(id)
+
+        assertSame(mockative, firstRepository)
+
+        verify(github).coroutine { repository(id) }
+            .wasInvoked(exactly = once)
+
+        val mockito = Repository(id, "Mockito")
+        given(github).coroutine { repository(id) }
+            .thenReturn(mockito)
+
+        // When
+        val secondRepository = service.repository(id)
+
+        // Then
+        assertSame(mockito, secondRepository)
 
         verify(github).coroutine { repository(id) }
             .wasInvoked(exactly = once)

@@ -23,7 +23,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     internal fun addBlockingStub(stub: BlockingStub) {
-        blockingStubs.add(stub)
+        blockingStubs.add(0, stub)
     }
 
     private fun getBlockingStub(invocation: Invocation, returnsUnit: Boolean): BlockingStub {
@@ -41,7 +41,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     internal fun addSuspendStub(stub: SuspendStub) {
-        suspendStubs.add(stub)
+        suspendStubs.add(0, stub)
     }
 
     private val expectations: List<Expectation>
