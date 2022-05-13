@@ -13,7 +13,13 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(project(":mockative"))
-                implementation("com.google.devtools.ksp:symbol-processing-api:1.6.0-1.0.1")
+
+                // KSP
+                implementation("com.google.devtools.ksp:symbol-processing-api:1.6.20-1.0.5")
+
+                // KotlinPoet
+                implementation("com.squareup:kotlinpoet:1.10.2")
+                implementation("com.squareup:kotlinpoet-ksp:1.10.2")
             }
 
             kotlin.srcDir("src/main/kotlin")
@@ -23,6 +29,7 @@ kotlin {
         all {
             languageSettings {
                 optIn("com.google.devtools.ksp.KspExperimental")
+                optIn("kotlin.RequiresOptIn")
             }
         }
     }

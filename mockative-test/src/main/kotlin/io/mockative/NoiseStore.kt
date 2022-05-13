@@ -1,5 +1,6 @@
 package io.mockative
 
+@MockableType
 interface NoiseStore {
     var noises: Map<String, () -> Unit>
     val readOnlyNoises: Map<String, () -> Unit>

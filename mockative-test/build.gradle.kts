@@ -9,11 +9,14 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
+            dependencies {
+                implementation(project(":mockative"))
+            }
+
             kotlin.srcDir("src/main/kotlin")
         }
         val commonTest by getting {
             dependencies {
-                implementation(project(":mockative"))
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }

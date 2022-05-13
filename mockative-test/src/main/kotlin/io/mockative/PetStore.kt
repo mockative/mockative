@@ -1,5 +1,6 @@
 package io.mockative
 
+@MockableType
 interface PetStore<T : CharSequence> {
     var pets: Map<String, () -> Unit>
     val readOnlyPets: Map<String, () -> Unit>
