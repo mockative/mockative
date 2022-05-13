@@ -2,8 +2,13 @@ package io.mockative
 
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
+import com.squareup.kotlinpoet.ksp.writeTo
+import io.mockative.ksp.addMocks
 import java.io.OutputStreamWriter
 
+@OptIn(KotlinPoetKspPreview::class)
 class MockativeSymbolProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
@@ -23,6 +28,16 @@ class MockativeSymbolProcessor(
             debug("Skipped: Already Processed")
             return emptyList()
         }
+
+        ProcessableFile.fromResolver(resolver)
+            .forEach { file ->
+                FileSpec.builder(file.packageName, "${file.fileName.removeSuffix(".kt")}.Mockative")
+                    .addMocks(file.types)
+                    .build()
+                    .writeTo(codeGenerator, aggregating = false)
+            }
+
+        return emptyList()
 
         val annotatedSymbols = resolver.getSymbolsWithAnnotation(Mock::class.qualifiedName!!).toList()
         if (annotatedSymbols.isEmpty()) {
