@@ -30,7 +30,7 @@ class MockativeSymbolProcessor(
                 FileSpec.builder(packageName, "${dotDelimitedSimpleName}Mock.Mockative")
                     .addType(type.buildMockTypeSpec())
                     .build()
-                    .writeTo(codeGenerator, aggregating = true)
+                    .writeTo(codeGenerator, aggregating = false)
             }
 
         // Generate Mock Functions
@@ -41,7 +41,7 @@ class MockativeSymbolProcessor(
                 FileSpec.builder("io.mockative", "${dotDelimitedSimpleName}.mock.Mockative")
                     .addFunction(type.buildMockFunSpec())
                     .build()
-                    .writeTo(codeGenerator, aggregating = true)
+                    .writeTo(codeGenerator, aggregating = false)
             }
 
         return emptyList()
