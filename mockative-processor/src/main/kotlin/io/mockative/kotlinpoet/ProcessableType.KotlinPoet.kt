@@ -8,7 +8,6 @@ import io.mockative.MOCKABLE
 import io.mockative.ProcessableType
 import io.mockative.SUPPRESS_ANNOTATION
 import io.mockative.ksp.addOriginatingKSFiles
-import io.mockative.ksp.getAllDependentFiles
 
 internal fun ProcessableType.buildMockFunSpec(): FunSpec {
     val suppressUnusedParameter = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
@@ -43,8 +42,6 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
 internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     val properties = buildPropertySpecs()
     val functions = buildFunSpecs()
-
-//    val dependentFiles = declaration.getAllDependentFiles()
 
     val parameterSpec = ParameterSpec.builder("stubsUnitByDefault", BOOLEAN)
         .build()

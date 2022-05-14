@@ -9,25 +9,27 @@ import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.mockative.kotlinpoet.buildMockFunSpec
 import io.mockative.kotlinpoet.buildMockTypeSpec
+import io.mockative.kotlinpoet.fullSimpleName
 
 @OptIn(KotlinPoetKspPreview::class)
 class MockativeSymbolProcessor(
     private val codeGenerator: CodeGenerator,
-    options: Map<String, String>
+    private val options: Map<String, String>
 ) : SymbolProcessor {
 
-    private val stubsUnitByDefault: Boolean = options["mockative.stubsUnitByDefault"].toBoolean()
-
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        val stubsUnitByDefault = options["mockative.stubsUnitByDefault"].toBoolean()
+
+        // Resolve the processable types
         val processableTypes = ProcessableType.fromResolver(resolver, stubsUnitByDefault)
 
         // Generate Mock classes
         processableTypes
             .forEach { type ->
                 val packageName = type.sourceClassName.packageName
-                val dotDelimitedSimpleName = type.sourceClassName.simpleNames.joinToString(".")
+                val fullSimpleName = type.sourceClassName.fullSimpleName
 
-                FileSpec.builder(packageName, "${dotDelimitedSimpleName}Mock.Mockative")
+                FileSpec.builder(packageName, "${fullSimpleName}Mock.Mockative")
                     .addType(type.buildMockTypeSpec())
                     .build()
                     .writeTo(codeGenerator, aggregating = false)
@@ -36,9 +38,9 @@ class MockativeSymbolProcessor(
         // Generate Mock Functions
         processableTypes
             .forEach { type ->
-                val dotDelimitedSimpleName = type.sourceClassName.simpleNames.joinToString(".")
+                val fullSimpleName = type.sourceClassName.fullSimpleName
 
-                FileSpec.builder("io.mockative", "${dotDelimitedSimpleName}.mock.Mockative")
+                FileSpec.builder("io.mockative", "${fullSimpleName}.mock.Mockative")
                     .addFunction(type.buildMockFunSpec())
                     .build()
                     .writeTo(codeGenerator, aggregating = false)

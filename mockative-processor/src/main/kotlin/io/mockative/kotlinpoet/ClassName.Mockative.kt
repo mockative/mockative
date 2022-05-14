@@ -8,3 +8,6 @@ import com.squareup.kotlinpoet.TypeVariableName
 internal fun ClassName.parameterizedByAny(typeArguments: List<TypeVariableName>): TypeName {
     return if (typeArguments.isEmpty()) this else parameterizedBy(typeArguments)
 }
+
+internal val ClassName.fullSimpleName: String
+    get() = simpleNames.joinToString(".")
