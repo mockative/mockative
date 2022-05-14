@@ -13,10 +13,6 @@ val SUPPRESS_ANNOTATION = Suppress::class.asClassName()
 
 val MOCKABLE = Mockable::class.asClassName()
 
-val MOCKABLE_COMPANION = Mockable.Companion::class.asClassName()
-val MOCKABLE_INVOKE = MemberName(MOCKABLE_COMPANION, "invoke")
-val MOCKABLE_SUSPEND = MemberName(MOCKABLE_COMPANION, "suspend")
-
 val INVOCATION_GETTER = Invocation.Getter::class.asClassName()
 val INVOCATION_SETTER = Invocation.Setter::class.asClassName()
 val INVOCATION_FUNCTION = Invocation.Function::class.asClassName()
