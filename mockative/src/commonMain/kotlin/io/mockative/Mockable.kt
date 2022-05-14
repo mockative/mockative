@@ -158,7 +158,6 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
             isRecording = false
         }
 
-        // The unconfined dispatcher should result in the coroutine running synchronously while recording
         return invocation!!
     }
 
@@ -172,10 +171,4 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
             return result as R
         }
     }
-
-//    companion object {
-//        fun <R> invoke(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.invoke(invocation, returnsUnit)
-//
-//        suspend fun <R> suspend(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.suspend(invocation, returnsUnit)
-//    }
 }
