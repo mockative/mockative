@@ -1,6 +1,6 @@
 package io.mockative
 
-interface GitHubAPI {
+internal interface GitHubAPI {
     suspend fun create(repository: Repository)
 
     suspend fun repositories(): List<Repository>

@@ -2,7 +2,7 @@ package io.mockative
 
 import kotlin.test.*
 
-class GitHubServiceMockTests {
+internal class GitHubServiceMockTests {
 
     @Mock val github = mock(classOf<GitHubAPI>())
 

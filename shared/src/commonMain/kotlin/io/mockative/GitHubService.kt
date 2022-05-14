@@ -2,7 +2,7 @@ package io.mockative
 
 import kotlinx.coroutines.withContext
 
-class GitHubService(
+internal class GitHubService(
     private val api: GitHubAPI,
     private val dispatchers: ApplicationDispatchers
 ) {

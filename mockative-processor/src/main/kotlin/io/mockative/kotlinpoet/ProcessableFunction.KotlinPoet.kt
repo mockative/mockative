@@ -1,5 +1,6 @@
 package io.mockative.kotlinpoet
 
+import com.google.devtools.ksp.isInternal
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toTypeName
