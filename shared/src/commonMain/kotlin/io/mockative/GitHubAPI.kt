@@ -10,4 +10,6 @@ internal interface GitHubAPI {
     fun thing(with: String, three: Int, arguments: Repository)
 
     fun String.doStuffToString(): String
+
+    fun getEvent(list: List<*>)
 }
