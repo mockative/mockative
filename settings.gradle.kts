@@ -13,11 +13,11 @@ pluginManagement {
 
 rootProject.name = "mockative"
 
-include(":shared")
-include(":mockative")
-include(":mockative-processor")
-include(":mockative-code-generator")
-
 if (startParameter.projectProperties.containsKey("check_publication")) {
     include(":tools:check-publication")
+} else {
+    include(":shared")
+    include(":mockative")
+    include(":mockative-processor")
+    include(":mockative-code-generator")
 }

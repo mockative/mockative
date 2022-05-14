@@ -104,9 +104,3 @@ kotlin {
         val wasm32Main by getting { dependsOn(wasmMain) }
     }
 }
-
-rootProject.plugins.withType(NodeJsRootPlugin::class.java) {
-    rootProject.extensions.configure<NodeJsRootExtension> {
-        download = false
-    }
-}
