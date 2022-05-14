@@ -5,6 +5,7 @@ import kotlin.test.*
 internal class GitHubServiceMockTests {
 
     @Mock val github = mock(classOf<GitHubAPI>())
+    @Mock val expected = mock(classOf<ExpectedAPI>())
 
     private val service = GitHubService(github, ApplicationDispatchers.Unconfined)
 
