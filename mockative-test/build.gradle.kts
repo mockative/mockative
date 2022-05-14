@@ -12,14 +12,14 @@ kotlin {
             dependencies {
                 implementation(project(":mockative"))
             }
-
-            kotlin.srcDir("src/main/kotlin")
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
+
+            kotlin.srcDir("generated/ksp/metadata/commonMain")
         }
 
         val jvmMain by getting
@@ -28,15 +28,20 @@ kotlin {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
             }
-
-            kotlin.srcDir("src/test/kotlin")
-            resources.srcDir("src/test/resources")
         }
     }
 }
 
+afterEvaluate {
+    configurations
+        .filter { it.name.startsWith("ksp") }
+        .forEach { configuration ->
+            println("${configuration.name} <$configuration>")
+        }
+}
+
 dependencies {
-    ksp(project(":mockative-processor"))
+    add("kspJvmTest", project(":mockative-processor"))
 }
 
 ksp {

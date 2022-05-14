@@ -1,6 +1,5 @@
 package io.mockative
 
-@MockableType
 interface PetStore<T : CharSequence> {
     var pets: Map<String, () -> Unit>
     val readOnlyPets: Map<String, () -> Unit>
@@ -14,4 +13,6 @@ interface PetStore<T : CharSequence> {
     fun clear()
 
     fun <R> call(function: Any.() -> R): R
+
+    fun varargFun(vararg params: List<T>): T
 }
