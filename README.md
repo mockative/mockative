@@ -38,14 +38,18 @@ kotlin {
     sourceSets {
         val commonTest by getting {
             dependencies {
-                implementation("io.mockative:mockative:1.1.4")
+                implementation("io.mockative:mockative:1.2.0")
             }
         }
     }
 }
 
 dependencies {
-    ksp("io.mockative:mockative-processor:1.1.4")
+    configurations
+        .filter { it.name.startsWith("ksp") && it.name.contains("Test") }
+        .forEach {
+            add(it.name, "io.mockative:mockative-processor:1.2.0")
+        }
 }
 ```
 
@@ -159,9 +163,9 @@ following additional `then` function:
 
 ### Implicit stubbing of functions returning Unit
 
-An experimental API has been added as opt-in for stubbing functions returning `Unit` by default,
-based on the idea that such functions are more typically used for verification than stubbing, and
-are trivially stubbed automatically.
+Mockative comes with an opt-in feature for stubbing functions returning `Unit` by default, based on 
+the idea that such functions are typically used for verification rather than stubbing, and are 
+trivially stubbed automatically.
 
 You can opt-in to this behaviour on the project level through your **build.gradle.kts** file:
 

@@ -16,7 +16,6 @@ rootProject.name = "mockative"
 include(":shared")
 include(":mockative")
 include(":mockative-processor")
-include(":mockative-test")
 include(":mockative-code-generator")
 
 if (startParameter.projectProperties.containsKey("check_publication")) {
