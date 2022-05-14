@@ -8,4 +8,6 @@ internal interface GitHubAPI {
     suspend fun repository(id: String): Repository?
 
     fun thing(with: String, three: Int, arguments: Repository)
+
+    fun String.doStuffToString(): String
 }

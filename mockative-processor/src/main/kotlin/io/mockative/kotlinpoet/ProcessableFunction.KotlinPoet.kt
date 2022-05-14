@@ -5,21 +5,29 @@ import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toTypeName
 import io.mockative.*
 
+@OptIn(KotlinPoetKspPreview::class)
 internal fun ProcessableFunction.buildFunSpec(): FunSpec {
     val modifiers = buildModifiers()
     val returnsUnit = if (returnType == UNIT) "true" else "false"
 
-    val invocation = if (isSuspend) MOCKABLE_SUSPEND else MOCKABLE_INVOKE
+    val invocation = if (isSuspend) "suspend" else "invoke"
 
     val argumentsList = buildArgumentList()
     val parameterSpecs = buildParameterSpecs()
 
     return FunSpec.builder(name)
+        .let { builder ->
+            declaration.extensionReceiver
+                ?.resolve()
+                ?.let { receiver ->
+                    builder.receiver(receiver.toTypeName(typeParameterResolver))
+                } ?: builder
+        }
         .addModifiers(modifiers)
         .returns(returnType)
         .addParameters(parameterSpecs)
         .addTypeVariables(typeVariables)
-        .addStatement("return %M<%T>(this, %T(%S, %L), %L)", invocation, returnType, INVOCATION_FUNCTION, name, argumentsList, returnsUnit)
+        .addStatement("return %L<%T>(%T(%S, %L), %L)", invocation, returnType, INVOCATION_FUNCTION, name, argumentsList, returnsUnit)
         .build()
 }
 

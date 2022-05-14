@@ -128,7 +128,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
+    protected fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
         } else {
@@ -163,7 +163,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
+    protected suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressError(invocation)
         } else {
@@ -173,9 +173,9 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
         }
     }
 
-    companion object {
-        fun <R> invoke(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.invoke(invocation, returnsUnit)
-
-        suspend fun <R> suspend(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.suspend(invocation, returnsUnit)
-    }
+//    companion object {
+//        fun <R> invoke(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.invoke(invocation, returnsUnit)
+//
+//        suspend fun <R> suspend(mock: Mockable, invocation: Invocation, returnsUnit: Boolean): R = mock.suspend(invocation, returnsUnit)
+//    }
 }

@@ -45,7 +45,7 @@ data class ProcessableType(
             val typeVariables = declaration.typeParameters
                 .map { it.toTypeVariableName(typeParameterResolver) }
 
-            return ProcessableType(
+            val processableType = ProcessableType(
                 declaration = declaration,
                 sourceClassName = sourceClassName,
                 mockClassName = mockClassName,
@@ -56,6 +56,10 @@ data class ProcessableType(
                 typeVariables = typeVariables,
                 stubsUnitByDefault = stubsUnitByDefault,
             )
+
+            functions.forEach { it.parent = processableType }
+
+            return processableType
         }
 
         @OptIn(KotlinPoetKspPreview::class)

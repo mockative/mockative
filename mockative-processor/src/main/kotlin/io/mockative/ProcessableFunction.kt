@@ -13,7 +13,8 @@ data class ProcessableFunction(
     val returnType: TypeName,
     val isSuspend: Boolean,
     val typeVariables: List<TypeVariableName>,
-    val typeParameterResolver: TypeParameterResolver
+    val typeParameterResolver: TypeParameterResolver,
+    var parent: ProcessableType? = null,
 ) {
     companion object {
         @OptIn(KotlinPoetKspPreview::class)
