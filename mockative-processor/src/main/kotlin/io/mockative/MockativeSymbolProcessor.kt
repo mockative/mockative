@@ -7,7 +7,8 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.writeTo
-import io.mockative.ksp.addMock
+import io.mockative.kotlinpoet.buildMockFunSpec
+import io.mockative.kotlinpoet.buildMockTypeSpec
 
 @OptIn(KotlinPoetKspPreview::class)
 class MockativeSymbolProcessor(
@@ -26,8 +27,19 @@ class MockativeSymbolProcessor(
                 val packageName = type.sourceClassName.packageName
                 val dotDelimitedSimpleName = type.sourceClassName.simpleNames.joinToString(".")
 
-                FileSpec.builder(packageName, "${dotDelimitedSimpleName}.Mockative")
-                    .addMock(type)
+                FileSpec.builder(packageName, "${dotDelimitedSimpleName}Mock.Mockative")
+                    .addType(type.buildMockTypeSpec())
+                    .build()
+                    .writeTo(codeGenerator, aggregating = true)
+            }
+
+        // Generate Mock Functions
+        processableTypes
+            .forEach { type ->
+                val dotDelimitedSimpleName = type.sourceClassName.simpleNames.joinToString(".")
+
+                FileSpec.builder("io.mockative", "${dotDelimitedSimpleName}.mock.Mockative")
+                    .addFunction(type.buildMockFunSpec())
                     .build()
                     .writeTo(codeGenerator, aggregating = true)
             }
