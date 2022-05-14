@@ -36,6 +36,7 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
         .addParameter(type)
         .returns(parameterizedSourceClassName)
         .addStatement("return %T()", parameterizedMockClassName)
+        .addOriginatingKSFiles(usages)
         .build()
 }
 
@@ -43,7 +44,7 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     val properties = buildPropertySpecs()
     val functions = buildFunSpecs()
 
-    val dependentFiles = declaration.getAllDependentFiles()
+//    val dependentFiles = declaration.getAllDependentFiles()
 
     val parameterSpec = ParameterSpec.builder("stubsUnitByDefault", BOOLEAN)
         .build()
@@ -63,7 +64,6 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
         .addProperties(properties)
         .addFunctions(functions)
         .addKdoc(declaration.docString?.trim() ?: "")
-        .addOriginatingKSFiles(dependentFiles)
         .addOriginatingKSFiles(usages)
         .build()
 }
