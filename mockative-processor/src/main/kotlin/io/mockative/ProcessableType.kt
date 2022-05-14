@@ -4,21 +4,27 @@ import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
-import com.squareup.kotlinpoet.ksp.toClassName
-import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
+import com.squareup.kotlinpoet.TypeVariableName
+import com.squareup.kotlinpoet.ksp.*
 
+@OptIn(KotlinPoetKspPreview::class)
 data class ProcessableType(
     val declaration: KSClassDeclaration,
     val sourceClassName: ClassName,
     val mockClassName: ClassName,
     val functions: List<ProcessableFunction>,
     val properties: List<ProcessableProperty>,
+    val usages: List<KSFile>,
+    val typeParameterResolver: TypeParameterResolver,
+    val typeVariables: List<TypeVariableName>,
+    val stubsUnitByDefault: Boolean,
 ) {
     companion object {
         @OptIn(KotlinPoetKspPreview::class)
-        private fun fromDeclaration(declaration: KSClassDeclaration): ProcessableType {
+        private fun fromDeclaration(declaration: KSClassDeclaration, usages: List<KSFile>, stubsUnitByDefault: Boolean): ProcessableType {
             val sourceClassName = declaration.toClassName()
             val simpleNames = sourceClassName.simpleNames.dropLast(1) + "${sourceClassName.simpleName}Mock"
             val mockClassName = ClassName(sourceClassName.packageName, *simpleNames.toTypedArray())
@@ -36,15 +42,39 @@ data class ProcessableType(
                 .map { ProcessableProperty.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 
-            return ProcessableType(declaration, sourceClassName, mockClassName, functions, properties)
+            val typeVariables = declaration.typeParameters
+                .map { it.toTypeVariableName(typeParameterResolver) }
+
+            return ProcessableType(
+                declaration = declaration,
+                sourceClassName = sourceClassName,
+                mockClassName = mockClassName,
+                functions = functions,
+                properties = properties,
+                usages = usages,
+                typeParameterResolver = typeParameterResolver,
+                typeVariables = typeVariables,
+                stubsUnitByDefault = stubsUnitByDefault,
+            )
         }
 
         @OptIn(KotlinPoetKspPreview::class)
-        fun fromResolver(resolver: Resolver): Sequence<ProcessableType> {
-            return resolver.getSymbolsWithAnnotation(MOCKABLE_TYPE_ANNOTATION.canonicalName)
-                .mapNotNull { symbol -> symbol as? KSClassDeclaration }
-                .filter { classDec -> classDec.classKind == ClassKind.INTERFACE }
-                .map { classDec -> fromDeclaration(classDec) }
+        fun fromResolver(resolver: Resolver, stubsUnitByDefault: Boolean): List<ProcessableType> {
+            return resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
+                .mapNotNull { symbol -> symbol as? KSPropertyDeclaration }
+                .mapNotNull { property ->
+                    (property.type.resolve().declaration as? KSClassDeclaration)
+                        ?.let { it to property.containingFile }
+                }
+                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE }
+                .groupBy({ (classDec, _) -> classDec }, { (_, file) -> file })
+                .map { (classDec, usages) ->
+                    fromDeclaration(
+                        declaration = classDec,
+                        usages = usages.filterNotNull(),
+                        stubsUnitByDefault = stubsUnitByDefault,
+                    )
+                }
         }
     }
 }

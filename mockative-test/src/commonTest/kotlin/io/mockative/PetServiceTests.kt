@@ -1,6 +1,6 @@
 package io.mockative
 
-import org.junit.Test
+import kotlin.test.Test
 
 class PetServiceTests {
 

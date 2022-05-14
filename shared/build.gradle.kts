@@ -21,6 +21,7 @@ kotlin {
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget = when {
         System.getenv("SDK_NAME")?.startsWith("iphoneos") == true -> ::iosArm64
         System.getenv("NATIVE_ARCH")?.startsWith("arm") == true -> ::iosSimulatorArm64
+        System.getProperty("os.arch") == "aarch64"-> ::iosSimulatorArm64
         else -> ::iosX64
     }
 
@@ -63,6 +64,8 @@ kotlin {
             languageSettings {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
             }
+
+            kotlin.srcDir(File(buildDir, "generated/ksp/ios/iosTest/kotlin"))
         }
 
         val jsMain by getting
@@ -96,10 +99,13 @@ android {
 }
 
 dependencies {
-    ksp(project(":mockative-processor"))
+    configurations
+        .filter { it.name.startsWith("ksp") && it.name.contains("Test") }
+        .forEach {
+            add(it.name, project(":mockative-processor"))
+        }
 }
 
 ksp {
-    arg("mockative.logging", "debug")
     arg("mockative.stubsUnitByDefault", "true")
 }

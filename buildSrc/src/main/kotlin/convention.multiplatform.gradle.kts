@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+
 plugins {
     kotlin("multiplatform")
 }
@@ -99,5 +102,11 @@ kotlin {
         val wasmMain by creating { dependsOn(commonMain) }
 
         val wasm32Main by getting { dependsOn(wasmMain) }
+    }
+}
+
+rootProject.plugins.withType(NodeJsRootPlugin::class.java) {
+    rootProject.extensions.configure<NodeJsRootExtension> {
+        download = false
     }
 }
