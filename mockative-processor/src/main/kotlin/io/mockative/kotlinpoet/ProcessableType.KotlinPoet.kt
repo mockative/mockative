@@ -1,5 +1,6 @@
 package io.mockative.kotlinpoet
 
+import com.google.devtools.ksp.isInternal
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import io.mockative.KCLASS
@@ -23,7 +24,14 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
         .addAnnotation(suppressUnusedParameter)
         .build()
 
+    val modifiers = buildList {
+        if (declaration.isInternal()) {
+            add(KModifier.INTERNAL)
+        }
+    }
+
     return FunSpec.builder("mock")
+        .addModifiers(modifiers)
         .addTypeVariables(typeVariables)
         .addParameter(type)
         .returns(parameterizedSourceClassName)
@@ -40,7 +48,14 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     val parameterSpec = ParameterSpec.builder("stubsUnitByDefault", BOOLEAN)
         .build()
 
+    val modifiers = buildList {
+        if (declaration.isInternal()) {
+            add(KModifier.INTERNAL)
+        }
+    }
+
     return TypeSpec.classBuilder(mockClassName)
+        .addModifiers(modifiers)
         .addTypeVariables(typeVariables)
         .superclass(MOCKABLE)
         .addSuperclassConstructorParameter("%N = %L", parameterSpec, stubsUnitByDefault)
