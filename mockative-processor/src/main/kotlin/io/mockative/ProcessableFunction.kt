@@ -4,7 +4,11 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeVariableName
-import com.squareup.kotlinpoet.ksp.*
+import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
+import com.squareup.kotlinpoet.ksp.TypeParameterResolver
+import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
+import com.squareup.kotlinpoet.ksp.toTypeVariableName
+import io.mockative.kotlinpoet.toTypeNameMockative
 
 @OptIn(KotlinPoetKspPreview::class)
 data class ProcessableFunction(
@@ -28,7 +32,7 @@ data class ProcessableFunction(
             return ProcessableFunction(
                 declaration = declaration,
                 name = declaration.simpleName.asString(),
-                returnType = declaration.returnType!!.toTypeName(typeParameterResolver),
+                returnType = declaration.returnType!!.toTypeNameMockative(typeParameterResolver),
                 isSuspend = declaration.modifiers.contains(Modifier.SUSPEND),
                 typeVariables = declaration.typeParameters
                     .map { it.toTypeVariableName(typeParameterResolver) },

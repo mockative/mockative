@@ -2,6 +2,8 @@ package io.mockative
 
 typealias MyList<T> = List<T>
 
+typealias MyStringMap<T> = Map<String, T>
+
 internal interface GitHubAPI {
     suspend fun create(repository: Repository)
 
@@ -15,5 +17,7 @@ internal interface GitHubAPI {
 
     fun getEvent(list: List<*>)
 
-    fun doEvents(list: MyList<Repository>)
+    fun doList(list: MyList<Repository>)
+
+    fun doMaps(map: MyStringMap<Repository>)
 }
