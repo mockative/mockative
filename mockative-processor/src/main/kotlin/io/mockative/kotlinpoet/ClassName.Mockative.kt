@@ -9,5 +9,9 @@ internal fun ClassName.parameterizedByAny(typeArguments: List<TypeVariableName>)
     return if (typeArguments.isEmpty()) this else parameterizedBy(typeArguments)
 }
 
+internal fun ClassName.withTypeArguments(typeArguments: List<TypeName>): TypeName {
+    return if (typeArguments.isEmpty()) this else parameterizedBy(typeArguments)
+}
+
 internal val ClassName.fullSimpleName: String
     get() = simpleNames.joinToString(".")

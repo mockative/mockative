@@ -2,8 +2,9 @@ package io.mockative.kotlinpoet
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
-import com.squareup.kotlinpoet.ksp.toTypeName
-import io.mockative.*
+import io.mockative.INVOCATION_FUNCTION
+import io.mockative.LIST_OF
+import io.mockative.ProcessableFunction
 
 @OptIn(KotlinPoetKspPreview::class)
 internal fun ProcessableFunction.buildFunSpec(): FunSpec {
@@ -17,11 +18,8 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
 
     return FunSpec.builder(name)
         .let { builder ->
-            declaration.extensionReceiver
-                ?.resolve()
-                ?.let { receiver ->
-                    builder.receiver(receiver.toTypeName(typeParameterResolver))
-                } ?: builder
+            declaration.extensionReceiver?.toTypeNameMockative(typeParameterResolver)
+                ?.let { receiver -> builder.receiver(receiver) } ?: builder
         }
         .addModifiers(modifiers)
         .returns(returnType)
@@ -56,7 +54,7 @@ private fun ProcessableFunction.buildArgumentList(): CodeBlock {
 private fun ProcessableFunction.buildParameterSpecs() = declaration.parameters
     .map { parameter ->
         val name = parameter.name!!.asString()
-        val type = parameter.type.toTypeName(typeParameterResolver)
+        val type = parameter.type.toTypeNameMockative(typeParameterResolver)
 
         ParameterSpec.Companion.builder(name, type)
             .build()

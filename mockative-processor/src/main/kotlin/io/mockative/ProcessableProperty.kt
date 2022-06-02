@@ -4,8 +4,8 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.TypeParameterResolver
-import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
+import io.mockative.kotlinpoet.toTypeNameMockative
 
 @OptIn(KotlinPoetKspPreview::class)
 data class ProcessableProperty(
@@ -26,7 +26,7 @@ data class ProcessableProperty(
             return ProcessableProperty(
                 declaration = declaration,
                 name = declaration.simpleName.asString(),
-                type = declaration.type.toTypeName(typeParameterResolver),
+                type = declaration.type.toTypeNameMockative(typeParameterResolver),
                 typeParameterResolver = typeParameterResolver
             )
         }
