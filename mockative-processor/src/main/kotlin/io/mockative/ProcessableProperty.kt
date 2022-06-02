@@ -26,7 +26,7 @@ data class ProcessableProperty(
             return ProcessableProperty(
                 declaration = declaration,
                 name = declaration.simpleName.asString(),
-                type = declaration.type.resolve().toTypeName(typeParameterResolver),
+                type = declaration.type.toTypeName(typeParameterResolver),
                 typeParameterResolver = typeParameterResolver
             )
         }

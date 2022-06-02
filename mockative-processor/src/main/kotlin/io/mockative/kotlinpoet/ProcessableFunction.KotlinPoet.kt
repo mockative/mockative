@@ -56,7 +56,7 @@ private fun ProcessableFunction.buildArgumentList(): CodeBlock {
 private fun ProcessableFunction.buildParameterSpecs() = declaration.parameters
     .map { parameter ->
         val name = parameter.name!!.asString()
-        val type = parameter.type.resolve().toTypeName(typeParameterResolver)
+        val type = parameter.type.toTypeName(typeParameterResolver)
 
         ParameterSpec.Companion.builder(name, type)
             .build()
