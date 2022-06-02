@@ -28,7 +28,7 @@ data class ProcessableFunction(
             return ProcessableFunction(
                 declaration = declaration,
                 name = declaration.simpleName.asString(),
-                returnType = declaration.returnType!!.resolve().toTypeName(typeParameterResolver),
+                returnType = declaration.returnType!!.toTypeName(typeParameterResolver),
                 isSuspend = declaration.modifiers.contains(Modifier.SUSPEND),
                 typeVariables = declaration.typeParameters
                     .map { it.toTypeVariableName(typeParameterResolver) },
