@@ -27,7 +27,8 @@ data class ProcessableType(
         private fun fromDeclaration(declaration: KSClassDeclaration, usages: List<KSFile>, stubsUnitByDefault: Boolean): ProcessableType {
             val sourceClassName = declaration.toClassName()
             val simpleNames = sourceClassName.simpleNames.dropLast(1) + "${sourceClassName.simpleName}Mock"
-            val mockClassName = ClassName(sourceClassName.packageName, *simpleNames.toTypedArray())
+            val simpleName = simpleNames.joinToString("_")
+            val mockClassName = ClassName(sourceClassName.packageName, simpleName)
 
             val typeParameterResolver = declaration.typeParameters
                 .toTypeParameterResolver()

@@ -1,6 +1,5 @@
 package io.mockative.kotlinpoet
 
-import com.google.devtools.ksp.isInternal
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import io.mockative.KCLASS
@@ -24,7 +23,7 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
         .build()
 
     val modifiers = buildList {
-        if (declaration.isInternal()) {
+        if (declaration.isEffectivelyInternal()) {
             add(KModifier.INTERNAL)
         }
     }
@@ -47,7 +46,7 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
         .build()
 
     val modifiers = buildList {
-        if (declaration.isInternal()) {
+        if (declaration.isEffectivelyInternal()) {
             add(KModifier.INTERNAL)
         }
     }
