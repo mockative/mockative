@@ -17,4 +17,8 @@ internal class GitHubService(
             api.repository(id)
         }
     }
+
+    interface NestedAPI {
+        fun foo(): String
+    }
 }
