@@ -1,10 +1,8 @@
 name: Build
 
 on:
+  workflow_dispatch:
   pull_request:
-  push:
-    branches:
-      - main
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process
