@@ -25,9 +25,15 @@ class GivenBuilder<T : Any>(private val receiver: T) {
     fun <V> setter(property: KMutableProperty<V>): GivenSetterBuilder<V> = GivenSetterBuilder(receiver.asMockable(), property.name)
     fun <V> setter(property: String): GivenSetterBuilder<V> = GivenSetterBuilder(receiver.asMockable(), property)
 
+    fun <R> function(name: String): GivenFunctionBuilder<R> = GivenFunctionBuilder(receiver.asMockable(), name)
+    fun <R> function(function: KFunction<R>): GivenFunctionBuilder<R> = GivenFunctionBuilder(receiver.asMockable(), function.name)
+
     fun <R, F> function(function: F): GivenFunction0Builder<R> where F : () -> R, F : KFunction<R> = GivenFunction0Builder(receiver.asMockable(), function)
     fun <R, F> function(function: F, @Suppress("unused") type: KFunction0): GivenFunction0Builder<R> where F : () -> R, F : KFunction<R> = GivenFunction0Builder(receiver.asMockable(), function)
 #functions#
+
+    fun <R> suspendFunction(name: String): GivenSuspendFunctionBuilder<R> = GivenSuspendFunctionBuilder(receiver.asMockable(), name)
+    fun <R> suspendFunction(function: KFunction<R>): GivenSuspendFunctionBuilder<R> = GivenSuspendFunctionBuilder(receiver.asMockable(), function.name)
 
     fun <R, F> suspendFunction(function: F): GivenSuspendFunction0Builder<R> where F : suspend () -> R, F : KFunction<R> = GivenSuspendFunction0Builder(receiver.asMockable(), function)
     fun <R, F> suspendFunction(function: F, @Suppress("unused") type: KFunction0): GivenSuspendFunction0Builder<R> where F : suspend () -> R, F : KFunction<R> = GivenSuspendFunction0Builder(receiver.asMockable(), function)

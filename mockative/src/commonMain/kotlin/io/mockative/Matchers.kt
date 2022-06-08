@@ -3,6 +3,10 @@ package io.mockative
 import io.mockative.matchers.*
 import kotlin.reflect.KClass
 
+inline fun wildcard(): WildcardMatcher<*> {
+    return WildcardMatcher<Any?>()
+}
+
 inline fun <reified T> anything(): AnythingMatcher<T> {
     return AnythingMatcher()
 }

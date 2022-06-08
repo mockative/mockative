@@ -28,12 +28,14 @@ class VerifyThatBuilder<T : Any>(private val receiver: T) {
 
 
     fun function(function: String): VerifyFunctionBuilder = VerifyFunctionBuilder(receiver.asMockable(), function)
+    fun <R> function(function: KFunction<R>): VerifyFunctionBuilder = VerifyFunctionBuilder(receiver.asMockable(), function.name)
 
     fun <R, F> function(function: F): Verification where F : () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
     fun <R, F> function(function: F, type: KFunction0): Verification where F : () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
 
 #functions#
     fun suspendFunction(function: String): VerifyFunctionBuilder = VerifyFunctionBuilder(receiver.asMockable(), function)
+    fun <R> suspendFunction(function: KFunction<R>): VerifyFunctionBuilder = VerifyFunctionBuilder(receiver.asMockable(), function.name)
 
     fun <R, F> suspendFunction(function: F): Verification where F : suspend () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
     fun <R, F> suspendFunction(function: F, type: KFunction0): Verification where F : suspend () -> R, F : KFunction<R> = Verification(receiver.asMockable(), Expectation.Function(function.name, SpecificArgumentsMatcher(emptyList())))
