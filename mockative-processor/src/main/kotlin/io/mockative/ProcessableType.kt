@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.ksp.*
+import io.mockative.ksp.isFromAny
 
 @OptIn(KotlinPoetKspPreview::class)
 data class ProcessableType(
@@ -24,7 +25,11 @@ data class ProcessableType(
 ) {
     companion object {
         @OptIn(KotlinPoetKspPreview::class)
-        private fun fromDeclaration(declaration: KSClassDeclaration, usages: List<KSFile>, stubsUnitByDefault: Boolean): ProcessableType {
+        private fun fromDeclaration(
+            declaration: KSClassDeclaration,
+            usages: List<KSFile>,
+            stubsUnitByDefault: Boolean
+        ): ProcessableType {
             val sourceClassName = declaration.toClassName()
             val simpleNames = sourceClassName.simpleNames.dropLast(1) + "${sourceClassName.simpleName}Mock"
             val simpleName = simpleNames.joinToString("_")
@@ -35,6 +40,8 @@ data class ProcessableType(
 
             val functions = declaration.getAllFunctions()
                 .filter { it.isPublic() }
+                // Functions from Any are manually implemented in [Mockable]
+                .filterNot { it.isFromAny() }
                 .map { ProcessableFunction.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 
@@ -63,7 +70,6 @@ data class ProcessableType(
             return processableType
         }
 
-        @OptIn(KotlinPoetKspPreview::class)
         fun fromResolver(resolver: Resolver, stubsUnitByDefault: Boolean): List<ProcessableType> {
             return resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
                 .mapNotNull { symbol -> symbol as? KSPropertyDeclaration }
