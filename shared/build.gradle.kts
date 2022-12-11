@@ -11,7 +11,7 @@ version = "1.0.0"
 group = "io.mockative"
 
 kotlin {
-    js {
+    js(IR) {
         browser()
         nodejs()
     }
