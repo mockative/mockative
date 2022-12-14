@@ -6,7 +6,6 @@ on:
     types: [ created ]
 
 env:
-  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.compiler.execution.strategy=in-process
   SONATYPE_BASE_URL: https://s01.oss.sonatype.org/service/local/
 
 jobs:
