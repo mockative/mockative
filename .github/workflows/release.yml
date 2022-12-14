@@ -27,11 +27,11 @@ jobs:
           description: Created by Release (Create staging repository) for mockative/mockative
 
   publish-on-macos:
-    runs-on: macos-11
+    runs-on: macos-12
     needs:
       - create-staging-repository
     env:
-      DEVELOPER_DIR: /Applications/Xcode_13.2.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -71,7 +71,7 @@ jobs:
 
   macos-host-check:
     name: Check on macOS
-    runs-on: macos-11
+    runs-on: macos-12
     needs:
       - create-staging-repository
       - publish-on-macos
