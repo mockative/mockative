@@ -11,7 +11,7 @@ version = "1.0.0"
 group = "io.mockative"
 
 kotlin {
-    js {
+    js(IR) {
         browser()
         nodejs()
     }
@@ -36,7 +36,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
             }
         }
         val commonTest by getting {
@@ -79,6 +79,7 @@ kotlin {
 
 android {
     compileSdk = 31
+    namespace = "io.mockative"
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdk = 21
@@ -93,8 +94,8 @@ android {
     }
 
     dependencies {
-        androidTestImplementation("androidx.test:runner:1.4.0")
-        androidTestUtil("androidx.test:orchestrator:1.4.0")
+        androidTestImplementation("androidx.test:runner:1.5.1")
+        androidTestUtil("androidx.test:orchestrator:1.4.2")
     }
 }
 
