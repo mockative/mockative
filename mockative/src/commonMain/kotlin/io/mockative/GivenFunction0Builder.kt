@@ -13,7 +13,7 @@ class GivenFunction0Builder<R>(private val mock: Mockable, private val function:
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnyResultBuilder<R> {
         fun then(block: () -> R) {
             val expectation = Expectation.Function(function.name, arguments)
-            val stub = BlockingStub(expectation) { args ->
+            val stub = BlockingStub(expectation) { _ ->
                 block()
             }
             mock.addBlockingStub(stub)
