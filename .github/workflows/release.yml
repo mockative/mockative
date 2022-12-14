@@ -50,7 +50,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 16
+          java-version: 17
 
       - name: Initialize Gradle
         run: ./gradlew
@@ -93,7 +93,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 16
+          java-version: 17
 
       - name: Check
         run: |
