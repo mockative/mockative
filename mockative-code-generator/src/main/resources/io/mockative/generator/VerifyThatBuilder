@@ -5,6 +5,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
+@Suppress("UNUSED", "UNUSED_PARAMETER")
 class VerifyThatBuilder<T : Any>(private val receiver: T) {
     fun <R> invocation(block: T.() -> R): Verification {
         val mock = receiver.asMockable()

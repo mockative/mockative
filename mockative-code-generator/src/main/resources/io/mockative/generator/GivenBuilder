@@ -4,6 +4,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty
 
+@Suppress("UNUSED", "UNUSED_PARAMETER")
 class GivenBuilder<T : Any>(private val receiver: T) {
     suspend fun <R> coroutine(block: suspend T.() -> R): SuspendResultBuilder<R> {
         val mock = receiver.asMockable()

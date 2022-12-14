@@ -14,7 +14,7 @@ class GivenSuspendFunction0Builder<R>(private val mock: Mockable, private val fu
     inner class ResultBuilder(private val arguments: ArgumentsMatcher) : AnySuspendResultBuilder<R> {
         fun then(block: suspend () -> R) {
             val expectation = Expectation.Function(function.name, arguments)
-            val stub = SuspendStub(expectation) { args ->
+            val stub = SuspendStub(expectation) { _ ->
                 block()
             }
             mock.addSuspendStub(stub)
