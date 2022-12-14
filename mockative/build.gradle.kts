@@ -23,7 +23,6 @@ kotlin {
 }
 
 afterEvaluate {
-    println("after evaluate")
     kotlin.targets["metadata"].compilations.forEach { compilation ->
         compilation.compileKotlinTask.doFirst {
             compilation.compileDependencyFiles = files(
