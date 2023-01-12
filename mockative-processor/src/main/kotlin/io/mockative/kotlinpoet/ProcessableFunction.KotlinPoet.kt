@@ -56,6 +56,12 @@ private fun ProcessableFunction.buildParameterSpecs() = declaration.parameters
         val name = parameter.name!!.asString()
         val type = parameter.type.toTypeNameMockative(typeParameterResolver)
 
-        ParameterSpec.Companion.builder(name, type)
+        val modifiers = buildList {
+            if (parameter.isVararg) {
+                add(KModifier.VARARG)
+            }
+        }
+
+        ParameterSpec.builder(name, type, modifiers)
             .build()
     }
