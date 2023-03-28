@@ -17,6 +17,8 @@ internal interface GitHubAPI {
 
     fun getEvent(list: List<*>)
 
+    fun getObject(`object`: String)
+
     fun doList(list: MyList<Repository>)
 
     fun doMaps(map: MyStringMap<Repository>)
