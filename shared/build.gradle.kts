@@ -47,16 +47,16 @@ kotlin {
             }
         }
 
-        val androidAndroidTest by getting {
+        val androidMain by getting
+        val androidUnitTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
             }
         }
 
-        val androidMain by getting
-        val androidTest by getting {
-            dependsOn(androidAndroidTest)
+        val androidInstrumentedTest by getting {
+            dependsOn(androidUnitTest)
         }
 
         val iosMain by getting
@@ -65,7 +65,7 @@ kotlin {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
             }
 
-            kotlin.srcDir(File(buildDir, "generated/ksp/ios/iosTest/kotlin"))
+//            kotlin.srcDir(File(buildDir, "generated/ksp/ios/iosTest/kotlin"))
         }
 
         val jsMain by getting
@@ -77,13 +77,16 @@ kotlin {
     }
 }
 
+@Suppress("UnstableApiUsage")
 android {
-    compileSdk = 31
+    compileSdk = 33
     namespace = "io.mockative"
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+
+//    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+
     defaultConfig {
         minSdk = 21
-        targetSdk = 31
+        targetSdk = 33
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
@@ -94,7 +97,7 @@ android {
     }
 
     dependencies {
-        androidTestImplementation("androidx.test:runner:1.5.1")
+        androidTestImplementation("androidx.test:runner:1.5.2")
         androidTestUtil("androidx.test:orchestrator:1.4.2")
     }
 }

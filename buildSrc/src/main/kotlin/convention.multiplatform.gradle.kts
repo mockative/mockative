@@ -22,6 +22,7 @@ kotlin {
     watchosX86()
     watchosX64()
     watchosSimulatorArm64()
+    watchosDeviceArm64()
 
     tvosArm64()
     tvosX64()
@@ -71,6 +72,7 @@ kotlin {
         val watchosX86Main by getting { dependsOn(watchosMain) }
         val watchosX64Main by getting { dependsOn(watchosMain) }
         val watchosSimulatorArm64Main by getting { dependsOn(watchosMain) }
+        val watchosDeviceArm64Main by getting { dependsOn(watchosMain) }
 
         // tvOS
         val tvosMain by creating { dependsOn(darwinMain) }
