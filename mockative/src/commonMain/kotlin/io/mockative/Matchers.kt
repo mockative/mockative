@@ -7,7 +7,7 @@ inline fun wildcard(): WildcardMatcher<*> {
     return WildcardMatcher<Any?>()
 }
 
-inline fun <reified T> anything(): AnythingMatcher<T> {
+fun <T> anything(): AnythingMatcher<T> {
     return AnythingMatcher()
 }
 
