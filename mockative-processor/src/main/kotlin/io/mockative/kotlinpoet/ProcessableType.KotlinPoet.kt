@@ -28,14 +28,20 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
         }
     }
 
+    val functionTypeVariables = typeVariables.map { it.withoutVariance() }
+
     return FunSpec.builder("mock")
         .addModifiers(modifiers)
-        .addTypeVariables(typeVariables)
+        .addTypeVariables(functionTypeVariables)
         .addParameter(type)
         .returns(parameterizedSourceClassName)
         .addStatement("return %T()", parameterizedMockClassName)
         .addOriginatingKSFiles(usages)
         .build()
+}
+
+private fun TypeVariableName.withoutVariance(): TypeVariableName {
+    return TypeVariableName(name = name, bounds = bounds)
 }
 
 internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
