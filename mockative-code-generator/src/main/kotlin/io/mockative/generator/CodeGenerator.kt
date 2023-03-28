@@ -104,7 +104,7 @@ internal class CodeGenerator(outputPath: String) {
             "type-param-list" to typeParameterCount.joinToString(", ") { "P$it" },
             "reified-type-param-list" to typeParameterCount.joinToString(", ") { "reified P$it" },
             "count" to "$count",
-            "with.parameters" to typeParameterCount.joinToString(", ") { "p$it: Matcher<P$it>" },
+            "with.parameters" to typeParameterCount.joinToString(", ") { "p$it: Matcher<P$it> = anything()" },
             "with.arguments" to typeParameterCount.joinToString(", ") { "p$it" },
             "then.arguments" to typeParameterCount.joinToString(", ") { "args[${it - 1}] as P${it}" },
             "thenInvoke.underscores" to typeParameterCount.joinToString(", ") { "_" }

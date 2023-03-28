@@ -126,4 +126,16 @@ internal class GitHubServiceMockTests {
         verify(github).coroutine { repository(id) }
             .wasInvoked(exactly = once)
     }
+
+    @Test
+    fun testDefaultMatchers() {
+        given(github).function(github::thing)
+            .whenInvokedWith(p2 = eq(3))
+            .thenDoNothing()
+
+        github.thing("a", 3, Repository("mockative", "mockative"))
+
+        verify(github).function(github::thing)
+            .with(p2 = eq(3))
+    }
 }
