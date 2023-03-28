@@ -61,11 +61,15 @@ kotlin {
 
         val iosMain by getting
         val iosTest by getting {
+            dependencies {
+                implementation(project(":mockative"))
+            }
+
             languageSettings {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
             }
 
-//            kotlin.srcDir(File(buildDir, "generated/ksp/ios/iosTest/kotlin"))
+            kotlin.srcDir(File(buildDir, "generated/ksp/ios/iosTest/kotlin"))
         }
 
         val jsMain by getting

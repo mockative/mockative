@@ -1,5 +1,6 @@
 package io.mockative.kotlinpoet
 
+import com.google.devtools.ksp.symbol.KSName
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import io.mockative.INVOCATION_FUNCTION
@@ -38,7 +39,7 @@ private fun ProcessableFunction.buildModifiers() = buildList {
 }
 
 private fun ProcessableFunction.buildArgumentList(): CodeBlock {
-    val argumentsListFormat = declaration.parameters.joinToString(", ") { "%L" }
+    val argumentsListFormat = declaration.parameters.joinToString(", ") { "`%L`" }
     val arguments = declaration.parameters.map { it.name!!.asString() }
 
     val argumentsListValues = CodeBlock.builder()
