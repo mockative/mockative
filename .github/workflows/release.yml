@@ -102,28 +102,28 @@ jobs:
             -Psonatype.password='${{ secrets.SONATYPE_PASSWORD }}' \
             -Psonatype.repository='${{ needs.create-staging-repository.outputs.repository-id }}'
 
-  close-staging-repository:
-    runs-on: ubuntu-latest
-    needs:
-      - create-staging-repository
-      - macos-host-check
-    if: ${{ always() && needs.create-staging-repository.result == 'success' }}
-    steps:
-      - name: Discard
-        if: ${{ needs.macos-host-check.result != 'success' }}
-        uses: nexus-actions/drop-nexus-staging-repo@v1
-        with:
-          username: ${{ secrets.SONATYPE_USERNAME }}
-          password: ${{ secrets.SONATYPE_PASSWORD }}
-          base_url: ${{ env.SONATYPE_BASE_URL }}
-          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
-
-      - name: Close
-        if: ${{ needs.macos-host-check.result == 'success' }}
-        uses: nexus-actions/release-nexus-staging-repo@v1.2
-        with:
-          username: ${{ secrets.SONATYPE_USERNAME }}
-          password: ${{ secrets.SONATYPE_PASSWORD }}
-          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
-          base_url: ${{ env.SONATYPE_BASE_URL }}
-          close_only: true
+#  close-staging-repository:
+#    runs-on: ubuntu-latest
+#    needs:
+#      - create-staging-repository
+#      - macos-host-check
+#    if: ${{ always() && needs.create-staging-repository.result == 'success' }}
+#    steps:
+#      - name: Discard
+#        if: ${{ needs.macos-host-check.result != 'success' }}
+#        uses: nexus-actions/drop-nexus-staging-repo@v1
+#        with:
+#          username: ${{ secrets.SONATYPE_USERNAME }}
+#          password: ${{ secrets.SONATYPE_PASSWORD }}
+#          base_url: ${{ env.SONATYPE_BASE_URL }}
+#          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
+#
+#      - name: Close
+#        if: ${{ needs.macos-host-check.result == 'success' }}
+#        uses: nexus-actions/release-nexus-staging-repo@v1.2
+#        with:
+#          username: ${{ secrets.SONATYPE_USERNAME }}
+#          password: ${{ secrets.SONATYPE_PASSWORD }}
+#          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
+#          base_url: ${{ env.SONATYPE_BASE_URL }}
+#          close_only: true
