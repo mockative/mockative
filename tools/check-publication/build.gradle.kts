@@ -12,7 +12,7 @@ kotlin {
 }
 
 android {
-    compileSdk = 31
+    compileSdk = 33
 }
 
 inline fun <reified T> getProperty(key: String): T {
@@ -45,5 +45,10 @@ kotlin {
 }
 
 dependencies {
-    ksp("io.mockative:mockative-processor:$version")
+    configurations
+        .filter { it.name.startsWith("ksp") && it.name.contains("Test") }
+        .forEach {
+            println("$it")
+            add(it.name, "io.mockative:mockative-processor:$version")
+        }
 }
