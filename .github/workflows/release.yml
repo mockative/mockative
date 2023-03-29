@@ -109,14 +109,14 @@ jobs:
       - macos-host-check
     if: ${{ always() && needs.create-staging-repository.result == 'success' }}
     steps:
-      - name: Discard
-        if: ${{ needs.macos-host-check.result != 'success' }}
-        uses: nexus-actions/drop-nexus-staging-repo@v1
-        with:
-          username: ${{ secrets.SONATYPE_USERNAME }}
-          password: ${{ secrets.SONATYPE_PASSWORD }}
-          base_url: ${{ env.SONATYPE_BASE_URL }}
-          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
+#      - name: Discard
+#        if: ${{ needs.macos-host-check.result != 'success' }}
+#        uses: nexus-actions/drop-nexus-staging-repo@v1
+#        with:
+#          username: ${{ secrets.SONATYPE_USERNAME }}
+#          password: ${{ secrets.SONATYPE_PASSWORD }}
+#          base_url: ${{ env.SONATYPE_BASE_URL }}
+#          staging_repository_id: ${{ needs.create-staging-repository.outputs.repository-id }}
 
       - name: Close
         if: ${{ needs.macos-host-check.result == 'success' }}
