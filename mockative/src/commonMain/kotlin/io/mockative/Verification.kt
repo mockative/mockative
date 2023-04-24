@@ -15,16 +15,16 @@ val Int.time: Times
     get() = Times(this)
 
 class Verification(private val receiver: Mockable, private val expectation: Expectation) {
-    fun wasInvoked(atLeast: Times = once, atMost: Times? = null) {
-        receiver.verify(RangeVerifier(expectation, atLeast.value, atMost?.value))
+    fun wasInvoked() {
+        receiver.verify(RangeVerifier(expectation, atLeast = 1, atMost = null))
+    }
+
+    fun wasInvoked(atLeast: Times? = null, atMost: Times? = null) {
+        receiver.verify(RangeVerifier(expectation, atLeast?.value, atMost?.value))
     }
 
     fun wasInvoked(exactly: Times) {
         receiver.verify(ExactVerifier(expectation, exactly.value))
-    }
-
-    fun wasMaybeInvoked(atMost: Times) {
-        receiver.verify(RangeVerifier(expectation, null, atMost.value))
     }
 
     fun wasNotInvoked() {
