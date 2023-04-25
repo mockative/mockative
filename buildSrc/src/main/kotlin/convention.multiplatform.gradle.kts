@@ -7,7 +7,7 @@ plugins {
 kotlin {
     jvm()
 
-    js(BOTH) {
+    js(IR) {
         browser()
         nodejs()
     }
@@ -18,7 +18,6 @@ kotlin {
 
     watchosArm32()
     watchosArm64()
-    watchosX86()
     watchosX64()
     watchosSimulatorArm64()
     watchosDeviceArm64()
@@ -31,13 +30,9 @@ kotlin {
     macosArm64()
 
     linuxArm64()
-    linuxArm32Hfp()
     linuxX64()
 
     mingwX64()
-    mingwX86()
-
-    wasm32()
 
     @OptIn(ExperimentalWasmDsl::class)
     wasm {
@@ -75,7 +70,6 @@ kotlin {
 
         val watchosArm32Main by getting { dependsOn(watchosMain) }
         val watchosArm64Main by getting { dependsOn(watchosMain) }
-        val watchosX86Main by getting { dependsOn(watchosMain) }
         val watchosX64Main by getting { dependsOn(watchosMain) }
         val watchosSimulatorArm64Main by getting { dependsOn(watchosMain) }
         val watchosDeviceArm64Main by getting { dependsOn(watchosMain) }
@@ -97,19 +91,15 @@ kotlin {
         val linuxMain by creating { dependsOn(nativeMain) }
 
         val linuxArm64Main by getting { dependsOn(linuxMain) }
-        val linuxArm32HfpMain by getting { dependsOn(linuxMain) }
         val linuxX64Main by getting { dependsOn(linuxMain) }
 
         // mingw (Windows)
         val mingwMain by creating { dependsOn(nativeMain) }
 
         val mingwX64Main by getting { dependsOn(mingwMain) }
-        val mingwX86Main by getting { dependsOn(mingwMain) }
 
         // wasm
         val wasmMain by getting { dependsOn(commonMain) }
-
-        val wasm32Main by getting { dependsOn(wasmMain) }
     }
 }
 
