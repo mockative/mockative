@@ -1,5 +1,4 @@
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
     kotlin("multiplatform")
@@ -39,6 +38,13 @@ kotlin {
     mingwX86()
 
     wasm32()
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasm {
+        browser()
+        nodejs()
+        generateTypeScriptDefinitions()
+    }
 
     @Suppress("UNUSED_VARIABLE")
     sourceSets {
@@ -101,8 +107,23 @@ kotlin {
         val mingwX86Main by getting { dependsOn(mingwMain) }
 
         // wasm
-        val wasmMain by creating { dependsOn(commonMain) }
+        val wasmMain by getting { dependsOn(commonMain) }
 
         val wasm32Main by getting { dependsOn(wasmMain) }
+    }
+}
+
+// https://youtrack.jetbrains.com/issue/KT-55751
+val kotlinFrameworkBuildTypeAttribute = Attribute.of("kotlinFrameworkBuildType", String::class.java)
+
+configurations.configureEach {
+    if (name == "releaseFrameworkIosFat") {
+        attributes {
+            attribute(kotlinFrameworkBuildTypeAttribute, "Release")
+        }
+    } else if (name == "debugFrameworkIosFat") {
+        attributes {
+            attribute(kotlinFrameworkBuildTypeAttribute, "Debug")
+        }
     }
 }
