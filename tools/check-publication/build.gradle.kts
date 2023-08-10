@@ -8,7 +8,7 @@ plugins {
 version = findProperty("project.version") as String
 
 kotlin {
-    android()
+    androidTarget()
 }
 
 android {
