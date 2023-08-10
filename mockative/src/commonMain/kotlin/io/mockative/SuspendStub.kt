@@ -18,4 +18,15 @@ internal class SuspendStub(val expectation: Expectation, private val invoke: sus
             invocations.add(invocation)
         }
     }
+
+    override fun toString(): String {
+        return buildString {
+            appendLine("$expectation")
+            appendLine("  Invocations")
+
+            invocations.forEach {
+                appendLine(it.toString().prependIndent("    "))
+            }
+        }
+    }
 }

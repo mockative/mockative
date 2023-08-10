@@ -2,12 +2,10 @@ package io.mockative
 
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.TypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
 import io.mockative.kotlinpoet.toTypeNameMockative
 
-@OptIn(KotlinPoetKspPreview::class)
 data class ProcessableProperty(
     val declaration: KSPropertyDeclaration,
     val name: String,
@@ -15,7 +13,6 @@ data class ProcessableProperty(
     val typeParameterResolver: TypeParameterResolver
 ) {
     companion object {
-        @OptIn(KotlinPoetKspPreview::class)
         fun fromDeclaration(
             declaration: KSPropertyDeclaration,
             parentTypeParameterResolver: TypeParameterResolver

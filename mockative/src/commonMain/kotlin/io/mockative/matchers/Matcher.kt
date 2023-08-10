@@ -1,5 +1,7 @@
 package io.mockative.matchers
 
-interface Matcher<in T> {
+interface Matcher<T> {
+    val defaultValue: T
+
     fun matches(value: Any?): Boolean
 }

@@ -1,6 +1,11 @@
 package io.mockative
 
-import kotlin.test.*
+import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 
 internal class GitHubServiceMockTests {
 
@@ -12,11 +17,11 @@ internal class GitHubServiceMockTests {
 
     @AfterTest
     fun validateMocks() {
-        verify(github).hasNoUnmetExpectations()
+        verifyNoUnmetExpectations(github)
     }
 
     @Test
-    fun whenCallingCreate_thenCreateIsCalled() = runBlockingTest {
+    fun whenCallingCreate_thenCreateIsCalled() = runTest {
         // given
         val repository = Repository(id = "mockative/mockative", name = "Mockative")
 
@@ -24,17 +29,17 @@ internal class GitHubServiceMockTests {
         service.create(repository)
 
         // then
-        verify(github).coroutine { create(repository) }
+        coVerify { github.create(repository) }
             .wasInvoked(atLeast = once)
     }
 
     @Test
-    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed() = runBlockingTest {
+    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed() = runTest {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        given(github).coroutine { repository(id) }
+        coGiven { github.repository(id) }
             .thenReturn(repository)
 
         // when
@@ -45,12 +50,12 @@ internal class GitHubServiceMockTests {
     }
 
     @Test
-    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed_dispatched() = dispatchBlockingTest {
+    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed_dispatched() = runTest {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        given(github).coroutine { repository(id) }
+        coGiven { github.repository(eq(id)) }
             .thenReturn(repository)
 
         // when
@@ -61,30 +66,30 @@ internal class GitHubServiceMockTests {
     }
 
     @Test
-    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsCalled() = runBlockingTest {
+    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsCalled() = runTest {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        given(github).coroutine { repository(id) }
+        coGiven { github.repository(id) }
             .thenReturn(repository)
 
         // when
         service.repository(id)
 
         // then
-        verify(github).coroutine { repository(id) }
+        coVerify { github.repository(id) }
             .wasInvoked(exactly = once)
 
-        verify(github).hasNoUnverifiedExpectations()
+        verifyNoUnmetExpectations(github)
     }
 
     @Test
-    fun givenSetupOfSuspendingCommandToThrow_whenCallingCommand_thenMockIsCalled() = runBlockingTest {
+    fun givenSetupOfSuspendingCommandToThrow_whenCallingCommand_thenMockIsCalled() = runTest {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
 
-        given(github).coroutine { repository(id) }
+        coGiven { github.repository(id) }
             .thenThrow(Error("Expected exception"))
 
         // when
@@ -93,28 +98,28 @@ internal class GitHubServiceMockTests {
         // then
         assertNotNull(actual.exceptionOrNull())
 
-        verify(github).coroutine { repository(id) }
+        coVerify { github.repository(id) }
             .wasInvoked(exactly = once)
     }
 
     @Test
-    fun testStubOverrides() = runBlockingTest {
+    fun testStubOverrides() = runTest {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val mockative = Repository(id, "Mockative")
 
-        given(github).coroutine { repository(id) }
+        coGiven { github.repository(id) }
             .thenReturn(mockative)
 
         val firstRepository = service.repository(id)
 
         assertSame(mockative, firstRepository)
 
-        verify(github).coroutine { repository(id) }
+        coVerify { github.repository(id) }
             .wasInvoked(exactly = once)
 
         val mockito = Repository(id, "Mockito")
-        given(github).coroutine { repository(id) }
+        coGiven { github.repository(id) }
             .thenReturn(mockito)
 
         // When
@@ -123,19 +128,22 @@ internal class GitHubServiceMockTests {
         // Then
         assertSame(mockito, secondRepository)
 
-        verify(github).coroutine { repository(id) }
+        coVerify { github.repository(id) }
             .wasInvoked(exactly = once)
     }
 
     @Test
     fun testDefaultMatchers() {
-        given(github).function(github::thing)
-            .whenInvokedWith(p2 = eq(3))
+        given { github.thing(any(""), eq(3), anyRepository()) }
             .thenDoNothing()
 
         github.thing("a", 3, Repository("mockative", "mockative"))
 
-        verify(github).function(github::thing)
-            .with(p2 = eq(3))
+        verify { github.thing(any(""), eq(3), anyRepository()) }
+            .wasInvoked()
     }
+}
+
+fun anyRepository(): Repository {
+    return Repository("", "")
 }

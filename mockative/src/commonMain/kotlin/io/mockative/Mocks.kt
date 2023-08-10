@@ -14,4 +14,4 @@ import kotlin.reflect.KClass
  * @param type the type to mock
  * @return an instance of the mocked type
  */
-fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockError(type)
+fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)

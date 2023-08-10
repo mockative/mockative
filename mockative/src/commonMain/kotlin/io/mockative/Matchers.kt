@@ -1,48 +1,62 @@
 package io.mockative
 
 import io.mockative.matchers.*
-import kotlin.reflect.KClass
+import kotlin.jvm.JvmName
+import kotlin.native.concurrent.ThreadLocal
 
-inline fun wildcard(): WildcardMatcher<*> {
-    return WildcardMatcher<Any?>()
+@ThreadLocal
+object Matchers {
+    private val matchers = mutableListOf<Matcher<*>>()
+
+    val size: Int
+        get() = matchers.size
+
+    fun <T> enqueue(matcher: Matcher<T>): T {
+        matchers.add(matcher)
+        return matcher.defaultValue
+    }
+
+    fun dequeue(): Matcher<*> {
+        return matchers.removeFirst()
+    }
+
+    fun clear() {
+        matchers.clear()
+    }
 }
 
-fun <T> anything(): AnythingMatcher<T> {
-    return AnythingMatcher()
+inline fun <reified T> error(): T {
+    throw IllegalStateException("This function may not be called.")
 }
 
-inline fun <reified T> any(): AnyMatcher<T> {
-    return AnyMatcher(T::class)
+inline fun <reified T> any(defaultValue: T): T {
+    return Matchers.enqueue(AnyMatcher(defaultValue))
 }
 
-fun <R : Any, T : R> anyInstanceOf(type: KClass<T>): AnyMatcher<R> {
-    return AnyMatcher(type)
+inline fun <reified T> eq(value: T): T {
+    return Matchers.enqueue(EqualsMatcher(value))
 }
 
-inline fun <reified T> eq(value: T): EqualsMatcher<T> {
-    return EqualsMatcher(value)
+inline fun <reified T> oneOf(vararg values: T): T {
+    return Matchers.enqueue(OneOfMatcher(values.toList()))
 }
 
-inline fun <reified T> oneOf(vararg values: T): OneOfMatcher<T> {
-    return OneOfMatcher(values.toList())
+inline fun <reified T : Comparable<T>> gt(value: T): T {
+    return Matchers.enqueue(ComparableMatcher(T::class, value, ">") { a, b -> a > b })
 }
 
-inline fun <reified T : Comparable<T>> gt(value: T): ComparableMatcher<T> {
-    return ComparableMatcher(T::class, value, ">") { a, b -> a > b }
+inline fun <reified T : Comparable<T>> gte(value: T): T {
+    return Matchers.enqueue(ComparableMatcher(T::class, value, ">=") { a, b -> a >= b })
 }
 
-inline fun <reified T : Comparable<T>> gte(value: T): ComparableMatcher<T> {
-    return ComparableMatcher(T::class, value, ">=") { a, b -> a >= b }
+inline fun <reified T : Comparable<T>> lt(value: T): T {
+    return Matchers.enqueue(ComparableMatcher(T::class, value, "<") { a, b -> a < b })
 }
 
-inline fun <reified T : Comparable<T>> lt(value: T): ComparableMatcher<T> {
-    return ComparableMatcher(T::class, value, "<") { a, b -> a < b }
+inline fun <reified T : Comparable<T>> lte(value: T): T {
+    return Matchers.enqueue(ComparableMatcher(T::class, value, "<=") { a, b -> a <= b })
 }
 
-inline fun <reified T : Comparable<T>> lte(value: T): ComparableMatcher<T> {
-    return ComparableMatcher(T::class, value, "<=") { a, b -> a <= b }
-}
-
-inline fun <reified T> matching(noinline predicate: (T) -> Boolean): PredicateMatcher<T> {
-    return PredicateMatcher(T::class, predicate)
+inline fun <reified T> matching(defaultValue: T, noinline predicate: (T) -> Boolean): T {
+    return Matchers.enqueue(PredicateMatcher(T::class, defaultValue, predicate))
 }

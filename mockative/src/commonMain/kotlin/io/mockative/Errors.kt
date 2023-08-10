@@ -2,9 +2,9 @@ package io.mockative
 
 import kotlin.reflect.KClass
 
-abstract class MockativeError(message: String) : Error(message)
+abstract class MockativeException(message: String) : Exception(message)
 
-class NoSuchMockError(type: KClass<*>) : MockativeError(
+class NoSuchMockException(type: KClass<*>) : MockativeException(
     buildString {
         appendLine("A mock for the type ${type.name} was not generated.")
         appendLine()
@@ -16,7 +16,7 @@ class NoSuchMockError(type: KClass<*>) : MockativeError(
     }
 )
 
-class ReceiverNotMockedError(receiver: Any) : MockativeError(
+class ReceiverNotMockedException(receiver: Any) : MockativeException(
     buildString {
         appendLine("Attempt to perform operation a non-mock instance of type ${receiver.getClassName()}.")
         appendLine()
@@ -28,13 +28,13 @@ class ReceiverNotMockedError(receiver: Any) : MockativeError(
     }
 )
 
-class ExactVerificationError(
+class ExactVerificationException(
     instance: Any,
     expected: Int,
     actual: Int,
     expectation: Expectation,
     invocations: List<Invocation>
-) : MockativeError(
+) : MockativeException(
     buildString {
         appendLine("A mock of type ${instance.getClassName()} was not invoked the expected number of times.")
         appendLine()
@@ -54,14 +54,14 @@ class ExactVerificationError(
     }
 )
 
-class RangeVerificationError(
+class RangeVerificationException(
     instance: Any,
     atLeast: Int?,
     atMost: Int?,
     actual: Int,
     expectation: Expectation,
     invocations: List<Invocation>
-) : MockativeError(
+) : MockativeException(
     buildString {
         appendLine("A mock of type ${instance.getClassName()} was not invoked the expected number of times.")
         appendLine()
@@ -89,7 +89,7 @@ class RangeVerificationError(
     }
 )
 
-class UnverifiedInvocationsError(instance: Any, invocations: List<Invocation>) : MockativeError(
+class UnverifiedInvocationsException(instance: Any, invocations: List<Invocation>) : MockativeException(
     buildString {
         appendLine(0, "A mock contains unverified invocations.")
         appendLine()
@@ -107,7 +107,7 @@ class UnverifiedInvocationsError(instance: Any, invocations: List<Invocation>) :
     }
 )
 
-class MockValidationError(instance: Any, expectations: List<Expectation>, invocations: List<Invocation>) : MockativeError(
+class MockValidationException(instance: Any, expectations: List<Expectation>, invocations: List<Invocation>) : MockativeException(
     buildString {
         appendLine("Validation of mock failed.")
         appendLine()
@@ -131,7 +131,7 @@ class MockValidationError(instance: Any, expectations: List<Expectation>, invoca
     }
 )
 
-class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeError(
+class MissingExpectationException(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeException(
     buildString {
         appendLine("A function was called without a matching expectation.")
         appendLine()
@@ -150,7 +150,7 @@ class MissingExpectationError(instance: Any, invocation: Invocation, isSuspend: 
     }
 )
 
-class InvalidExpectationError(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeError(
+class InvalidExpectationException(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeException(
     buildString {
         appendLine("A function was called without a matching expectation.")
         appendLine()
@@ -173,6 +173,10 @@ class InvalidExpectationError(instance: Any, invocation: Invocation, isSuspend: 
         appendLine(1, "")
     }
 )
+
+class MixedArgumentMatcherException : Exception("Mixing values and matchers like `eq()` or `any()` in the same function call is not supported.")
+
+class StubbingInProgressException(val receiver: Mockable, val invocation: Invocation) : Exception()
 
 private inline fun buildString(block: Appendable.() -> Unit): String {
     return StringBuilder().also { block(it) }.toString()

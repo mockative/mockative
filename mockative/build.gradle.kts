@@ -13,6 +13,12 @@ kotlin {
             kotlin.srcDirs("$buildDir/generated/mockative-code-generator")
         }
 
+        named("jvmMain") {
+            dependencies {
+                implementation("net.bytebuddy:byte-buddy:1.14.5")
+            }
+        }
+
         all {
             languageSettings {
                 optIn("kotlin.RequiresOptIn")

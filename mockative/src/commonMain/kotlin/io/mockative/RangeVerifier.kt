@@ -9,8 +9,8 @@ internal class RangeVerifier(
         val matchingInvocations = invocations.filter { expectation.matches(it) }
 
         val actual = matchingInvocations.size
-        if (actual < atLeast ?: 0 || atMost != null && actual > atMost) {
-            throw RangeVerificationError(instance, atLeast, atMost, actual, expectation, invocations)
+        if (actual < (atLeast ?: 0) || atMost != null && actual > atMost) {
+            throw RangeVerificationException(instance, atLeast, atMost, actual, expectation, invocations)
         }
 
         return matchingInvocations

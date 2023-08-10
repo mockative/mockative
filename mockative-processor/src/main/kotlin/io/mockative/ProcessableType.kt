@@ -11,7 +11,6 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.ksp.*
 import io.mockative.ksp.isFromAny
 
-@OptIn(KotlinPoetKspPreview::class)
 data class ProcessableType(
     val declaration: KSClassDeclaration,
     val sourceClassName: ClassName,
@@ -24,7 +23,6 @@ data class ProcessableType(
     val stubsUnitByDefault: Boolean,
 ) {
     companion object {
-        @OptIn(KotlinPoetKspPreview::class)
         private fun fromDeclaration(
             declaration: KSClassDeclaration,
             usages: List<KSFile>,

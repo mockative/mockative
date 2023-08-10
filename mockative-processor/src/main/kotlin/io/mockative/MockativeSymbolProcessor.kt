@@ -5,13 +5,11 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.mockative.kotlinpoet.buildMockFunSpec
 import io.mockative.kotlinpoet.buildMockTypeSpec
 import io.mockative.kotlinpoet.fullSimpleName
 
-@OptIn(KotlinPoetKspPreview::class)
 class MockativeSymbolProcessor(
     private val codeGenerator: CodeGenerator,
     private val options: Map<String, String>

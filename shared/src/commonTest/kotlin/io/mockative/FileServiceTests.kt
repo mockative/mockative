@@ -1,5 +1,6 @@
 package io.mockative
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,8 +18,7 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).function<File>(s3Client::getObjectSync)
-            .whenInvokedWith(eq(request), wildcard())
+        given { s3Client.getObjectSync<File>(eq(request), any { _ -> error() }) }
             .thenReturn(expected)
 
         // When
@@ -36,8 +36,7 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).function<File>("getObjectSync")
-            .whenInvokedWith(eq(request), wildcard())
+        given { s3Client.getObjectSync<File>(eq(request), any { _ -> error() }) }
             .thenReturn(expected)
 
         // When
@@ -48,15 +47,14 @@ class FileServiceTests {
     }
 
     @Test
-    fun givenGetObject_whenGettingFile_thenFileIsReturned() = runBlockingTest {
+    fun givenGetObject_whenGettingFile_thenFileIsReturned() = runTest {
         // Given
         val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
         val expected = File("the-body")
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).suspendFunction<File>(s3Client::getObject)
-            .whenInvokedWith(eq(request), wildcard())
+        coGiven { s3Client.getObject<File>(eq(request), any { _ -> error() }) }
             .thenReturn(expected)
 
         // When
@@ -67,15 +65,14 @@ class FileServiceTests {
     }
 
     @Test
-    fun givenGetObjectString_whenGettingFile_thenFileIsReturned() = runBlockingTest {
+    fun givenGetObjectString_whenGettingFile_thenFileIsReturned() = runTest {
         // Given
         val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
         val expected = File("the-body")
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).suspendFunction<File>("getObject")
-            .whenInvokedWith(eq(request), wildcard())
+        coGiven { s3Client.getObject<File>(eq(request), any { _ -> error() }) }
             .thenReturn(expected)
 
         // When

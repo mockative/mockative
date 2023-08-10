@@ -1,6 +1,9 @@
 package io.mockative.matchers
 
 class OneOfMatcher<T>(private val values: List<T>) : Matcher<T> {
+    override val defaultValue: T
+        get() = values.first()
+
     override fun matches(value: Any?): Boolean {
         return values.contains(value)
     }

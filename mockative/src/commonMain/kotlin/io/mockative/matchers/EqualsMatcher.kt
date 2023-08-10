@@ -1,6 +1,9 @@
 package io.mockative.matchers
 
 class EqualsMatcher<T>(private val expected: T) : Matcher<T> {
+    override val defaultValue: T
+        get() = expected
+
     override fun matches(value: Any?): Boolean {
         return expected == value
     }

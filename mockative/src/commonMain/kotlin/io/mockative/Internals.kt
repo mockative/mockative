@@ -7,4 +7,4 @@ internal val KClass<*>.name
 
 internal fun Any.getClassName() = this::class.name
 
-internal fun Any.asMockable(): Mockable = this as? Mockable ?: throw ReceiverNotMockedError(this)
+internal fun Any.asMockable(): Mockable = this as? Mockable ?: throw ReceiverNotMockedException(this)

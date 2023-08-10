@@ -9,7 +9,7 @@ internal class ExactVerifier(
 
         val actual = matchingInvocations.size
         if (actual != count) {
-            throw ExactVerificationError(instance, count, actual, expectation, invocations)
+            throw ExactVerificationException(instance, count, actual, expectation, invocations)
         }
 
         return matchingInvocations

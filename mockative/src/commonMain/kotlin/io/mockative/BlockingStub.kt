@@ -18,4 +18,15 @@ internal class BlockingStub(val expectation: Expectation, private val invoke: (A
             invocations.add(invocation)
         }
     }
+
+    override fun toString(): String {
+        return buildString {
+            appendLine("$expectation")
+            appendLine("  Invocations")
+
+            invocations.forEach {
+                appendLine(it.toString().prependIndent("    "))
+            }
+        }
+    }
 }
