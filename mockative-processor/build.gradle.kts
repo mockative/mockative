@@ -10,7 +10,7 @@ kotlin {
     jvm()
 
     sourceSets {
-        val jvmMain by getting {
+        named("jvmMain") {
             dependencies {
                 implementation(project(":mockative"))
 

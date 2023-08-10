@@ -11,12 +11,14 @@ version = "1.0.0"
 group = "io.mockative"
 
 kotlin {
+    jvmToolchain(17)
+
     js(IR) {
         browser()
         nodejs()
     }
 
-    android()
+    androidTarget()
 
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget = when {
         System.getenv("SDK_NAME")?.startsWith("iphoneos") == true -> ::iosArm64
@@ -34,12 +36,12 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        named("commonMain") {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
             }
         }
-        val commonTest by getting {
+        named("commonTest") {
             dependencies {
                 implementation(project(":mockative"))
                 implementation(kotlin("test-common"))
@@ -47,7 +49,7 @@ kotlin {
             }
         }
 
-        val androidMain by getting
+        named("androidMain")
         val androidUnitTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
@@ -55,12 +57,12 @@ kotlin {
             }
         }
 
-        val androidInstrumentedTest by getting {
+        named("androidInstrumentedTest") {
             dependsOn(androidUnitTest)
         }
 
-        val iosMain by getting
-        val iosTest by getting {
+//        named("iosMain")
+        named("iosTest") {
             dependencies {
                 implementation(project(":mockative"))
             }
@@ -72,8 +74,8 @@ kotlin {
             kotlin.srcDir(File(buildDir, "generated/ksp/ios/iosTest/kotlin"))
         }
 
-        val jsMain by getting
-        val jsTest by getting {
+//        named("jsMain")
+        named("jsTest") {
             dependencies {
                 implementation(kotlin("test-js"))
             }
@@ -90,7 +92,6 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
@@ -98,6 +99,11 @@ android {
         testOptions {
             execution = "ANDROIDX_TEST_ORCHESTRATOR"
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     dependencies {

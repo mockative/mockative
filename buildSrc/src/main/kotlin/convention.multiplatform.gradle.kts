@@ -102,18 +102,3 @@ kotlin {
         val wasmMain by getting { dependsOn(commonMain) }
     }
 }
-
-// https://youtrack.jetbrains.com/issue/KT-55751
-val kotlinFrameworkBuildTypeAttribute = Attribute.of("kotlinFrameworkBuildType", String::class.java)
-
-configurations.configureEach {
-    if (name == "releaseFrameworkIosFat") {
-        attributes {
-            attribute(kotlinFrameworkBuildTypeAttribute, "Release")
-        }
-    } else if (name == "debugFrameworkIosFat") {
-        attributes {
-            attribute(kotlinFrameworkBuildTypeAttribute, "Debug")
-        }
-    }
-}
