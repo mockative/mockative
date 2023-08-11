@@ -9,13 +9,13 @@ internal class CodeGenerator(outputPath: String) {
         outputDir.deleteRecursively()
         outputDir.mkdirs()
 
-        generateFiles("GivenFunctionBuilder") { count -> "GivenFunction${count}Builder.kt"}
-        generateFiles("GivenSuspendFunctionBuilder") { count -> "GivenSuspendFunction${count}Builder.kt"}
-        generateFiles("VerifyFunctionBuilder") { count -> "VerifyFunction${count}Builder.kt"}
+//        generateFiles("GivenFunctionBuilder") { count -> "GivenFunction${count}Builder.kt"}
+//        generateFiles("GivenSuspendFunctionBuilder") { count -> "GivenSuspendFunction${count}Builder.kt"}
+//        generateFiles("VerifyFunctionBuilder") { count -> "VerifyFunction${count}Builder.kt"}
 
-        generateKFunctions()
-        generateGivenBuilder()
-        generateVerifyThatBuilder()
+//        generateKFunctions()
+//        generateGivenBuilder()
+//        generateVerifyThatBuilder()
     }
 
     private fun generateKFunctions() {

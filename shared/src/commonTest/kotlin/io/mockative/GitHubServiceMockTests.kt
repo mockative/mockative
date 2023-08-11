@@ -12,8 +12,9 @@ internal class GitHubServiceMockTests {
     @Mock val github = mock(classOf<GitHubAPI>())
     @Mock val expected = mock(classOf<ExpectedAPI>())
     @Mock val nested = mock(classOf<GitHubService.NestedAPI>())
+    @Mock val configuration = mock(classOf<GitHubConfiguration>())
 
-    private val service = GitHubService(github, ApplicationDispatchers.Unconfined)
+    private val service = GitHubService(github, configuration, ApplicationDispatchers.Unconfined)
 
     @AfterTest
     fun validateMocks() {
@@ -39,7 +40,7 @@ internal class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        coGiven { github.repository(id) }
+        coEvery { github.repository(id) }
             .thenReturn(repository)
 
         // when
@@ -55,7 +56,7 @@ internal class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        coGiven { github.repository(eq(id)) }
+        coEvery { github.repository(eq(id)) }
             .thenReturn(repository)
 
         // when
@@ -71,7 +72,7 @@ internal class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val repository = Repository(id, "Mockative")
 
-        coGiven { github.repository(id) }
+        coEvery { github.repository(id) }
             .thenReturn(repository)
 
         // when
@@ -89,7 +90,7 @@ internal class GitHubServiceMockTests {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
 
-        coGiven { github.repository(id) }
+        coEvery { github.repository(id) }
             .thenThrow(Error("Expected exception"))
 
         // when
@@ -108,7 +109,7 @@ internal class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
         val mockative = Repository(id, "Mockative")
 
-        coGiven { github.repository(id) }
+        coEvery { github.repository(id) }
             .thenReturn(mockative)
 
         val firstRepository = service.repository(id)
@@ -119,7 +120,7 @@ internal class GitHubServiceMockTests {
             .wasInvoked(exactly = once)
 
         val mockito = Repository(id, "Mockito")
-        coGiven { github.repository(id) }
+        coEvery { github.repository(id) }
             .thenReturn(mockito)
 
         // When
@@ -133,17 +134,56 @@ internal class GitHubServiceMockTests {
     }
 
     @Test
-    fun testDefaultMatchers() {
-        given { github.thing(any(""), eq(3), anyRepository()) }
-            .thenDoNothing()
+    fun getToken() {
+        // Given
+        val token = "the-token"
+        every { configuration.token }.returns(token)
 
-        github.thing("a", 3, Repository("mockative", "mockative"))
+        // When
+        val result = service.getToken()
 
-        verify { github.thing(any(""), eq(3), anyRepository()) }
+        // Then
+        assertEquals(token, result)
+    }
+
+    @Test
+    fun setToken() {
+        // Given
+        val token = "the-token"
+        every { configuration.token = token }.doesNothing()
+
+        // When
+        service.setToken(token)
+
+        // Then
+        verify { configuration.token = token }
             .wasInvoked()
     }
-}
 
-fun anyRepository(): Repository {
-    return Repository("", "")
+    @Test
+    fun setTokenWithAny() {
+        // Given
+        val token = "the-token"
+        every { configuration.token = any() }.doesNothing()
+
+        // When
+        service.setToken(token)
+
+        // Then
+        verify { configuration.token = token }
+            .wasInvoked()
+    }
+
+    @Test
+    fun testDefaultMatchers() {
+//        given(github).function(github::thing)
+//            .whenInvokedWith(p2 = eq(3))
+//            .thenDoNothing()
+//
+//        github.thing("a", 3, Repository("mockative", "mockative"))
+//
+//        verify(github).function(github::thing)
+//            .with(p2 = eq(3))
+//            .wasInvoked()
+    }
 }

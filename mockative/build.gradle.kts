@@ -15,7 +15,8 @@ kotlin {
 
         named("jvmMain") {
             dependencies {
-                implementation("net.bytebuddy:byte-buddy:1.14.5")
+                implementation("org.objenesis:objenesis:3.3")
+                implementation("org.javassist:javassist:3.29.2-GA")
             }
         }
 

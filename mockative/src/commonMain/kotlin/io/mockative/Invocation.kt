@@ -24,7 +24,6 @@ sealed class Invocation {
             }
 
             if (arguments.size != Matchers.size) {
-                Matchers.clear()
                 throw MixedArgumentMatcherException()
             }
 
