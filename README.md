@@ -148,8 +148,7 @@ verify { block.invoke(response) }
 
 ### Stubbing implementations
 
-Both expressions and callable references supports the same API for stubbing the implementation,
-through the use of the `then` functions.
+The following functions are available to provide a stub implementation for every expectation:
 
 | Function                                              | Description                                                                                                                                                                                                                      |
 |-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
