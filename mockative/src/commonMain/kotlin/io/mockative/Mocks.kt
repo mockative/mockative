@@ -13,5 +13,14 @@ import kotlin.reflect.KClass
  *
  * @param type the type to mock
  * @return an instance of the mocked type
+ * @see classOf
  */
 fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)
+
+/**
+ * Checks if the specified [value] is a Mockative mock instance.
+ *
+ * @param value The value to check
+ * @return `true` if the [value] is a Mockative mock; `false` otherwise.
+ */
+fun <T : Any> isMock(value: T): Boolean = value is Mockable

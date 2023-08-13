@@ -1,14 +1,14 @@
 package io.mockative.matchers
 
-class EqualsMatcher<T>(private val expected: T) : Matcher<T> {
+class NotEqualsMatcher<T>(private val expected: T) : Matcher<T> {
     override val placeholder: T
         get() = expected
 
     override fun matches(value: Any?): Boolean {
-        return expected == value
+        return expected != value
     }
 
     override fun toString(): String {
-        return "<value == ${expected.toString()}>"
+        return "<value != ${expected.toString()}>"
     }
 }

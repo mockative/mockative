@@ -27,21 +27,21 @@ class MockativeSymbolProcessor(
         processableTypes
             .forEach { type ->
                 val packageName = type.mockClassName.packageName
-                val fullSimpleName = type.mockClassName.fullSimpleName
+                val fileName = type.mockClassName.fullSimpleName
 
-                FileSpec.builder(packageName, "${fullSimpleName}.Mockative")
+                FileSpec.builder(packageName, fileName)
                     .addType(type.buildMockTypeSpec())
                     .build()
                     .writeTo(codeGenerator, aggregating = false)
             }
 
         // Generate Mock Functions
-        // This must be generated in a separate file for some reason I have yet to discover...
         processableTypes
             .forEach { type ->
-                val fullSimpleName = type.sourceClassName.fullSimpleName
+                val reflectionName = type.sourceClassName.reflectionName()
+                val fileName = "${reflectionName}.Mockative"
 
-                FileSpec.builder("io.mockative", "${fullSimpleName}.mock.Mockative")
+                FileSpec.builder("io.mockative", fileName)
                     .addFunction(type.buildMockFunSpec())
                     .build()
                     .writeTo(codeGenerator, aggregating = false)

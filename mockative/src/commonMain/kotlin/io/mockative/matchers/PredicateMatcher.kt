@@ -1,6 +1,5 @@
 package io.mockative.matchers
 
-import io.mockative.name
 import kotlin.reflect.KClass
 
 class PredicateMatcher<T>(val type: KClass<*>, override val placeholder: T, val predicate: (T) -> Boolean) : Matcher<T> {
@@ -10,6 +9,6 @@ class PredicateMatcher<T>(val type: KClass<*>, override val placeholder: T, val 
     }
 
     override fun toString(): String {
-        return "matches<${type.name}>"
+        return "<matches($predicate)>"
     }
 }
