@@ -16,7 +16,9 @@ class MockativeSymbolProcessor(
 ) : SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val stubsUnitByDefault = options["mockative.stubsUnitByDefault"].toBoolean()
+        val stubsUnitByDefault = options["mockative.stubsUnitByDefault"]
+            ?.let { !it.equals("false", ignoreCase = true) }
+            ?: true
 
         // Resolve the processable types
         val processableTypes = ProcessableType.fromResolver(resolver, stubsUnitByDefault)

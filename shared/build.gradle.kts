@@ -120,7 +120,3 @@ dependencies {
             add(it.name, project(":mockative-processor"))
         }
 }
-
-ksp {
-    arg("mockative.stubsUnitByDefault", "true")
-}

@@ -7,15 +7,12 @@
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 Notable features include:
 
-- Effortless multi-threading when using coroutines (see
-  [Coroutines.kt](shared/src/commonTest/kotlin/io/mockative/Coroutines.kt))
 - Concise, non-intrusive, type-safe API
 - Mocking of **interfaces only**
-- Supports both [expression](#stubbing-using-expressions)
-  and [matcher](#stubbing-using-callable-references) based stubbing
-  and [verification](#verification)
-- Supports [implicit stubbing](#implicit-stubbing-of-functions-returning-unit) of functions
-  returning `Unit`
+- Supports both [values](#stubbing-using-values) and [matchers](#stubbing-using-matchers) when during 
+  stubbing [verification](#verification)
+- Supports [implicit stubbing](#implicit-stubbing-of-functions-returning-unit) of functions returning `Unit`
+- Provides an API inspired by MockK 
 
 ## Installation for Multiplatform projects
 
@@ -140,7 +137,7 @@ Both expressions and callable references supports the same API for stubbing the 
 through the use of the `then` functions.
 
 | Function                           | Description                                                                                                |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+|------------------------------------|------------------------------------------------------------------------------------------------------------|
 | `then(block: (P1, P..., PN) -> R)` | Invokes the specified block. The arguments passed to the block are the arguments passed to the invocation. |
 | `thenInvoke(block: () -> R)`       | Invokes the specified block.                                                                               |
 | `thenReturn(value: R)`             | Returns the specified value.                                                                               |
@@ -150,20 +147,20 @@ When the return type of the function or property being stubbed is `Unit`, the fo
 then function is available:
 
 | Function          | Description     |
-| ----------------- | --------------- |
+|-------------------|-----------------|
 | `thenDoNothing()` | Returns `Unit`. |
 
 The untyped callable references using `function(String)` and `suspendFunction(String)` supports the
 following additional `then` function:
 
 | Function                                   | Description                                                                                                      |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+|--------------------------------------------|------------------------------------------------------------------------------------------------------------------|
 | `then(block: (args: Array<Any?>) -> Any?)` | Invokes the specified block. The argument passed to the block is an array of arguments passed to the invocation. |
 
 ### Implicit stubbing of functions returning Unit
 
-Mockative comes with an opt-in feature for stubbing functions returning `Unit` by default, based on 
-the idea that such functions are typically used for verification rather than stubbing, and are 
+Mockative comes with an opt-in feature for stubbing functions returning `Unit` by default, based on
+the idea that such functions are typically used for verification rather than stubbing, and are
 trivially stubbed automatically.
 
 You can opt-in to this behaviour on the project level through your **build.gradle.kts** file:
@@ -180,13 +177,15 @@ Alternatively, you can opt-in (or opt-out if you've opted in on the project leve
 `configure(mock, block)` function either inline:
 
 ```kotlin
-@Mock val api = configure(mock(classOf<GitHubAPI>())) { stubsUnitByDefault = true }
+@Mock
+val api = configure(mock(classOf<GitHubAPI>())) { stubsUnitByDefault = true }
 ```
 
 Or as needed:
 
 ```kotlin
-@Mock val api = mock(classOf<GitHubAPI>())
+@Mock
+val api = mock(classOf<GitHubAPI>())
 
 @Test
 fun test() {

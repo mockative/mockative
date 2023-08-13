@@ -1,7 +1,5 @@
 package io.mockative
 
-//fun <T : Any> verify(mock: T): VerifyThatBuilder<T> = VerifyThatBuilder(mock)
-
 fun verifyNoUnverifiedExpectations(receiver: Any) {
     receiver.asMockable().confirmVerified()
 }

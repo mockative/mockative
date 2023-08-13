@@ -22,6 +22,11 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
         verifiedInvocations.clear()
     }
 
+    internal fun unmock() {
+        blockingStubs.clear()
+        suspendStubs.clear()
+    }
+
     internal fun addBlockingStub(stub: BlockingStub) {
         blockingStubs.add(0, stub)
     }

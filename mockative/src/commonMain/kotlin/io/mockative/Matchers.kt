@@ -26,7 +26,7 @@ object Matchers {
 }
 
 inline fun <reified T> any(): T {
-    return Matchers.enqueue(AnyMatcher(valueOf<T>()))
+    return any(valueOf<T>())
 }
 
 inline fun <reified T> any(validValue: T): T {
@@ -57,10 +57,10 @@ inline fun <reified T : Comparable<T>> lte(value: T): T {
     return Matchers.enqueue(ComparableMatcher(T::class, value, "<=") { a, b -> a <= b })
 }
 
-inline fun <reified T> matching(noinline predicate: (T) -> Boolean): T {
-    return Matchers.enqueue(PredicateMatcher(T::class, valueOf<T>(), predicate))
+inline fun <reified T> matches(noinline predicate: (T) -> Boolean): T {
+    return matches(valueOf<T>(), predicate)
 }
 
-inline fun <reified T> matching(placeholder: T, noinline predicate: (T) -> Boolean): T {
+inline fun <reified T> matches(placeholder: T, noinline predicate: (T) -> Boolean): T {
     return Matchers.enqueue(PredicateMatcher(T::class, placeholder, predicate))
 }

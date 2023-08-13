@@ -1,7 +1,5 @@
 package io.mockative
 
-//fun <T : Any> given(receiver: T): GivenBuilder<T> = GivenBuilder(receiver)
-
 fun <R> every(block: () -> R): ResultBuilder<R> {
     try {
         val (mock, invocation) = Mockable.record(block)
