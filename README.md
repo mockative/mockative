@@ -122,6 +122,30 @@ any<suspend (GetObjectResponse) -> File>()
 
 But that would be significantly more verbose that the alternative.
 
+### Stubbing using functions
+
+You may want to provide a function as an argument to another function, where you would like to be 
+able to record invocations on that function. To do that, Mockative includes the interfaces `Fun[N]` 
+and `CoFun[N]` (for `suspend` functions), each declaring a single function `invoke` that you can 
+pass as a mock to other functions in order to stub and verify invocations on it:
+
+```kotlin
+// Declare the mock function as a property in your test class
+@Mock
+val block = mock(classOf<Fun1<GetObjectResponse, File>>())
+
+// Stub the mock function
+every { block.invoke(response) }
+  .returns(file)
+
+// Call something that calls the mock function
+s3Client.getObject(request, block::invoke)
+
+// Verify the call to the mock function
+verify { block.invoke(response) }
+    .wasInvoked(exactly = once)
+```
+
 ### Stubbing implementations
 
 Both expressions and callable references supports the same API for stubbing the implementation,

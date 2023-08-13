@@ -9,7 +9,7 @@ class FileServiceTests {
     private val s3Client = mock(classOf<S3Client>())
 
     @Mock
-    private val block = mock(classOf<KFun1<GetObjectResponse, File>>())
+    private val block = mock(classOf<Fun1<GetObjectResponse, File>>())
 
     private val fileService = FileService(s3Client)
 

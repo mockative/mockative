@@ -13,7 +13,7 @@ internal class GitHubServiceMockTests {
     @Mock val expected = mock(classOf<ExpectedAPI>())
     @Mock val nested = mock(classOf<GitHubService.NestedAPI>())
     @Mock val configuration = mock(classOf<GitHubConfiguration>())
-    @Mock val function = mock(classOf<KFun0<Unit>>())
+    @Mock val function = mock(classOf<Fun0<Unit>>())
 
     private val service = GitHubService(github, configuration, ApplicationDispatchers.Unconfined)
 
