@@ -2,6 +2,10 @@ package io.mockative.fake
 
 import kotlin.reflect.KClass
 
+inline fun <reified T> valueOf(): T {
+    return valueOf(T::class)
+}
+
 @Suppress("UNCHECKED_CAST")
 fun <T> valueOf(type: KClass<*>): T {
     return when (type) {

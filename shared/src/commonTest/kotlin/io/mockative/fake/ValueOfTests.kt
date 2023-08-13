@@ -10,42 +10,40 @@ import kotlin.test.assertNotNull
 class ValueOfTests {
     @Test
     fun valueOfReturnsStandardTypes() {
-        assertEquals(false, valueOf(Boolean::class))
-        assertEquals(0.toByte(), valueOf(Byte::class))
-        assertEquals(0.toShort(), valueOf(Short::class))
-        assertEquals(0.toChar(), valueOf(Char::class))
-        assertEquals(0, valueOf(Int::class))
-        assertEquals(0L, valueOf(Long::class))
-        assertEquals(0f, valueOf(Float::class))
-        assertEquals(0.0, valueOf(Double::class))
+        assertEquals(false, valueOf<Boolean>())
+        assertEquals(0.toByte(), valueOf<Byte>())
+        assertEquals(0.toShort(), valueOf<Short>())
+        assertEquals(0.toChar(), valueOf<Char>())
+        assertEquals(0, valueOf<Int>())
+        assertEquals(0L, valueOf<Long>())
+        assertEquals(0f, valueOf<Float>())
+        assertEquals(0.0, valueOf<Double>())
 
-        assertContentEquals(BooleanArray(0), valueOf(BooleanArray::class))
-        assertContentEquals(ByteArray(0), valueOf(ByteArray::class))
-        assertContentEquals(ShortArray(0), valueOf(ShortArray::class))
-        assertContentEquals(CharArray(0), valueOf(CharArray::class))
-        assertContentEquals(IntArray(0), valueOf(IntArray::class))
-        assertContentEquals(LongArray(0), valueOf(LongArray::class))
-        assertContentEquals(FloatArray(0), valueOf(FloatArray::class))
-        assertContentEquals(DoubleArray(0), valueOf(DoubleArray::class))
+        assertContentEquals(BooleanArray(0), valueOf<BooleanArray>())
+        assertContentEquals(ByteArray(0), valueOf<ByteArray>())
+        assertContentEquals(ShortArray(0), valueOf<ShortArray>())
+        assertContentEquals(CharArray(0), valueOf<CharArray>())
+        assertContentEquals(IntArray(0), valueOf<IntArray>())
+        assertContentEquals(LongArray(0), valueOf<LongArray>())
+        assertContentEquals(FloatArray(0), valueOf<FloatArray>())
+        assertContentEquals(DoubleArray(0), valueOf<DoubleArray>())
 
-        assertEquals(emptyList<Nothing>(), valueOf(List::class))
-        assertEquals(emptyMap<Nothing, Nothing>(), valueOf(Map::class))
-        assertEquals(emptySet<Nothing>(), valueOf(Set::class))
+        assertEquals(emptyList(), valueOf<List<Nothing>>())
+        assertEquals(emptyMap(), valueOf<Map<Nothing, Nothing>>())
+        assertEquals(emptySet(), valueOf<Set<Nothing>>())
 
-        assertEquals(arrayListOf<Nothing>(), valueOf(ArrayList::class))
-        assertEquals(hashMapOf<Nothing, Nothing>(), valueOf(HashMap::class))
-        assertEquals(hashSetOf<Nothing>(), valueOf(HashSet::class))
+        assertEquals(arrayListOf(), valueOf<ArrayList<Nothing>>())
+        assertEquals(hashMapOf(), valueOf<HashMap<Nothing, Nothing>>())
+        assertEquals(hashSetOf(), valueOf<HashSet<Nothing>>())
 
-        assertEquals("", valueOf(String::class))
+        assertEquals("", valueOf<String>())
+        assertEquals("", valueOf<CharSequence>())
     }
 
     @Test
     fun makeValueOfReturnsOtherStuff() {
-        val functionType: () -> Unit = {}
-        assertNotNull(valueOf(functionType::class))
-
-        assertNotNull(valueOf(Repository::class))
-
-        assertNotNull(valueOf(AbstractParameter::class))
+        assertNotNull(valueOf<() -> Unit>())
+        assertNotNull(valueOf<Repository>())
+        assertNotNull(valueOf<AbstractParameter>())
     }
 }

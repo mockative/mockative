@@ -13,7 +13,7 @@ object Matchers {
 
     fun <T> enqueue(matcher: Matcher<T>): T {
         matchers.add(matcher)
-        return matcher.defaultValue
+        return matcher.placeholder
     }
 
     fun dequeue(): Matcher<*> {
@@ -25,12 +25,8 @@ object Matchers {
     }
 }
 
-inline fun <reified T> error(): T {
-    throw IllegalStateException("This function may not be called.")
-}
-
 inline fun <reified T> any(): T {
-    return Matchers.enqueue(AnyMatcher(valueOf(T::class)))
+    return Matchers.enqueue(AnyMatcher(valueOf<T>()))
 }
 
 inline fun <reified T> any(validValue: T): T {
@@ -62,9 +58,9 @@ inline fun <reified T : Comparable<T>> lte(value: T): T {
 }
 
 inline fun <reified T> matching(noinline predicate: (T) -> Boolean): T {
-    return Matchers.enqueue(PredicateMatcher(T::class, valueOf(T::class), predicate))
+    return Matchers.enqueue(PredicateMatcher(T::class, valueOf<T>(), predicate))
 }
 
-inline fun <reified T> matching(validValue: T, noinline predicate: (T) -> Boolean): T {
-    return Matchers.enqueue(PredicateMatcher(T::class, validValue, predicate))
+inline fun <reified T> matching(placeholder: T, noinline predicate: (T) -> Boolean): T {
+    return Matchers.enqueue(PredicateMatcher(T::class, placeholder, predicate))
 }

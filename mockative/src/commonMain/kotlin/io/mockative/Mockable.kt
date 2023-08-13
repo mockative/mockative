@@ -40,7 +40,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
                 when (fallback) {
                     null -> throwMissingBlockingStubException(invocation)
                     else -> {
-                        val fallbackStub = BlockingStub(invocation.toOpenExpectation(), fallback)
+                        val fallbackStub = OpenBlockingStub(invocation.toOpenExpectation(), fallback)
                         addBlockingStub(fallbackStub)
                         return fallbackStub
                     }
@@ -58,7 +58,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     private fun getBlockingStubOrNull(invocation: Invocation): BlockingStub? {
-        return blockingStubs.firstOrNull { stub -> stub.expectation.matches(invocation) }
+        return blockingStubs.firstOrNull { stub -> stub.matches(invocation) }
     }
 
     internal fun addSuspendStub(stub: SuspendStub) {
@@ -74,7 +74,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
                 when (fallback) {
                     null -> throwMissingSuspendStubException(invocation)
                     else -> {
-                        val fallbackStub = SuspendStub(invocation.toOpenExpectation(), fallback)
+                        val fallbackStub = OpenSuspendStub(invocation.toOpenExpectation(), fallback)
                         addSuspendStub(fallbackStub)
                         return fallbackStub
                     }

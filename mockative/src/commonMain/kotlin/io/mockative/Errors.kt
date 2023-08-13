@@ -93,10 +93,7 @@ class UnverifiedInvocationsException(instance: Any, invocations: List<Invocation
     buildString {
         appendLine(0, "A mock contains unverified invocations.")
         appendLine()
-        appendLine(
-            1,
-            "The following invocations on the type ${instance.getClassName()} were not verified:"
-        )
+        appendLine(1, "The following invocations on the type ${instance.getClassName()} were not verified:")
         appendLine()
 
         invocations.forEach { invocation ->
@@ -107,31 +104,37 @@ class UnverifiedInvocationsException(instance: Any, invocations: List<Invocation
     }
 )
 
-class MockValidationException(instance: Any, expectations: List<Expectation>, invocations: List<Invocation>) : MockativeException(
-    buildString {
-        appendLine("Validation of mock failed.")
-        appendLine()
-        appendLine(1, "The following expectations on the type ${instance.getClassName()} were not met.")
-        appendLine()
+class MockValidationException(instance: Any, expectations: List<Expectation>, invocations: List<Invocation>) :
+    MockativeException(
+        buildString {
+            appendLine("Validation of mock failed.")
+            appendLine()
+            appendLine(1, "The following expectations on the type ${instance.getClassName()} were not met.")
+            appendLine()
 
-        expectations.forEach { expectation ->
-            appendLine(2, "$expectation")
+            expectations.forEach { expectation ->
+                appendLine(2, "$expectation")
+            }
+
+            appendLine()
+
+            appendLine(1, "The following invocations were recorded:")
+            appendLine()
+
+            invocations.forEach { invocation ->
+                appendLine(2, "$invocation")
+            }
+
+            appendLine(1, "")
         }
+    )
 
-        appendLine()
-
-        appendLine(1, "The following invocations were recorded:")
-        appendLine()
-
-        invocations.forEach { invocation ->
-            appendLine(2, "$invocation")
-        }
-
-        appendLine(1, "")
-    }
-)
-
-class MissingExpectationException(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeException(
+class MissingExpectationException(
+    instance: Any,
+    invocation: Invocation,
+    isSuspend: Boolean,
+    expectations: List<Expectation>
+) : MockativeException(
     buildString {
         appendLine("A function was called without a matching expectation.")
         appendLine()
@@ -139,8 +142,11 @@ class MissingExpectationException(instance: Any, invocation: Invocation, isSuspe
         appendLine(2, "${instance.getClassName()}.$invocation")
         appendLine()
         appendLine(1, "Set up an expectation using:")
-        appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ".invocation"} { $invocation }")
-        appendLine(3, ".then { ... }")
+
+        val every = if (isSuspend) "coEvery" else "every"
+        val propertyName = instance.getPropertyName()
+        appendLine(2, "$every { $propertyName.$invocation }")
+        appendLine(3, ".invokes { ... }")
         appendLine(1, "")
         appendLine(1, "The following expectations were configured on the mock:")
         expectations.forEach {
@@ -150,21 +156,27 @@ class MissingExpectationException(instance: Any, invocation: Invocation, isSuspe
     }
 )
 
-class InvalidExpectationException(instance: Any, invocation: Invocation, isSuspend: Boolean, expectations: List<Expectation>) : MockativeException(
+class InvalidExpectationException(
+    instance: Any,
+    invocation: Invocation,
+    isSuspend: Boolean,
+    expectations: List<Expectation>
+) : MockativeException(
     buildString {
         appendLine("A function was called without a matching expectation.")
         appendLine()
-        appendLine(
-            1,
-            "A ${if (isSuspend) "blocking" else "coroutine"} stub was expected, but a " +
-                    "${if (isSuspend) "coroutine" else "blocking"} stub was configured on the " +
-                    "function:"
-        )
+        
+        val expectedType = if (isSuspend) "blocking" else "coroutine"
+        val actualType = if (isSuspend) "coroutine" else "blocking"
+        appendLine(1, "A $expectedType stub was expected, but a $actualType stub was configured on the function:")
         appendLine(2, "${instance.getClassName()}.$invocation")
         appendLine()
         appendLine(1, "Set up an expectation using:")
-        appendLine(2, "given(instance)${if (isSuspend) ".coroutine" else ".invocation"} { $invocation }")
-        appendLine(3, ".then { ... }")
+
+        val every = if (isSuspend) "coEvery" else "every"
+        val propertyName = instance.getPropertyName()
+        appendLine(2, "$every { $propertyName.$invocation }")
+        appendLine(3, ".invokes { ... }")
         appendLine(1, "")
         appendLine(1, "The following expectations were configured on the mock:")
         expectations.forEach {
@@ -174,7 +186,8 @@ class InvalidExpectationException(instance: Any, invocation: Invocation, isSuspe
     }
 )
 
-class MixedArgumentMatcherException : Exception("Mixing values and matchers like `eq()` or `any()` in the same function call is not supported.")
+class MixedArgumentMatcherException :
+    Exception("Mixing values and matchers like `eq()` or `any()` in the same function call is not supported.")
 
 class StubbingInProgressException(val receiver: Mockable, val invocation: Invocation) : Exception()
 

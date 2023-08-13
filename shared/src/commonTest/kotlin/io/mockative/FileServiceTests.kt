@@ -37,7 +37,7 @@ class FileServiceTests {
         val request = GetObjectRequest(id)
 
         every { s3Client.getObjectSync<File>(eq(request), any()) }
-            .returns(expected)
+            .returnsMany(expected)
 
         // When
         val file = fileService.getFileSync(id)
@@ -55,7 +55,7 @@ class FileServiceTests {
         val request = GetObjectRequest(id)
 
         coEvery { s3Client.getObject<File>(eq(request), any()) }
-            .thenReturn(expected)
+            .returnsMany(expected)
 
         // When
         val file = fileService.getFile(id)
@@ -73,7 +73,7 @@ class FileServiceTests {
         val request = GetObjectRequest(id)
 
         coEvery { s3Client.getObject<File>(eq(request), any()) }
-            .thenReturn(expected)
+            .returnsMany(expected)
 
         // When
         val file = fileService.getFile(id)

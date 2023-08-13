@@ -8,7 +8,7 @@ class ComparableMatcher<T : Comparable<T>>(
     private val operator: String,
     private val comparison: (T, T) -> Boolean
 ) : Matcher<T> {
-    override val defaultValue: T
+    override val placeholder: T
         get() = operand
 
     @Suppress("UNCHECKED_CAST")

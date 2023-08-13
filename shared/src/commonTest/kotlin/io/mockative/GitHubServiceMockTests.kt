@@ -41,7 +41,7 @@ internal class GitHubServiceMockTests {
         val repository = Repository(id, "Mockative")
 
         coEvery { github.repository(id) }
-            .thenReturn(repository)
+            .returnsMany(repository)
 
         // when
         val result = service.repository(id)
@@ -57,7 +57,7 @@ internal class GitHubServiceMockTests {
         val repository = Repository(id, "Mockative")
 
         coEvery { github.repository(eq(id)) }
-            .thenReturn(repository)
+            .returnsMany(repository)
 
         // when
         val result = service.repository(id)
@@ -73,7 +73,7 @@ internal class GitHubServiceMockTests {
         val repository = Repository(id, "Mockative")
 
         coEvery { github.repository(id) }
-            .thenReturn(repository)
+            .returnsMany(repository)
 
         // when
         service.repository(id)
@@ -91,7 +91,7 @@ internal class GitHubServiceMockTests {
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
 
         coEvery { github.repository(id) }
-            .thenThrow(Error("Expected exception"))
+            .throwsMany(Error("Expected exception"))
 
         // when
         val actual = runCatching { service.repository(id) }
@@ -110,7 +110,7 @@ internal class GitHubServiceMockTests {
         val mockative = Repository(id, "Mockative")
 
         coEvery { github.repository(id) }
-            .thenReturn(mockative)
+            .returnsMany(mockative)
 
         val firstRepository = service.repository(id)
 
@@ -121,7 +121,7 @@ internal class GitHubServiceMockTests {
 
         val mockito = Repository(id, "Mockito")
         coEvery { github.repository(id) }
-            .thenReturn(mockito)
+            .returnsMany(mockito)
 
         // When
         val secondRepository = service.repository(id)
