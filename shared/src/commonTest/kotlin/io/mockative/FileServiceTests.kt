@@ -8,6 +8,9 @@ class FileServiceTests {
     @Mock
     private val s3Client = mock(classOf<S3Client>())
 
+    @Mock
+    private val block = mock(classOf<KFun1<GetObjectResponse, File>>())
+
     private val fileService = FileService(s3Client)
 
     @Test
@@ -77,6 +80,24 @@ class FileServiceTests {
 
         // When
         val file = fileService.getFile(id)
+
+        // Then
+        assertEquals(expected, file)
+    }
+
+    @Test
+    fun givenGetObjectSyncWithFun_whenGettingFileSync_thenFileIsReturned() {
+        // Given
+        val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
+        val expected = File("the-body")
+
+        val request = GetObjectRequest(id)
+
+        every { s3Client.getObjectSync<File>(eq(request), any()) }
+            .returns(expected)
+
+        // When
+        val file = fileService.getFileRawSync(id, block::invoke)
 
         // Then
         assertEquals(expected, file)

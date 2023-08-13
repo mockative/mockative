@@ -31,7 +31,7 @@ data class ProcessableType(
             val sourceClassName = declaration.toClassName()
             val simpleNames = sourceClassName.simpleNames.dropLast(1) + "${sourceClassName.simpleName}Mock"
             val simpleName = simpleNames.joinToString("_")
-            val mockClassName = ClassName(sourceClassName.packageName, simpleName)
+            val mockClassName = ClassName("io.mockative.${sourceClassName.packageName}", simpleName)
 
             val typeParameterResolver = declaration.typeParameters
                 .toTypeParameterResolver()
