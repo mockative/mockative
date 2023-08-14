@@ -9,6 +9,6 @@ class InstanceOfMatcher<T : Any>(override val placeholder: T, private val type: 
     }
 
     override fun toString(): String {
-        return "<value is ${type.qualifiedName ?: type.simpleName ?: type.name}>"
+        return "<value is ${type.name}>"
     }
 }

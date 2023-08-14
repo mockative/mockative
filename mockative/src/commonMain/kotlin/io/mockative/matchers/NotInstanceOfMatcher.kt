@@ -9,6 +9,6 @@ class NotInstanceOfMatcher<T : Any>(override val placeholder: T, private val typ
     }
 
     override fun toString(): String {
-        return "<value !is ${type.qualifiedName ?: type.simpleName ?: type.name}>"
+        return "<value !is ${type.name}>"
     }
 }
