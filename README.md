@@ -14,9 +14,14 @@ Notable features include:
   stubbing [verification](#verification)
 - Supports [implicit stubbing](#implicit-stubbing-of-functions-returning-unit) of functions
   returning `Unit`
-- Provides an API inspired by [MockK](https://mockk.io/)
 
 ## Installation for Multiplatform projects
+
+> ❗️Mockative 2 introduces a new API that should feel familiar to the Kotlin/JVM developers coming
+> from [MockK](https://mockk.io/) and Java developers coming from
+> [Mockito](https://site.mockito.org/).
+>
+> Please see [Migrating to Mockative 2](wiki/MIGRATING-TO-2.md) for a migration guide.
 
 Mockative uses [KSP] to generate mock classes for interfaces, and as such, it requires adding the
 KSP plugin in addition to adding the runtime library and symbol processor dependencies.
