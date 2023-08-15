@@ -44,6 +44,7 @@ kotlin {
         named("commonTest") {
             dependencies {
                 implementation(project(":mockative"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
@@ -118,8 +119,4 @@ dependencies {
         .forEach {
             add(it.name, project(":mockative-processor"))
         }
-}
-
-ksp {
-    arg("mockative.stubsUnitByDefault", "true")
 }

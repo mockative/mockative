@@ -1,11 +1,15 @@
 package io.mockative
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FileServiceTests {
     @Mock
     private val s3Client = mock(classOf<S3Client>())
+
+    @Mock
+    private val block = mock(classOf<Fun1<GetObjectResponse, File>>())
 
     private val fileService = FileService(s3Client)
 
@@ -17,9 +21,8 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).function<File>(s3Client::getObjectSync)
-            .whenInvokedWith(eq(request), wildcard())
-            .thenReturn(expected)
+        every { s3Client.getObjectSync<File>(eq(request), any()) }
+            .returns(expected)
 
         // When
         val file = fileService.getFileSync(id)
@@ -36,9 +39,8 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).function<File>("getObjectSync")
-            .whenInvokedWith(eq(request), wildcard())
-            .thenReturn(expected)
+        every { s3Client.getObjectSync<File>(eq(request), any()) }
+            .returnsMany(expected)
 
         // When
         val file = fileService.getFileSync(id)
@@ -48,16 +50,15 @@ class FileServiceTests {
     }
 
     @Test
-    fun givenGetObject_whenGettingFile_thenFileIsReturned() = runBlockingTest {
+    fun givenGetObject_whenGettingFile_thenFileIsReturned() = runTest {
         // Given
         val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
         val expected = File("the-body")
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).suspendFunction<File>(s3Client::getObject)
-            .whenInvokedWith(eq(request), wildcard())
-            .thenReturn(expected)
+        coEvery { s3Client.getObject<File>(eq(request), any()) }
+            .returnsMany(expected)
 
         // When
         val file = fileService.getFile(id)
@@ -67,19 +68,36 @@ class FileServiceTests {
     }
 
     @Test
-    fun givenGetObjectString_whenGettingFile_thenFileIsReturned() = runBlockingTest {
+    fun givenGetObjectString_whenGettingFile_thenFileIsReturned() = runTest {
         // Given
         val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
         val expected = File("the-body")
 
         val request = GetObjectRequest(id)
 
-        given(s3Client).suspendFunction<File>("getObject")
-            .whenInvokedWith(eq(request), wildcard())
-            .thenReturn(expected)
+        coEvery { s3Client.getObject<File>(eq(request), any()) }
+            .returnsMany(expected)
 
         // When
         val file = fileService.getFile(id)
+
+        // Then
+        assertEquals(expected, file)
+    }
+
+    @Test
+    fun givenGetObjectSyncWithFun_whenGettingFileSync_thenFileIsReturned() {
+        // Given
+        val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
+        val expected = File("the-body")
+
+        val request = GetObjectRequest(id)
+
+        every { s3Client.getObjectSync<File>(eq(request), any()) }
+            .returns(expected)
+
+        // When
+        val file = fileService.getFileRawSync(id, block::invoke)
 
         // Then
         assertEquals(expected, file)

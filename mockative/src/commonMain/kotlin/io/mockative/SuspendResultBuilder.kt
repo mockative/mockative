@@ -4,9 +4,15 @@ class SuspendResultBuilder<R>(
     private val mock: Mockable,
     private val expectation: Expectation
 ) : AnySuspendResultBuilder<R> {
-    fun then(block: suspend (arguments: Array<Any?>) -> R) {
-        mock.addSuspendStub(SuspendStub(expectation, block))
+    fun invokes(block: suspend (arguments: Array<Any?>) -> R) {
+        mock.addSuspendStub(OpenSuspendStub(expectation, block))
     }
 
-    override fun thenInvoke(block: suspend () -> R) = then { block() }
+    fun invokesMany(blocks: List<suspend (arguments: Array<Any?>) -> R>) {
+        mock.addSuspendStub(ClosedSuspendStub(expectation, blocks))
+    }
+
+    override fun invokes(block: suspend () -> R) = invokes { _ -> block() }
+
+    override fun invokesMany(vararg blocks: suspend () -> R) = invokesMany(blocks.map { block -> { _ -> block() } })
 }

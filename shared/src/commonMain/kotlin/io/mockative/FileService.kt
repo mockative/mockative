@@ -8,4 +8,8 @@ class FileService(private val client: S3Client) {
     suspend fun getFile(id: String): File {
         return client.getObject(GetObjectRequest(id)) { File(it.body) }
     }
+
+    fun getFileRawSync(id: String, block: (GetObjectResponse) -> File): File {
+        return client.getObjectSync(GetObjectRequest(id), block)
+    }
 }

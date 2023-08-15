@@ -4,6 +4,7 @@ import kotlinx.coroutines.withContext
 
 internal class GitHubService(
     private val api: GitHubAPI,
+    private val configuration: GitHubConfiguration,
     private val dispatchers: ApplicationDispatchers
 ) {
     suspend fun create(repository: Repository) {
@@ -16,6 +17,14 @@ internal class GitHubService(
         return withContext(dispatchers.default) {
             api.repository(id)
         }
+    }
+
+    fun getToken(): String {
+        return configuration.token
+    }
+
+    fun setToken(token: String) {
+        configuration.token = token
     }
 
     interface NestedAPI {

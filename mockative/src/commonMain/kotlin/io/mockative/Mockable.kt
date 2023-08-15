@@ -3,19 +3,16 @@ package io.mockative
 import io.mockative.concurrency.AtomicList
 import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
+import kotlin.native.concurrent.ThreadLocal
 
 abstract class Mockable(stubsUnitByDefault: Boolean) {
 
     // Serves as a workaround for getting default implementations to work with Kotlin/JS
     private val instance = Any()
 
-    private class StubbingInProgressError(val invocation: Invocation) : Error()
-
     private val blockingStubs = AtomicList<BlockingStub>()
     private val suspendStubs = AtomicList<SuspendStub>()
     private val verifiedInvocations = AtomicSet<Invocation>()
-
-    private var isRecording: Boolean by atomic(false)
 
     internal var stubsUnitsByDefault: Boolean by atomic(stubsUnitByDefault)
 
@@ -23,6 +20,11 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
         blockingStubs.clear()
         suspendStubs.clear()
         verifiedInvocations.clear()
+    }
+
+    internal fun unmock() {
+        blockingStubs.clear()
+        suspendStubs.clear()
     }
 
     internal fun addBlockingStub(stub: BlockingStub) {
@@ -43,7 +45,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
                 when (fallback) {
                     null -> throwMissingBlockingStubException(invocation)
                     else -> {
-                        val fallbackStub = BlockingStub(invocation.toOpenExpectation(), fallback)
+                        val fallbackStub = OpenBlockingStub(invocation.toOpenExpectation(), fallback)
                         addBlockingStub(fallbackStub)
                         return fallbackStub
                     }
@@ -55,13 +57,13 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
 
     private fun throwMissingBlockingStubException(invocation: Invocation): Nothing {
         when (getSuspendStubOrNull(invocation)) {
-            null -> throw MissingExpectationError(this, invocation, false, expectations)
-            else -> throw InvalidExpectationError(this, invocation, false, expectations)
+            null -> throw MissingExpectationException(this, invocation, false, expectations)
+            else -> throw InvalidExpectationException(this, invocation, false, expectations)
         }
     }
 
     private fun getBlockingStubOrNull(invocation: Invocation): BlockingStub? {
-        return blockingStubs.firstOrNull { stub -> stub.expectation.matches(invocation) }
+        return blockingStubs.firstOrNull { stub -> stub.matches(invocation) }
     }
 
     internal fun addSuspendStub(stub: SuspendStub) {
@@ -77,7 +79,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
                 when (fallback) {
                     null -> throwMissingSuspendStubException(invocation)
                     else -> {
-                        val fallbackStub = SuspendStub(invocation.toOpenExpectation(), fallback)
+                        val fallbackStub = OpenSuspendStub(invocation.toOpenExpectation(), fallback)
                         addSuspendStub(fallbackStub)
                         return fallbackStub
                     }
@@ -89,8 +91,8 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
 
     private fun throwMissingSuspendStubException(invocation: Invocation): Nothing {
         when (getBlockingStubOrNull(invocation)) {
-            null -> throw MissingExpectationError(this, invocation, true, expectations)
-            else -> throw InvalidExpectationError(this, invocation, true, expectations)
+            null -> throw MissingExpectationException(this, invocation, true, expectations)
+            else -> throw InvalidExpectationException(this, invocation, true, expectations)
         }
     }
 
@@ -118,12 +120,12 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     /**
-     * @throws UnverifiedInvocationsError the mock contains unverified invocations
+     * @throws UnverifiedInvocationsException the mock contains unverified invocations
      */
     internal fun confirmVerified() {
         val unverified = unverifiedInvocations
         if (unverified.isNotEmpty()) {
-            throw UnverifiedInvocationsError(this, unverified)
+            throw UnverifiedInvocationsException(this, unverified)
         }
     }
 
@@ -137,7 +139,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
         val unmetExpectations = unmetBlockingExpectations + unmetSuspendExpectations
 
         if (unmetExpectations.isNotEmpty()) {
-            throw MockValidationError(this, unmetExpectations, invocations)
+            throw MockValidationException(this, unmetExpectations, invocations)
         }
     }
 
@@ -155,7 +157,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
 
         try {
             block(this as T)
-        } catch (error: StubbingInProgressError) {
+        } catch (error: StubbingInProgressException) {
             invocation = error.invocation
         } finally {
             isRecording = false
@@ -167,12 +169,19 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     @Suppress("UNCHECKED_CAST")
     protected fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
-            throw StubbingInProgressError(invocation)
+            throw StubbingInProgressException(this, invocation)
         } else {
             val fallback = getUnitFallbackOrNull(returnsUnit)
             val stub = getBlockingStub(invocation, fallback)
-            val result = stub.invoke(invocation)
-            return result as R
+
+            try {
+                val result = stub.invoke(invocation)
+                invocation.result = InvocationResult.Return(result)
+                return result as R
+            } catch (e: Throwable) {
+                invocation.result = InvocationResult.Exception(e)
+                throw e
+            }
         }
     }
 
@@ -190,7 +199,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
 
         try {
             block(this as T)
-        } catch (error: StubbingInProgressError) {
+        } catch (error: StubbingInProgressException) {
             invocation = error.invocation
         } finally {
             isRecording = false
@@ -202,18 +211,25 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     @Suppress("UNCHECKED_CAST")
     protected suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
-            throw StubbingInProgressError(invocation)
+            throw StubbingInProgressException(this, invocation)
         } else {
             val fallback = getUnitFallbackOrNull(returnsUnit)
             val stub = getSuspendStub(invocation, fallback)
-            val result = stub.invoke(invocation)
-            return result as R
+
+            try {
+                val result = stub.invoke(invocation)
+                invocation.result = InvocationResult.Return(result)
+                return result as R
+            } catch (e: Throwable) {
+                invocation.result = InvocationResult.Exception(e)
+                throw e
+            }
         }
     }
 
     private inline fun <reified R> invokeWithFallback(invocation: Invocation, default: () -> R): R {
         if (isRecording) {
-            throw StubbingInProgressError(invocation)
+            throw StubbingInProgressException(this, invocation)
         } else {
             return when (val stub = getBlockingStubOrNull(invocation)) {
                 null -> default()
@@ -238,6 +254,169 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     override fun toString(): String {
         return invokeWithFallback(Invocation.Function("toString", emptyList())) {
             "io.mockative.Mockable@${instance.hashCode()}"
+        }
+    }
+
+    fun debug() {
+        val debugString = buildString {
+            appendLine(this@Mockable.getClassName())
+            appendLine("-----")
+            appendLine( "  Blocking Stubs")
+
+            val blockingStubs = blockingStubs.reversed()
+            if (blockingStubs.isEmpty()) {
+                appendLine("    <none>")
+            } else {
+                blockingStubs.forEach { stub ->
+                    appendLine("    ${stub.expectation}")
+                    for (invocation in stub.invocations) {
+                        val indicator = if (verifiedInvocations.contains(invocation)) "✓" else "?"
+                        appendLine("$indicator $invocation".prependIndent("      "))
+                    }
+                }
+            }
+
+            appendLine("-----")
+            appendLine( "  Suspend Stubs")
+
+            val suspendStubs = suspendStubs.reversed()
+            if (suspendStubs.isEmpty()) {
+                appendLine("    <none>")
+            } else {
+                suspendStubs.forEach { stub ->
+                    appendLine("    ${stub.expectation}")
+                    for (invocation in stub.invocations) {
+                        val indicator = if (verifiedInvocations.contains(invocation)) "✓" else "?"
+                        appendLine("$indicator $invocation".prependIndent("      "))
+                    }
+                }
+            }
+
+            appendLine("-----")
+
+            appendLine("  Invocations")
+            val invocations = invocations
+            if (invocations.isEmpty()) {
+                appendLine("    <none>")
+            } else {
+                invocations.forEach {
+                    val invocation = it.toString()
+                    val prefix = if (verifiedInvocations.contains(it)) "✓" else "?"
+                    appendLine("$prefix $invocation".prependIndent("    "))
+                }
+            }
+            appendLine("-----")
+        }
+
+        println(debugString)
+    }
+
+    @ThreadLocal
+    companion object {
+        var isRecording: Boolean = false
+
+
+        /**
+         * Records the invocation of a single member on this mock.
+         *
+         * @param block the block invoking the member on this mock.
+         * @return the recorded invocation
+         */
+        @Suppress("DuplicatedCode")
+        fun <R> record(block: () -> R): Pair<Mockable, Invocation> {
+            var receiver: Mockable? = null
+            var invocation: Invocation? = null
+
+            isRecording = true
+
+            try {
+                block()
+            } catch (error: StubbingInProgressException) {
+                receiver = error.receiver
+                invocation = error.invocation
+            } finally {
+                isRecording = false
+            }
+
+            return receiver!! to invocation!!
+        }
+
+        /**
+         * Records the invocation of a single member on this mock.
+         *
+         * @param block the block invoking the member on this mock.
+         * @return the recorded invocation
+         */
+        @Suppress("DuplicatedCode")
+        suspend fun <R> record(block: suspend () -> R): Pair<Mockable, Invocation> {
+            var receiver: Mockable? = null
+            var invocation: Invocation? = null
+
+            isRecording = true
+
+            try {
+                block()
+            } catch (error: StubbingInProgressException) {
+                receiver = error.receiver
+                invocation = error.invocation
+            } finally {
+                isRecording = false
+            }
+
+            return receiver!! to invocation!!
+        }
+
+        /**
+         * Prints a representation of the internal state of the [target] mock, useful while debugging issues.
+         *
+         * The debug message is formatted like this:
+         *
+         * ```
+         * <name of mock>
+         * -----
+         *   Blocking Stubs
+         *     <list of blocking stubs (if any) and their invocations (if any)>
+         * -----
+         *   Suspend Stubs
+         *     <list of coroutine stubs (if any) and their invocations (if any)>
+         * -----
+         *   Invocations
+         *     <list of all invocations (if any)>
+         * -----
+         * ```
+         *
+         * In front of every logged invocation is either a checkmark (✓) meaning the invocation has been verified, or a
+         * question-mark (?) meaning the invocation has not been verified.
+         *
+         * Note: The order of the debug output represents the internal state and as such may not always match the
+         * actual order of declaration in code.
+         *
+         * Example:
+         * ```
+         * GitHubAPIMock
+         * -----
+         *   Blocking Stubs
+         *     <none>
+         * -----
+         *   Suspend Stubs
+         *     repository(0efb1b3b-f1b2-41f8-a1d8-368027cc86ee)
+         *       ? repository(0efb1b3b-f1b2-41f8-a1d8-368027cc86ee) =
+         *           Repository(id=0efb1b3b-f1b2-41f8-a1d8-368027cc86ee, name=Mockito)
+         *     repository(0efb1b3b-f1b2-41f8-a1d8-368027cc86ee)
+         *       ✓ repository(0efb1b3b-f1b2-41f8-a1d8-368027cc86ee) =
+         *           Repository(id=0efb1b3b-f1b2-41f8-a1d8-368027cc86ee, name=Mockative)
+         * -----
+         *   Invocations
+         *     ? repository(0efb1b3b-f1b2-41f8-a1d8-368027cc86ee) =
+         *         Repository(id=0efb1b3b-f1b2-41f8-a1d8-368027cc86ee, name=Mockito)
+         *     ✓ repository(0efb1b3b-f1b2-41f8-a1d8-368027cc86ee) =
+         *         Repository(id=0efb1b3b-f1b2-41f8-a1d8-368027cc86ee, name=Mockative)
+         * -----
+         * ```
+         */
+        fun debug(target: Any) {
+            val mock = target.asMockable()
+            mock.debug()
         }
     }
 }

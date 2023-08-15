@@ -11,7 +11,6 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.ksp.*
 import io.mockative.ksp.isFromAny
 
-@OptIn(KotlinPoetKspPreview::class)
 data class ProcessableType(
     val declaration: KSClassDeclaration,
     val sourceClassName: ClassName,
@@ -24,16 +23,27 @@ data class ProcessableType(
     val stubsUnitByDefault: Boolean,
 ) {
     companion object {
-        @OptIn(KotlinPoetKspPreview::class)
+        private fun isKotlinPackage(packageName: String): Boolean {
+            return packageName == "kotlin" || packageName.startsWith("kotlin.")
+        }
+
         private fun fromDeclaration(
             declaration: KSClassDeclaration,
             usages: List<KSFile>,
             stubsUnitByDefault: Boolean
         ): ProcessableType {
             val sourceClassName = declaration.toClassName()
-            val simpleNames = sourceClassName.simpleNames.dropLast(1) + "${sourceClassName.simpleName}Mock"
-            val simpleName = simpleNames.joinToString("_")
-            val mockClassName = ClassName(sourceClassName.packageName, simpleName)
+            val sourcePackageName = sourceClassName.packageName
+
+            val mockPackageNamePrefix =
+                if (isKotlinPackage(sourcePackageName)) "io.mockative." else ""
+
+            val simpleNamePrefix = sourceClassName.simpleNames.dropLast(1)
+            val simpleNameSuffix = "${sourceClassName.simpleName}Mock"
+
+            val mockSimpleNames = simpleNamePrefix + simpleNameSuffix
+            val mockSimpleName = mockSimpleNames.joinToString("_")
+            val mockClassName = ClassName(mockPackageNamePrefix + sourcePackageName, mockSimpleName)
 
             val typeParameterResolver = declaration.typeParameters
                 .toTypeParameterResolver()

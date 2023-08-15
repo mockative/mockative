@@ -45,7 +45,6 @@ internal fun KSDeclaration.toClassNameInternal(): ClassName {
     return ClassName(pkgName, simpleNames)
 }
 
-@KotlinPoetKspPreview
 internal fun KSType.toTypeNameMockative(
     typeParamResolver: TypeParameterResolver,
     typeArguments: List<KSTypeArgument>,
@@ -89,7 +88,6 @@ internal fun KSType.toTypeNameMockative(
  *                          declarations can be anything with generics that child nodes declare as
  *                          defined by [KSType.arguments].
  */
-@KotlinPoetKspPreview
 fun KSTypeReference.toTypeNameMockative(
     typeParamResolver: TypeParameterResolver = TypeParameterResolver.EMPTY
 ): TypeName {

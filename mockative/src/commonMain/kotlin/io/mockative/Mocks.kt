@@ -8,10 +8,19 @@ import kotlin.reflect.KClass
  *
  * This specific function is never actually called when Mockative is used correctly, because the
  * Mockative Kotlin Symbol Processor will generate a more specific overload of this function in the
- * same package with the file name `GeneratedMocks.kt`, accepting the specific type of the mock,
- * which overload resolution results in the compiler using instead.
+ * same package, accepting the specific type of the mock, which overload resolution results in the
+ * compiler using instead.
  *
  * @param type the type to mock
  * @return an instance of the mocked type
+ * @see classOf
  */
-fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockError(type)
+fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)
+
+/**
+ * Checks if the specified [value] is a Mockative mock instance.
+ *
+ * @param value The value to check
+ * @return `true` if the [value] is a Mockative mock; `false` otherwise.
+ */
+fun <T : Any> isMock(value: T): Boolean = value is Mockable

@@ -4,9 +4,15 @@ class ResultBuilder<R>(
     private val mock: Mockable,
     private val expectation: Expectation
 ) : AnyResultBuilder<R> {
-    fun then(block: (arguments: Array<Any?>) -> R) {
-        mock.addBlockingStub(BlockingStub(expectation, block))
+    fun invokes(block: (arguments: Array<Any?>) -> R) {
+        mock.addBlockingStub(OpenBlockingStub(expectation, block))
     }
 
-    override fun thenInvoke(block: () -> R) = then { block() }
+    fun invokesMany(blocks: List<(arguments: Array<Any?>) -> R>) {
+        mock.addBlockingStub(ClosedBlockingStub(expectation, blocks))
+    }
+
+    override fun invokes(block: () -> R) = invokes { _ -> block() }
+
+    override fun invokesMany(vararg blocks: () -> R) = invokesMany(blocks.map { block -> { _ -> block() } })
 }

@@ -9,13 +9,13 @@ internal class CodeGenerator(outputPath: String) {
         outputDir.deleteRecursively()
         outputDir.mkdirs()
 
-        generateFiles("GivenFunctionBuilder") { count -> "GivenFunction${count}Builder.kt"}
-        generateFiles("GivenSuspendFunctionBuilder") { count -> "GivenSuspendFunction${count}Builder.kt"}
-        generateFiles("VerifyFunctionBuilder") { count -> "VerifyFunction${count}Builder.kt"}
-
-        generateKFunctions()
-        generateGivenBuilder()
-        generateVerifyThatBuilder()
+//        generateFiles("GivenFunctionBuilder") { count -> "GivenFunction${count}Builder.kt"}
+//        generateFiles("GivenSuspendFunctionBuilder") { count -> "GivenSuspendFunction${count}Builder.kt"}
+//        generateFiles("VerifyFunctionBuilder") { count -> "VerifyFunction${count}Builder.kt"}
+//
+//        generateKFunctions()
+//        generateGivenBuilder()
+//        generateVerifyThatBuilder()
     }
 
     private fun generateKFunctions() {
@@ -104,7 +104,7 @@ internal class CodeGenerator(outputPath: String) {
             "type-param-list" to typeParameterCount.joinToString(", ") { "P$it" },
             "reified-type-param-list" to typeParameterCount.joinToString(", ") { "reified P$it" },
             "count" to "$count",
-            "with.parameters" to typeParameterCount.joinToString(", ") { "p$it: Matcher<P$it> = anything()" },
+            "with.parameters" to typeParameterCount.joinToString(", ") { "p$it: P$it = any()" },
             "with.arguments" to typeParameterCount.joinToString(", ") { "p$it" },
             "then.arguments" to typeParameterCount.joinToString(", ") { "args[${it - 1}] as P${it}" },
             "thenInvoke.underscores" to typeParameterCount.joinToString(", ") { "_" }

@@ -1,30 +1,25 @@
 package io.mockative
 
-import kotlin.jvm.JvmInline
+val once: Int = 1
+val twice: Int = 2
 
-val once: Times = Times(1)
-val twice: Times = Times(2)
+val Int.times: Int
+    get() = this
 
-@JvmInline
-value class Times(val value: Int)
-
-val Int.times: Times
-    get() = Times(this)
-
-val Int.time: Times
-    get() = Times(this)
+val Int.time: Int
+    get() = this
 
 class Verification(private val receiver: Mockable, private val expectation: Expectation) {
     fun wasInvoked() {
         receiver.verify(RangeVerifier(expectation, atLeast = 1, atMost = null))
     }
 
-    fun wasInvoked(atLeast: Times? = null, atMost: Times? = null) {
-        receiver.verify(RangeVerifier(expectation, atLeast?.value, atMost?.value))
+    fun wasInvoked(atLeast: Int? = null, atMost: Int? = null) {
+        receiver.verify(RangeVerifier(expectation, atLeast, atMost))
     }
 
-    fun wasInvoked(exactly: Times) {
-        receiver.verify(ExactVerifier(expectation, exactly.value))
+    fun wasInvoked(exactly: Int) {
+        receiver.verify(ExactVerifier(expectation, exactly))
     }
 
     fun wasNotInvoked() {

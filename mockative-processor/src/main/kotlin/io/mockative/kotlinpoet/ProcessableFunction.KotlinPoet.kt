@@ -1,13 +1,15 @@
 package io.mockative.kotlinpoet
 
-import com.google.devtools.ksp.symbol.KSName
-import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
+import com.squareup.kotlinpoet.ANY
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.UNIT
 import io.mockative.INVOCATION_FUNCTION
 import io.mockative.LIST_OF
 import io.mockative.ProcessableFunction
 
-@OptIn(KotlinPoetKspPreview::class)
 internal fun ProcessableFunction.buildFunSpec(): FunSpec {
     val modifiers = buildModifiers()
     val returnsUnit = if (returnType == UNIT) "true" else "false"
@@ -51,7 +53,6 @@ private fun ProcessableFunction.buildArgumentList(): CodeBlock {
         .build()
 }
 
-@OptIn(KotlinPoetKspPreview::class)
 private fun ProcessableFunction.buildParameterSpecs() = declaration.parameters
     .map { parameter ->
         val name = parameter.name!!.asString()

@@ -13,6 +13,13 @@ kotlin {
             kotlin.srcDirs("$buildDir/generated/mockative-code-generator")
         }
 
+        named("jvmMain") {
+            dependencies {
+                implementation("org.objenesis:objenesis:3.3")
+                implementation("org.javassist:javassist:3.29.2-GA")
+            }
+        }
+
         all {
             languageSettings {
                 optIn("kotlin.RequiresOptIn")
