@@ -13,6 +13,7 @@ kotlin {
 
 android {
     compileSdk = 33
+    namespace = "io.mockative"
 }
 
 inline fun <reified T> getProperty(key: String): T {
