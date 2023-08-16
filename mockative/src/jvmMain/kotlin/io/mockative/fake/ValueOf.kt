@@ -14,6 +14,24 @@ private val hasSealed by lazy {
     Class::class.java.methods.any { it.name == "isSealed" }
 }
 
+@Suppress("ObjectPropertyName")
+private val Class<*>._isSealed: Boolean
+    get() {
+        val method = methods.firstOrNull { it.name == "isSealed" } ?: return false
+        method.isAccessible = true
+        return method.invoke(this) as Boolean
+    }
+
+@Suppress("ObjectPropertyName")
+private val Class<*>._permittedSubclasses: kotlin.Array<Class<*>>
+    get() {
+        val method = methods.firstOrNull { it.name == "getPermittedSubclasses" } ?: return emptyArray()
+        method.isAccessible = true
+
+        @Suppress("UNCHECKED_CAST")
+        return method.invoke(this) as kotlin.Array<Class<*>>
+    }
+
 @Suppress("UNCHECKED_CAST", "NewApi")
 internal actual fun <T> makeValueOf(type: KClass<*>): T {
     return makeValueOf(type.java) as T
@@ -24,7 +42,7 @@ internal fun makeValueOf(clazz: Class<*>): Any? {
     return when {
         clazz.isArray -> Array.newInstance(clazz.componentType, 0)
 
-        hasSealed && clazz.isSealed -> clazz.permittedSubclasses
+        hasSealed && clazz._isSealed -> clazz._permittedSubclasses
             .firstNotNullOf { runCatching { makeValueOf(it) }.getOrNull() }
 
         clazz.isInterface -> Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz)) { _, method, _ ->
