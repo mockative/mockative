@@ -1,4 +1,5 @@
 @file:JvmName("ValueOfJVM")
+
 package io.mockative.fake
 
 import javassist.util.proxy.ProxyFactory
@@ -10,50 +11,43 @@ import kotlin.reflect.KClass
 
 private val objenesis = ObjenesisStd()
 
-private val hasSealed by lazy {
-    Class::class.java.methods.any { it.name == "isSealed" }
+@Suppress("UNCHECKED_CAST")
+private fun <T> Any.invoke(methodName: String, defaultValue: T): T {
+    val method =
+        this::class.java.methods.firstOrNull { it.name == methodName } ?: return defaultValue
+    return method.invoke(this) as T
 }
 
-@Suppress("ObjectPropertyName")
-private val Class<*>._isSealed: Boolean
-    get() {
-        val method = methods.firstOrNull { it.name == "isSealed" } ?: return false
-        method.isAccessible = true
-        return method.invoke(this) as Boolean
-    }
+private fun isSealed(clazz: Class<*>): Boolean {
+    return clazz.invoke("isSealed", false)
+}
 
-@Suppress("ObjectPropertyName")
-private val Class<*>._permittedSubclasses: kotlin.Array<Class<*>>
-    get() {
-        val method = methods.firstOrNull { it.name == "getPermittedSubclasses" } ?: return emptyArray()
-        method.isAccessible = true
+private fun getPermittedSubclasses(clazz: Class<*>): kotlin.Array<Class<*>> {
+    return clazz.invoke("getPermittedSubclasses", emptyArray())
+}
 
-        @Suppress("UNCHECKED_CAST")
-        return method.invoke(this) as kotlin.Array<Class<*>>
-    }
-
-@Suppress("UNCHECKED_CAST", "NewApi")
+@Suppress("UNCHECKED_CAST")
 internal actual fun <T> makeValueOf(type: KClass<*>): T {
     return makeValueOf(type.java) as T
 }
 
-@Suppress("NewApi")
 internal fun makeValueOf(clazz: Class<*>): Any? {
     return when {
         clazz.isArray -> Array.newInstance(clazz.componentType, 0)
 
-        hasSealed && clazz._isSealed -> clazz._permittedSubclasses
+        isSealed(clazz) -> getPermittedSubclasses(clazz)
             .firstNotNullOf { runCatching { makeValueOf(it) }.getOrNull() }
 
-        clazz.isInterface -> Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz)) { _, method, _ ->
-            error(method.toString())
-        }
+        clazz.isInterface ->
+            Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz)) { _, method, _ ->
+                throw NotImplementedError(method.toString())
+            }
 
         Modifier.isAbstract(clazz.modifiers) -> {
             val constructor = clazz.constructors[0]
-            val arguments = Array(constructor.parameterCount) { index ->
-                valueOf<Any?>(constructor.parameterTypes[index].kotlin)
-            }
+            val arguments = constructor.parameterTypes
+                .map { valueOf<Any?>(it.kotlin) }
+                .toTypedArray()
 
             val proxyFactory = ProxyFactory()
             proxyFactory.superclass = clazz
