@@ -101,6 +101,6 @@ kotlin {
         val mingwX64Main by getting { dependsOn(mingwMain) }
 
         // wasm
-        val wasmMain by getting { dependsOn(commonMain) }
+        val wasmJsMain by getting { dependsOn(commonMain) }
     }
 }

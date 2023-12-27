@@ -143,29 +143,6 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
         }
     }
 
-    /**
-     * Records the invocation of a single member on this mock.
-     *
-     * @param block the block invoking the member on this mock.
-     * @return the recorded invocation
-     */
-    @Suppress("UNCHECKED_CAST", "DuplicatedCode")
-    internal fun <T : Any, R> record(block: T.() -> R): Invocation {
-        var invocation: Invocation? = null
-
-        isRecording = true
-
-        try {
-            block(this as T)
-        } catch (error: StubbingInProgressException) {
-            invocation = error.invocation
-        } finally {
-            isRecording = false
-        }
-
-        return invocation!!
-    }
-
     @Suppress("UNCHECKED_CAST")
     protected fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
@@ -183,29 +160,6 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
                 throw e
             }
         }
-    }
-
-    /**
-     * Records the invocation of a single member on this mock.
-     *
-     * @param block the block invoking the member on this mock.
-     * @return the recorded invocation
-     */
-    @Suppress("UNCHECKED_CAST", "DuplicatedCode")
-    internal suspend fun <T : Any, R> record(block: suspend T.() -> R): Invocation {
-        var invocation: Invocation? = null
-
-        isRecording = true
-
-        try {
-            block(this as T)
-        } catch (error: StubbingInProgressException) {
-            invocation = error.invocation
-        } finally {
-            isRecording = false
-        }
-
-        return invocation!!
     }
 
     @Suppress("UNCHECKED_CAST")

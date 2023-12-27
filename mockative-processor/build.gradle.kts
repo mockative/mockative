@@ -15,7 +15,7 @@ kotlin {
                 implementation(project(":mockative"))
 
                 // KSP
-                implementation("com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.13")
+                implementation("com.google.devtools.ksp:symbol-processing-api:1.9.22-1.0.16")
 
                 // KotlinPoet
                 implementation("com.squareup:kotlinpoet:1.14.2")

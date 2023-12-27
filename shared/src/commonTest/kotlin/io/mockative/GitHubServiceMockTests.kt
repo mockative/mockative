@@ -9,11 +9,21 @@ import kotlin.test.assertSame
 
 internal class GitHubServiceMockTests {
 
-    @Mock val github = mock(classOf<GitHubAPI>())
-    @Mock val expected = mock(classOf<ExpectedAPI>())
-    @Mock val nested = mock(classOf<GitHubService.NestedAPI>())
-    @Mock val configuration = mock(classOf<GitHubConfiguration>())
-    @Mock val function = mock(classOf<Fun0<Unit>>())
+    @Mock
+    val github: GitHubAPI = mock(classOf<GitHubAPI>())
+
+    @Mock
+    val expected: ExpectedAPI = mock(classOf<ExpectedAPI>())
+
+    @Mock
+    val nested: GitHubService.NestedAPI = mock(classOf<GitHubService.NestedAPI>())
+
+    @Mock
+    val configuration: GitHubConfiguration = mock(classOf<GitHubConfiguration>())
+
+    @Mock
+    val function: Fun0<Unit> = mock(classOf<Fun0<Unit>>())
+
 
     private val service = GitHubService(github, configuration, ApplicationDispatchers.Unconfined)
 
