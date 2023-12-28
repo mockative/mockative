@@ -1,5 +1,6 @@
 package io.mockative
 
+import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
@@ -49,9 +50,8 @@ data class ProcessableType(
                 .toTypeParameterResolver()
 
             val functions = declaration.getAllFunctions()
-                .filter { it.isPublic() }
                 // Functions from Any are manually implemented in [Mockable]
-                .filterNot { it.isFromAny() }
+                .filter { it.isPublic() && !it.isConstructor() && !it.isFromAny() }
                 .map { ProcessableFunction.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 
@@ -87,7 +87,7 @@ data class ProcessableType(
                     (property.type.resolve().declaration as? KSClassDeclaration)
                         ?.let { it to property.containingFile }
                 }
-                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE }
+                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
                 .groupBy({ (classDec, _) -> classDec }, { (_, file) -> file })
                 .map { (classDec, usages) ->
                     fromDeclaration(

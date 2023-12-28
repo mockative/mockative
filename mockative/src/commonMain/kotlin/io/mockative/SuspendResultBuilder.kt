@@ -1,6 +1,6 @@
 package io.mockative
 
-class SuspendResultBuilder<R>(
+class SuspendResultBuilder<R> internal constructor(
     private val mock: Mockable,
     private val expectation: Expectation
 ) : AnySuspendResultBuilder<R> {

@@ -1,9 +1,10 @@
 package io.mockative.kotlinpoet
 
+import com.google.devtools.ksp.symbol.ClassKind
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import io.mockative.CONFIGURE
 import io.mockative.KCLASS
-import io.mockative.MOCKABLE
 import io.mockative.ProcessableType
 import io.mockative.SUPPRESS_ANNOTATION
 import io.mockative.ksp.addOriginatingKSFiles
@@ -35,7 +36,7 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
         .addTypeVariables(functionTypeVariables)
         .addParameter(type)
         .returns(parameterizedSourceClassName)
-        .addStatement("return %T()", parameterizedMockClassName)
+        .addStatement("return %M(%T()) { stubsUnitByDefault = %L }", CONFIGURE, parameterizedMockClassName, stubsUnitByDefault)
         .addOriginatingKSFiles(usages)
         .build()
 }
@@ -48,21 +49,23 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     val properties = buildPropertySpecs()
     val functions = buildFunSpecs()
 
-    val parameterSpec = ParameterSpec.builder("stubsUnitByDefault", BOOLEAN)
-        .build()
-
     val modifiers = buildList {
         if (declaration.isEffectivelyInternal()) {
             add(KModifier.INTERNAL)
         }
     }
 
-    return TypeSpec.classBuilder(mockClassName)
+    val typeSpec = TypeSpec.classBuilder(mockClassName)
         .addModifiers(modifiers)
         .addTypeVariables(typeVariables)
-        .superclass(MOCKABLE)
-        .addSuperclassConstructorParameter("%N = %L", parameterSpec, stubsUnitByDefault)
-        .addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))
+
+    if (declaration.classKind == ClassKind.CLASS) {
+        typeSpec.superclass(sourceClassName.parameterizedByAny(typeVariables))
+    } else if (declaration.classKind == ClassKind.INTERFACE) {
+        typeSpec.addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))
+    }
+
+    return typeSpec
         .addProperties(properties)
         .addFunctions(functions)
         .addKdoc(declaration.docString?.trim() ?: "")

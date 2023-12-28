@@ -8,6 +8,7 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.UNIT
 import io.mockative.INVOCATION_FUNCTION
 import io.mockative.LIST_OF
+import io.mockative.MOCKED
 import io.mockative.ProcessableFunction
 
 internal fun ProcessableFunction.buildFunSpec(): FunSpec {
@@ -28,7 +29,7 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
         .returns(returnType)
         .addParameters(parameterSpecs)
         .addTypeVariables(typeVariables)
-        .addStatement("return %L<%T>(%T(%S, %L), %L)", invocation, returnType, INVOCATION_FUNCTION, name, argumentsList, returnsUnit)
+        .addStatement("return %T.%L<%T>(this, %T(%S, %L), %L)", MOCKED, invocation, returnType, INVOCATION_FUNCTION, name, argumentsList, returnsUnit)
         .build()
 }
 
