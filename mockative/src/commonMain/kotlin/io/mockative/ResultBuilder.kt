@@ -1,6 +1,6 @@
 package io.mockative
 
-class ResultBuilder<R> internal constructor(
+class ResultBuilder<R>(
     private val mock: Mockable,
     private val expectation: Expectation
 ) : AnyResultBuilder<R> {
