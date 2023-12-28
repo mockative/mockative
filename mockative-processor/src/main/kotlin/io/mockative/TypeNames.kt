@@ -11,7 +11,7 @@ val KCLASS = ClassName("kotlin.reflect", "KClass")
 val MOCK_ANNOTATION = Mock::class.asClassName()
 val SUPPRESS_ANNOTATION = Suppress::class.asClassName()
 
-val MOCKED = Mockable::class.asClassName()
+val MOCKABLE = Mockable::class.asClassName()
 
 val INVOCATION_GETTER = Invocation.Getter::class.asClassName()
 val INVOCATION_SETTER = Invocation.Setter::class.asClassName()

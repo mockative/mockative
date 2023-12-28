@@ -145,7 +145,7 @@ class Mockable(val instance: Any) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    protected fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
+    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
@@ -164,7 +164,19 @@ class Mockable(val instance: Any) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    protected suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
+    internal fun <R> invoke(invocation: Invocation, default: () -> R): R {
+        if (isRecording) {
+            throw StubbingInProgressException(this, invocation)
+        } else {
+            return when (val stub = getBlockingStubOrNull(invocation)) {
+                null -> default()
+                else -> stub.invoke(invocation) as R
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
@@ -179,36 +191,6 @@ class Mockable(val instance: Any) {
                 invocation.result = InvocationResult.Exception(e)
                 throw e
             }
-        }
-    }
-
-    private inline fun <reified R> invokeWithFallback(invocation: Invocation, default: () -> R): R {
-        if (isRecording) {
-            throw StubbingInProgressException(this, invocation)
-        } else {
-            return when (val stub = getBlockingStubOrNull(invocation)) {
-                null -> default()
-                else -> stub.invoke(invocation) as R
-            }
-        }
-    }
-
-    @Suppress("ReplaceCallWithBinaryOperator")
-    override fun equals(other: Any?): Boolean {
-        return invokeWithFallback(Invocation.Function("equals", listOf(other))) {
-            instanceToken.equals((other as? Mockable)?.instanceToken)
-        }
-    }
-
-    override fun hashCode(): Int {
-        return invokeWithFallback(Invocation.Function("hashCode", emptyList())) {
-            instanceToken.hashCode()
-        }
-    }
-
-    override fun toString(): String {
-        return invokeWithFallback(Invocation.Function("toString", emptyList())) {
-            "io.mockative.Mockable@${instanceToken.hashCode()}"
         }
     }
 
@@ -280,52 +262,16 @@ class Mockable(val instance: Any) {
             return mockables.getOrPut(instance) { Mockable(instance) }
         }
 
-        internal fun reset(instance: Any) {
-            mockable(instance).reset()
-        }
-
-        internal fun unmock(instance: Any) {
-            mockable(instance).unmock()
-        }
-
-        internal fun addBlockingStub(instance: Any, stub: BlockingStub) {
-            mockable(instance).addBlockingStub(stub)
-        }
-
-        internal fun addSuspendStub(instance: Any, stub: SuspendStub) {
-            mockable(instance).addSuspendStub(stub)
-        }
-
-        internal fun verify(instance: Any, verifier: Verifier) {
-            mockable(instance).verify(verifier)
-        }
-
-        internal fun confirmVerified(instance: Any) {
-            mockable(instance).confirmVerified()
-        }
-
-        internal fun verifyNoUnmetExpectations(instance: Any) {
-            mockable(instance).verifyNoUnmetExpectations()
-        }
-
         fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
             return mockable(instance).invoke(invocation, returnsUnit)
         }
 
+        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R): R {
+            return mockable(instance).invoke(invocation, default)
+        }
+
         suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
             return mockable(instance).suspend(invocation, returnsUnit)
-        }
-
-        fun equals(instance: Any, other: Any?): Boolean {
-            return mockable(instance).equals(other)
-        }
-
-        fun hashCode(instance: Any): Int {
-            return mockable(instance).hashCode()
-        }
-
-        fun toString(instance: Any): String {
-            return mockable(instance).toString()
         }
 
         /**

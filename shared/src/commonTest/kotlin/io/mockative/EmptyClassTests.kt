@@ -2,22 +2,21 @@ package io.mockative
 
 import kotlin.test.Test
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-class EmptyInterfaceTests {
+class EmptyClassTests {
     @Mock
-    val mock = mock(classOf<EmptyInterface>())
+    val mock = mock(classOf<EmptyClass>())
 
-    val notMock = object : EmptyInterface() {}
+    val notMock = object : EmptyClass() {}
 
     @Test
-    fun isMockEmptyInterface() {
+    fun isMockEmptyClass() {
         assertTrue(isMock(mock))
     }
 
     @Test
-    fun isNotMockEmptyInterface() {
+    fun isNotMockEmptyClass() {
         assertFalse(isMock(notMock))
     }
 }

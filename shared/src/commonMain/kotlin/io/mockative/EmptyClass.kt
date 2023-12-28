@@ -1,5 +1,5 @@
 package io.mockative
 
 @Mocked
-class EmptyInterface {
+class EmptyClass {
 }
