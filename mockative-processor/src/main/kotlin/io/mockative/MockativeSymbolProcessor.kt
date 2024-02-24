@@ -22,15 +22,18 @@ class MockativeSymbolProcessor(
 
         // Resolve the processable types
         val processableTypes = ProcessableType.fromResolver(resolver, stubsUnitByDefault)
+        val generatedMockTypes = processableTypes.associateBy(
+            { it.sourceClassName.toString() }, { it.mockClassName.toString() }
+        )
 
-        // Generate Mock classes
+        // Generate Mock Classes
         processableTypes
             .forEach { type ->
                 val packageName = type.mockClassName.packageName
                 val fileName = type.mockClassName.fullSimpleName
 
                 FileSpec.builder(packageName, fileName)
-                    .addType(type.buildMockTypeSpec())
+                    .addType(type.buildMockTypeSpec(generatedMockTypes))
                     .build()
                     .writeTo(codeGenerator, aggregating = false)
             }

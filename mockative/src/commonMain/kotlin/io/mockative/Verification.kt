@@ -9,20 +9,20 @@ val Int.times: Int
 val Int.time: Int
     get() = this
 
-class Verification(private val receiver: Mockable, private val expectation: Expectation) {
+class Verification(private val mockable: Mockable, private val expectation: Expectation) {
     fun wasInvoked() {
-        receiver.verify(RangeVerifier(expectation, atLeast = 1, atMost = null))
+        mockable.verify(RangeVerifier(expectation, atLeast = 1, atMost = null))
     }
 
     fun wasInvoked(atLeast: Int? = null, atMost: Int? = null) {
-        receiver.verify(RangeVerifier(expectation, atLeast, atMost))
+        mockable.verify(RangeVerifier(expectation, atLeast, atMost))
     }
 
     fun wasInvoked(exactly: Int) {
-        receiver.verify(ExactVerifier(expectation, exactly))
+        mockable.verify(ExactVerifier(expectation, exactly))
     }
 
     fun wasNotInvoked() {
-        receiver.verify(ExactVerifier(expectation, 0))
+        mockable.verify(ExactVerifier(expectation, 0))
     }
 }

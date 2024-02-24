@@ -6,6 +6,5 @@ package io.mockative
  * @param receiver The mock to reset
  */
 fun <T : Any> reset(receiver: T) {
-    val mock = receiver.asMockable()
-    mock.reset()
+    Mockable.mockable(receiver).reset()
 }

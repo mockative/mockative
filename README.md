@@ -8,7 +8,6 @@ Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Proce
 Notable features include:
 
 - Concise, non-intrusive, type-safe API
-- Mocking of **interfaces only**
 - Supports both [values](#stubbing-using-values) and [matchers](#stubbing-using-matchers) when
   during
   stubbing [verification](#verification)
@@ -23,7 +22,7 @@ Notable features include:
 >
 > Please see [Migrating to Mockative 2](wiki/MIGRATING-TO-2.md) for a migration guide.
 
-Mockative uses [KSP] to generate mock classes for interfaces, and as such, it requires adding the
+Mockative uses [KSP] to generate mock classes, and as such, it requires adding the
 KSP plugin in addition to adding the runtime library and symbol processor dependencies.
 
 **build.gradle.kts**
@@ -56,9 +55,61 @@ dependencies {
 }
 ```
 
+## Gradle configuration for mocking classes
+To utilize Mockative effectively in your Kotlin project, it's essential to configure your Gradle build script to open classes for mocking. Mockative requires classes to be open for subclassing, as Kotlin classes are final by default. This is achieved using the Kotlin `all-open` compiler plugin along with a specific annotation provided by Mockative.
+
+### Step 1: Apply the Kotlin All-Open Plugin
+
+First, ensure that your project applies the Kotlin `all-open` plugin. Add the following to your `build.gradle.kts` file:
+
+```kotlin
+plugins {
+    kotlin("jvm") // or kotlin("multiplatform") as applicable
+    id("org.jetbrains.kotlin.plugin.allopen") version "<kotlin_version>"
+}
+
+```
+
+Replace `<kotlin_version>` with the version of Kotlin you are using in your project.
+
+### Step 2: Configure `allOpen` Annotation
+
+Next, configure the `allOpen` plugin to recognize the `@Mocked` annotation. This step makes all classes annotated with `@Mocked` non-final, thus allowing Mockative to mock them. Add the following configuration to your `build.gradle.kts` file:
+
+```kotlin
+allOpen {
+    annotation("io.mockative.Mocked")
+}
+```
+
+This configuration should be placed outside of and after the `plugins` block.
+
+### Using `@Mocked`
+
+To mock a class with Mockative, annotate the class or interface with `@Mocked`. This annotation indicates to Mockative (and the Kotlin compiler, with the above configuration) that the class should be open for subclassing and available for mocking.
+
+```kotlin
+import io.mockative.Mocked
+
+@Mocked
+class MyService {
+    // Class implementation
+}
+```
+
+### Global Mocking
+
+If you prefer to make all classes in your project open (and thus mockable by Mockative) without annotating them individually, you can adjust the `allOpen` configuration to apply to all classes. However, use this approach with caution, as it may have unintended side effects by making all your classes non-final.
+
+```kotlin
+allOpen {
+    annotation("kotlin.Metadata")
+}
+```
+
 ## Testing with Mockative
 
-To mock a given method on an interface, annotate a property holding the interface type with the
+To mock a given method on an interface or a class, annotate a property holding the interface- or class type with the
 `@Mock` annotation, and assign it to the result of a call to the `<T> mock(KClass<T>)` function:
 
 ```kotlin

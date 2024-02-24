@@ -1,15 +1,18 @@
 package io.mockative
 
+import com.google.devtools.ksp.getConstructors
+import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
-import com.google.devtools.ksp.symbol.ClassKind
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeVariableName
-import com.squareup.kotlinpoet.ksp.*
+import com.squareup.kotlinpoet.ksp.TypeParameterResolver
+import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
+import com.squareup.kotlinpoet.ksp.toTypeVariableName
 import io.mockative.ksp.isFromAny
+import kotlin.properties.Delegates
 
 data class ProcessableType(
     val declaration: KSClassDeclaration,
@@ -21,16 +24,45 @@ data class ProcessableType(
     val typeParameterResolver: TypeParameterResolver,
     val typeVariables: List<TypeVariableName>,
     val stubsUnitByDefault: Boolean,
+    private var children: List<ProcessableType>,
+    val constructorParameters: List<KSValueParameter>
 ) {
     companion object {
+        private var stubsUnitByDefault by Delegates.notNull<Boolean>()
+
         private fun isKotlinPackage(packageName: String): Boolean {
             return packageName == "kotlin" || packageName.startsWith("kotlin.")
+        }
+
+        private fun processConstructorParameters(
+            declaration: KSClassDeclaration,
+        ): Pair<List<KSValueParameter>, List<ProcessableType>> {
+            val constructor = declaration.primaryConstructor
+                ?: return emptyList<KSValueParameter>() to emptyList<ProcessableType>()
+
+            val constructorParameters = constructor.parameters
+            val processableTypes = constructorParameters.mapNotNull { parameter ->
+                val parameterDeclaration = parameter.type.resolve().declaration as? KSClassDeclaration
+                val modifiers = parameterDeclaration?.modifiers
+                val isNotFinal = modifiers?.contains(Modifier.FINAL) == false && !modifiers.contains(Modifier.SEALED)
+
+                val containingFilesOfClass =
+                    parameterDeclaration?.containingFile?.let { listOf(it) } ?: emptyList() // if class is changed, include in incremental compilation
+
+                return@mapNotNull if (isNotFinal && parameterDeclaration != null) {
+                    fromDeclaration(
+                        declaration = parameterDeclaration,
+                        usages = containingFilesOfClass,
+                    )
+                } else null
+            }
+
+            return constructorParameters to processableTypes
         }
 
         private fun fromDeclaration(
             declaration: KSClassDeclaration,
             usages: List<KSFile>,
-            stubsUnitByDefault: Boolean
         ): ProcessableType {
             val sourceClassName = declaration.toClassName()
             val sourcePackageName = sourceClassName.packageName
@@ -49,9 +81,8 @@ data class ProcessableType(
                 .toTypeParameterResolver()
 
             val functions = declaration.getAllFunctions()
-                .filter { it.isPublic() }
                 // Functions from Any are manually implemented in [Mockable]
-                .filterNot { it.isFromAny() }
+                .filter { it.isPublic() && !it.isConstructor() && !it.isFromAny() }
                 .map { ProcessableFunction.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 
@@ -63,6 +94,7 @@ data class ProcessableType(
             val typeVariables = declaration.typeParameters
                 .map { it.toTypeVariableName(typeParameterResolver) }
 
+            val (constructorParameters, children) = processConstructorParameters(declaration)
             val processableType = ProcessableType(
                 declaration = declaration,
                 sourceClassName = sourceClassName,
@@ -73,6 +105,8 @@ data class ProcessableType(
                 typeParameterResolver = typeParameterResolver,
                 typeVariables = typeVariables,
                 stubsUnitByDefault = stubsUnitByDefault,
+                children = children,
+                constructorParameters = constructorParameters
             )
 
             functions.forEach { it.parent = processableType }
@@ -81,21 +115,31 @@ data class ProcessableType(
         }
 
         fun fromResolver(resolver: Resolver, stubsUnitByDefault: Boolean): List<ProcessableType> {
-            return resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
+            this.stubsUnitByDefault = stubsUnitByDefault
+
+            val processableTypes = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
                 .mapNotNull { symbol -> symbol as? KSPropertyDeclaration }
                 .mapNotNull { property ->
                     (property.type.resolve().declaration as? KSClassDeclaration)
                         ?.let { it to property.containingFile }
                 }
-                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE }
+                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
                 .groupBy({ (classDec, _) -> classDec }, { (_, file) -> file })
                 .map { (classDec, usages) ->
                     fromDeclaration(
                         declaration = classDec,
                         usages = usages.filterNotNull(),
-                        stubsUnitByDefault = stubsUnitByDefault,
                     )
                 }
+            // want to filter out all of processable types which appear more than one time.
+            // That is, we dont want to create mock classes for the same type more than once
+            return processableTypes.flatten().distinctBy { it.mockClassName }
+        }
+
+        private fun List<ProcessableType>.flatten(): List<ProcessableType> {
+            return this.flatMap { type ->
+                listOf(type) + type.children.flatten()
+            }
         }
     }
 }

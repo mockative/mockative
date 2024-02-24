@@ -18,3 +18,5 @@ val INVOCATION_SETTER = Invocation.Setter::class.asClassName()
 val INVOCATION_FUNCTION = Invocation.Function::class.asClassName()
 
 val LIST_OF = MemberName("kotlin.collections", "listOf")
+
+val CONFIGURE = MemberName("io.mockative", "configure")
