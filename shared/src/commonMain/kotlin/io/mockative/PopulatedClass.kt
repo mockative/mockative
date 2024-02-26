@@ -1,6 +1,6 @@
 package io.mockative
 
-@Mocked
+@MockativeMockable
 class PopulatedClass(
     private val class2: Class2,
     private val inner2: InnerClass,
@@ -23,7 +23,7 @@ class PopulatedClass(
     val hashSet: HashSet<String>,
 ) {
 
-    @Mocked
+    @MockativeMockable
     class InnerClass(val s: String) {
         fun wassup() = "Hello"
     }
@@ -32,13 +32,13 @@ class PopulatedClass(
     fun greet() = "Hello"
 }
 
-@Mocked
+@MockativeMockable
 class Class2(val class3: Class3) {
     val message1 = "message1"
     val message2 = "message2"
 }
 
-@Mocked
+@MockativeMockable
 class Class3 {
     val message1 = "message1"
     val message2 = "message2"

@@ -12,10 +12,6 @@ plugins {
 version = "1.0.0"
 group = "io.mockative"
 
-allOpen {
-    annotation("io.mockative.Mocked")
-}
-
 kotlin {
     jvmToolchain(17)
 
@@ -134,4 +130,10 @@ dependencies {
         .forEach {
             add(it.name, project(":mockative-processor"))
         }
+}
+
+tasks.withType<Test>().configureEach {
+    allOpen {
+        annotation("io.mockative.MockativeMockable")
+    }
 }
