@@ -65,7 +65,7 @@ First, ensure that your project applies the Kotlin `all-open` plugin. Add the fo
 ```kotlin
 plugins {
     kotlin("jvm") // or kotlin("multiplatform") as applicable
-    id("org.jetbrains.kotlin.plugin.allopen") version "<kotlin_version>"
+    kotlin("plugin.allopen") version "<kotlin_version>"
 }
 
 ```
