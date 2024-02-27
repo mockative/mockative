@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)

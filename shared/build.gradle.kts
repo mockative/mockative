@@ -134,6 +134,6 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     allOpen {
-        annotation("io.mockative.MockativeMockable")
+        annotation("io.github.MockativeMockable")
     }
 }

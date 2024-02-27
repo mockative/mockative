@@ -20,3 +20,10 @@ val INVOCATION_FUNCTION = Invocation.Function::class.asClassName()
 val LIST_OF = MemberName("kotlin.collections", "listOf")
 
 val CONFIGURE = MemberName("io.mockative", "configure")
+
+val ARRAY_LIST = ClassName("kotlin.collections", "ArrayList")
+val ARRAY_DEQUE = ClassName("kotlin.collections", "ArrayDeque")
+val LINKED_HASH_MAP = ClassName("kotlin.collections", "LinkedHashMap")
+val HASH_MAP = ClassName("kotlin.collections", "HashMap")
+val LINKED_HASH_SET = ClassName("kotlin.collections", "LinkedHashSet")
+val HASH_SET = ClassName("kotlin.collections", "HashSet")

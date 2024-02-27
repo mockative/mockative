@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 sealed interface SealedInterface {
     val name: String

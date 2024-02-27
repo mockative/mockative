@@ -1,7 +1,8 @@
-package io.mockative.fake
+package io.github.fake
 
-import io.mockative.AbstractParameter
-import io.mockative.Repository
+import io.github.AbstractParameter
+import io.github.Repository
+import io.mockative.fake.valueOf
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

@@ -1,11 +1,17 @@
-package io.mockative
+package io.github
 
+import io.mockative.MissingExpectationException
+import io.mockative.Mock
+import io.mockative.classOf
+import io.mockative.every
+import io.mockative.isMock
+import io.mockative.mock
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class PopulatedClassTests {
     @Mock
-    val mock = mock(classOf<PopulatedClass>())
+    val mock: PopulatedClass = mock(classOf<PopulatedClass>())
 
     @Mock
     val class3Mock = mock(classOf<Class3>())

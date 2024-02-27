@@ -42,7 +42,7 @@ private fun TypeVariableName.withoutVariance(): TypeVariableName {
     return TypeVariableName(name = name, bounds = bounds)
 }
 
-internal fun ProcessableType.buildMockTypeSpec(generatedMockTypes: Map<String, String>): TypeSpec {
+internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     val properties = buildPropertySpecs()
     val functions = buildFunSpecs()
 
@@ -55,7 +55,18 @@ internal fun ProcessableType.buildMockTypeSpec(generatedMockTypes: Map<String, S
     val typeSpec = TypeSpec.classBuilder(mockClassName)
         .addModifiers(modifiers)
         .addTypeVariables(typeVariables)
-        .buildTypeSpec(this, generatedMockTypes)
+
+    if (declaration.classKind == ClassKind.CLASS) {
+        typeSpec.superclass(sourceClassName.parameterizedByAny(typeVariables))
+
+        constructorParameters
+            .map { it.type.toTypeNameMockative(typeParameterResolver).copy(nullable = false).rawType() }
+            .forEach { type ->
+                typeSpec.addSuperclassConstructorParameter("%L", valueOf(type))
+            }
+    } else if (declaration.classKind == ClassKind.INTERFACE) {
+        typeSpec.addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))
+    }
 
     return typeSpec
         .addProperties(properties)
@@ -75,30 +86,4 @@ private fun ProcessableType.buildFunSpecs(): List<FunSpec> {
     return functions
         .map { it.buildFunSpec() }
         .toList()
-}
-
-private fun TypeSpec.Builder.buildTypeSpec(
-    processableType: ProcessableType,
-    generatedMockTypes: Map<String, String>
-): TypeSpec.Builder {
-    val typeSpec = this
-    processableType.run {
-        if (declaration.classKind == ClassKind.CLASS) {
-            typeSpec.superclass(sourceClassName.parameterizedByAny(typeVariables))
-
-            constructorParameters.forEach { param ->
-                val property =
-                    properties.find { it.name == param.name?.asString() }?.type
-                        ?: param.type.toTypeNameMockative() // if the constructor parameter is not a property, then it is private
-
-                val constructorParameterInitialization = property.getConstructorParameterValue(generatedMockTypes)
-
-                addSuperclassConstructorParameter("$param = %L", constructorParameterInitialization)
-            }
-        } else { // ClassKind.INTERFACE
-            typeSpec.addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))
-        }
-    }
-
-    return typeSpec
 }

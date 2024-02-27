@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 @MockativeMockable
 class PopulatedClass(
@@ -21,6 +21,7 @@ class PopulatedClass(
     val hashMap: HashMap<String, String>,
     val linkedSet: LinkedHashSet<String>,
     val hashSet: HashSet<String>,
+    val block: () -> Unit,
 ) {
 
     @MockativeMockable

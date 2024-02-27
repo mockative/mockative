@@ -1,6 +1,12 @@
 package io.mockative.kotlinpoet
 
 import com.squareup.kotlinpoet.*
+import io.mockative.ARRAY_DEQUE
+import io.mockative.ARRAY_LIST
+import io.mockative.HASH_MAP
+import io.mockative.HASH_SET
+import io.mockative.LINKED_HASH_MAP
+import io.mockative.LINKED_HASH_SET
 
 internal fun TypeName.applySafeAnnotations(): TypeName {
     return when (this) {
@@ -29,59 +35,44 @@ private fun TypeName.addAnnotations(additionalAnnotations: List<AnnotationSpec>)
     return copy(annotations = this.annotations + additionalAnnotations)
 }
 
-internal fun TypeName.getConstructorParameterValue(
-    generatedMockTypes: Map<String, String>
-): CodeBlock {
-    val propertyType = this.toString().removeSuffix("?")
-    val propertyTypeWithoutGenerics = propertyType.substringBefore("<")
-    val generics = propertyType.dropWhile { it != '<' }
-    val classMock = generatedMockTypes.getOrElse(propertyTypeWithoutGenerics) { "" }
-
-    val constructorParameterInitialization =
-        if (classMock.isNotEmpty()) {
-            if (generics.isNotEmpty()) {
-                CodeBlock.of("%L%L()", classMock, generics)
-            } else { // Not generic
-                CodeBlock.of("%L()", classMock)
-            }
-        } else {
-            // Whenever it is not a mockative type, we use the valueOf function to get a default value
-            CodeBlock.of("%L", valueOf(propertyTypeWithoutGenerics, generics))
-        }
-
-    return constructorParameterInitialization
+private fun mockValue(type: ClassName): CodeBlock {
+    val simpleName = type.simpleNames.joinToString("_")
+    val mockName = ClassName(type.packageName, "${simpleName}Mock")
+    return CodeBlock.of("%T()", mockName)
 }
 
-private fun valueOf(propertyWithoutGenerics: String, generics: String): String {
-    return when (propertyWithoutGenerics) {
-        Boolean::class.qualifiedName -> "false"
-        Byte::class.qualifiedName -> "0.toByte()"
-        Short::class.qualifiedName -> "0.toShort()"
-        Char::class.qualifiedName -> "0.toChar()"
-        Int::class.qualifiedName -> "0"
-        Long::class.qualifiedName -> "0L"
-        Float::class.qualifiedName -> "0f"
-        Double::class.qualifiedName -> "0.0"
+internal fun valueOf(type: ClassName): CodeBlock {
+    return when (type) {
+        BOOLEAN -> CodeBlock.of("%L", false)
+        BYTE -> CodeBlock.of("%L", 0)
+        SHORT -> CodeBlock.of("%L", 0)
+        CHAR -> CodeBlock.of("%L.toChar()", 0)
+        INT -> CodeBlock.of("%L", 0)
+        LONG -> CodeBlock.of("%L", 0)
+        FLOAT -> CodeBlock.of("%L", 0)
+        DOUBLE -> CodeBlock.of("%L", 0)
 
-        BooleanArray::class.qualifiedName -> "BooleanArray(0)"
-        ByteArray::class.qualifiedName -> "ByteArray(0)"
-        ShortArray::class.qualifiedName -> "ShortArray(0)"
-        CharArray::class.qualifiedName -> "CharArray(0)"
-        IntArray::class.qualifiedName -> "IntArray(0)"
-        LongArray::class.qualifiedName -> "LongArray(0)"
-        FloatArray::class.qualifiedName -> "FloatArray(0)"
-        DoubleArray::class.qualifiedName -> "DoubleArray(0)"
-        String::class.qualifiedName -> "\"\""
+        BOOLEAN_ARRAY -> CodeBlock.of("%T(0)", BOOLEAN_ARRAY)
+        BYTE_ARRAY -> CodeBlock.of("%T(0)", BYTE_ARRAY)
+        SHORT_ARRAY -> CodeBlock.of("%T(0)", SHORT_ARRAY)
+        CHAR_ARRAY -> CodeBlock.of("%T(0)", CHAR_ARRAY)
+        INT_ARRAY -> CodeBlock.of("%T(0)", INT_ARRAY)
+        LONG_ARRAY -> CodeBlock.of("%T(0)", LONG_ARRAY)
+        FLOAT_ARRAY -> CodeBlock.of("%T(0)", FLOAT_ARRAY)
+        DOUBLE_ARRAY -> CodeBlock.of("%T(0)", DOUBLE_ARRAY)
+        STRING -> CodeBlock.of("\"\"")
+        CHAR_SEQUENCE -> CodeBlock.of("\"\"")
 
-        "kotlin.collections.ArrayList" -> "ArrayList$generics()"
-        "kotlin.collections.ArrayDeque" -> "ArrayDeque$generics()"
-        "kotlin.collections.LinkedHashMap" -> "LinkedHashMap$generics()"
-        "kotlin.collections.HashMap" -> "HashMap$generics()"
-        "kotlin.collections.LinkedHashSet" -> "LinkedHashSet$generics()"
-        "kotlin.collections.HashSet" -> "HashSet$generics()"
+        ARRAY_LIST -> CodeBlock.of("%T()", ARRAY_LIST)
+        ARRAY_DEQUE -> CodeBlock.of("%T()", ARRAY_DEQUE)
+        LINKED_HASH_MAP -> CodeBlock.of("%T()", LINKED_HASH_MAP)
+        HASH_MAP -> CodeBlock.of("%T()", HASH_MAP)
+        LINKED_HASH_SET -> CodeBlock.of("%T()", LINKED_HASH_SET)
+        HASH_SET -> CodeBlock.of("%T()", HASH_SET)
 
-        else -> error(
-            "\nCould not find default value for type $propertyWithoutGenerics\n" +
-                    "Please open an issue at https://github.com/mockative/mockative, or consider changing the type to a non-final type.")
+        else -> mockValue(type)
+//        else -> error(
+//            "\nCould not find default value for type $type\n" +
+//                    "Please open an issue at https://github.com/mockative/mockative, or consider changing the type to a non-final type.")
     }
 }
