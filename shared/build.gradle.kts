@@ -132,7 +132,7 @@ dependencies {
         }
 }
 
-tasks.withType<Test>().configureEach {
+if (gradle.startParameter.taskNames.any { it == "check" || it.startsWith("test") || it.contains("Test") }) {
     allOpen {
         annotation("io.github.MockativeMockable")
     }
