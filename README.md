@@ -81,12 +81,15 @@ package some.packagename
 annotation class MockativeMockable
 ```
 
-Next, configure the `allOpen` plugin to recognize the `@MockativeMockable` annotation. This step makes all classes annotated with `@MockativeMockable` open during test, thus allowing Mockative to mock them. Add the following configuration to your `build.gradle.kts` file:
+Next, configure the `allOpen` plugin to recognize the `@MockativeMockable` annotation. This step makes all classes annotated with `@MockativeMockable` open during test, thus allowing Mockative to mock them. An example configuration is shown below:
 
 ```kotlin
-tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+val taskIsRunningTest = gradle.startParameter.taskNames.any {
+  it == "check" || it.startsWith("test") || it.contains("Test")
+}
+if (taskIsRunningTest) {
   allOpen {
-    annotation("some.packagename.MockativeMockable")
+    annotation("io.github.MockativeMockable")
   }
 }
 ```
