@@ -8,7 +8,7 @@ Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Proce
 Notable features include:
 
 - Concise, non-intrusive, type-safe API
-- Mocking of **interfaces only**
+- Mocking of **interfaces only** (📢 `class` types will be supported in Q1 of 2024!)
 - Supports both [values](#stubbing-using-values) and [matchers](#stubbing-using-matchers) when
   during
   stubbing [verification](#verification)
