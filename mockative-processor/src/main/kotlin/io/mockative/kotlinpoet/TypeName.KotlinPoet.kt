@@ -41,6 +41,7 @@ private fun isKotlinPackage(packageName: String): Boolean {
 
 private fun mockValue(type: ClassName): CodeBlock {
     val simpleName = type.simpleNames.joinToString("_")
+    // Not allowed to use the kotlin package as base when creating new classes
     val mockPackageNamePrefix = if (isKotlinPackage(type.packageName)) "io.mockative." else ""
     val mockName = ClassName(mockPackageNamePrefix + type.packageName, "${simpleName}Mock")
     return CodeBlock.of("%T()", mockName)

@@ -67,6 +67,7 @@ data class ProcessableType(
             val sourceClassName = declaration.toClassName()
             val sourcePackageName = sourceClassName.packageName
 
+            // Not allowed to use the kotlin package as base when creating new classes
             val mockPackageNamePrefix = if (isKotlinPackage(sourcePackageName)) "io.mockative." else ""
 
             val simpleNamePrefix = sourceClassName.simpleNames.dropLast(1)
