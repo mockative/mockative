@@ -35,9 +35,14 @@ private fun TypeName.addAnnotations(additionalAnnotations: List<AnnotationSpec>)
     return copy(annotations = this.annotations + additionalAnnotations)
 }
 
+private fun isKotlinPackage(packageName: String): Boolean {
+    return packageName == "kotlin" || packageName.startsWith("kotlin.")
+}
+
 private fun mockValue(type: ClassName): CodeBlock {
     val simpleName = type.simpleNames.joinToString("_")
-    val mockName = ClassName(type.packageName, "${simpleName}Mock")
+    val mockPackageNamePrefix = if (isKotlinPackage(type.packageName)) "io.mockative." else ""
+    val mockName = ClassName(mockPackageNamePrefix + type.packageName, "${simpleName}Mock")
     return CodeBlock.of("%T()", mockName)
 }
 
@@ -71,8 +76,5 @@ internal fun valueOf(type: ClassName): CodeBlock {
         HASH_SET -> CodeBlock.of("%T()", HASH_SET)
 
         else -> mockValue(type)
-//        else -> error(
-//            "\nCould not find default value for type $type\n" +
-//                    "Please open an issue at https://github.com/mockative/mockative, or consider changing the type to a non-final type.")
     }
 }

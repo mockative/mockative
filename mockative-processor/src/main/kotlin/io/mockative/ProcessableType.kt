@@ -67,12 +67,14 @@ data class ProcessableType(
             val sourceClassName = declaration.toClassName()
             val sourcePackageName = sourceClassName.packageName
 
+            val mockPackageNamePrefix = if (isKotlinPackage(sourcePackageName)) "io.mockative." else ""
+
             val simpleNamePrefix = sourceClassName.simpleNames.dropLast(1)
             val simpleNameSuffix = "${sourceClassName.simpleName}Mock"
 
             val mockSimpleNames = simpleNamePrefix + simpleNameSuffix
             val mockSimpleName = mockSimpleNames.joinToString("_")
-            val mockClassName = ClassName(sourcePackageName, mockSimpleName)
+            val mockClassName = ClassName(mockPackageNamePrefix + sourcePackageName, mockSimpleName)
 
             val typeParameterResolver = declaration.typeParameters
                 .toTypeParameterResolver()
