@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.allopen")
+
     id("com.android.library")
 
     id("com.google.devtools.ksp")
@@ -9,6 +11,10 @@ plugins {
 
 version = "1.0.0"
 group = "io.mockative"
+
+allOpen {
+    annotation("io.mockative.Mocked")
+}
 
 kotlin {
     jvmToolchain(17)
