@@ -34,22 +34,28 @@ data class ProcessableType(
             return packageName == "kotlin" || packageName.startsWith("kotlin.")
         }
 
+        private fun KSClassDeclaration.getPublicConstructor(): KSFunctionDeclaration? {
+            return getConstructors().firstOrNull { it.isPublic() }
+        }
+
         private fun processConstructorParameters(
             declaration: KSClassDeclaration,
         ): Pair<List<KSValueParameter>, List<ProcessableType>> {
-            val constructor = declaration.primaryConstructor
+            val constructor = declaration.getPublicConstructor()
                 ?: return emptyList<KSValueParameter>() to emptyList<ProcessableType>()
+
 
             val constructorParameters = constructor.parameters
             val processableTypes = constructorParameters.mapNotNull { parameter ->
-                val parameterDeclaration = parameter.type.resolve().declaration as? KSClassDeclaration
-                val modifiers = parameterDeclaration?.modifiers
-                val isNotFinal = modifiers?.contains(Modifier.FINAL) == false && !modifiers.contains(Modifier.SEALED)
+                val parameterDeclaration = parameter.type.resolve().declaration as? KSClassDeclaration ?: return@mapNotNull null
+                if (parameterDeclaration.classKind == ClassKind.CLASS) parameterDeclaration.getPublicConstructor() ?: return@mapNotNull null
 
-                val containingFilesOfClass =
-                    parameterDeclaration?.containingFile?.let { listOf(it) } ?: emptyList() // if class is changed, include in incremental compilation
+                val modifiers = parameterDeclaration.modifiers
+                val isNotFinal = !modifiers.contains(Modifier.FINAL) && !modifiers.contains(Modifier.SEALED)
 
-                return@mapNotNull if (isNotFinal && parameterDeclaration != null) {
+                val containingFilesOfClass = parameterDeclaration.containingFile?.let { listOf(it) } ?: emptyList()
+
+                return@mapNotNull if (isNotFinal) {
                     fromDeclaration(
                         declaration = parameterDeclaration,
                         usages = containingFilesOfClass,
@@ -82,7 +88,7 @@ data class ProcessableType(
 
             val functions = declaration.getAllFunctions()
                 // Functions from Any are manually implemented in [Mockable]
-                .filter { it.isPublic() && !it.isConstructor() && !it.isFromAny() }
+                .filter { it.isPublic() && !it.isConstructor() && !it.isFromAny() && !it.modifiers.contains(Modifier.FINAL) }
                 .map { ProcessableFunction.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 
