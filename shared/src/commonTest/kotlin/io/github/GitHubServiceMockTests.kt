@@ -1,5 +1,18 @@
-package io.mockative
+package io.github
 
+import io.mockative.Fun0
+import io.mockative.Mock
+import io.mockative.any
+import io.mockative.classOf
+import io.mockative.coEvery
+import io.mockative.coVerify
+import io.mockative.doesNothing
+import io.mockative.eq
+import io.mockative.every
+import io.mockative.mock
+import io.mockative.once
+import io.mockative.verify
+import io.mockative.verifyNoUnmetExpectations
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test

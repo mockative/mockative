@@ -1,5 +1,13 @@
-package io.mockative
+package io.github
 
+import io.mockative.Mock
+import io.mockative.any
+import io.mockative.classOf
+import io.mockative.doesNothing
+import io.mockative.every
+import io.mockative.mock
+import io.mockative.once
+import io.mockative.verify
 import kotlin.test.Test
 
 class SealedInterfaceServiceTests {

@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 interface DefaultInvocationTestSubject {
     val type: String

@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 class FileService(private val client: S3Client) {
     fun getFileSync(id: String): File {

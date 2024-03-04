@@ -23,7 +23,7 @@ class MockativeSymbolProcessor(
         // Resolve the processable types
         val processableTypes = ProcessableType.fromResolver(resolver, stubsUnitByDefault)
 
-        // Generate Mock classes
+        // Generate Mock Classes
         processableTypes
             .forEach { type ->
                 val packageName = type.mockClassName.packageName

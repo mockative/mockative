@@ -8,6 +8,7 @@ import com.squareup.kotlinpoet.ksp.TypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toTypeVariableName
 import io.mockative.kotlinpoet.toTypeNameMockative
+import io.mockative.ksp.isFromAny
 
 data class ProcessableFunction(
     val declaration: KSFunctionDeclaration,
@@ -16,6 +17,7 @@ data class ProcessableFunction(
     val isSuspend: Boolean,
     val typeVariables: List<TypeVariableName>,
     val typeParameterResolver: TypeParameterResolver,
+    val isFromAny: Boolean,
     var parent: ProcessableType? = null,
 ) {
     companion object {
@@ -33,7 +35,8 @@ data class ProcessableFunction(
                 isSuspend = declaration.modifiers.contains(Modifier.SUSPEND),
                 typeVariables = declaration.typeParameters
                     .map { it.toTypeVariableName(typeParameterResolver) },
-                typeParameterResolver = typeParameterResolver
+                typeParameterResolver = typeParameterResolver,
+                isFromAny = declaration.isFromAny()
             )
         }
     }

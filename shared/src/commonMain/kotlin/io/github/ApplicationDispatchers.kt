@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

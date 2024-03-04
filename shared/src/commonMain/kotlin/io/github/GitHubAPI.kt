@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 typealias MyList<T> = List<T>
 
