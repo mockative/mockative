@@ -262,15 +262,15 @@ class Mockable(val instance: Any) {
             return mockables.getOrPut(instance) { Mockable(instance) }
         }
 
-        fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
+        fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBLock: () -> R): R {
             return mockable(instance).invoke(invocation, returnsUnit)
         }
 
-        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R): R {
+        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R, spyBLock: () -> R): R {
             return mockable(instance).invoke(invocation, default)
         }
 
-        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
+        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBLock: () -> R): R {
             return mockable(instance).suspend(invocation, returnsUnit)
         }
 
