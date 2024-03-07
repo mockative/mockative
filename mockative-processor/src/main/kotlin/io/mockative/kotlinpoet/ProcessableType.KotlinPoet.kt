@@ -16,8 +16,10 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
 
     val typeType = KCLASS.parameterizedBy(parameterizedSourceClassName)
 
-    val type = ParameterSpec.builder("type", typeType)
+    val typeParameter = ParameterSpec.builder("type", typeType)
         .addAnnotation(suppressUnusedParameter)
+        .build()
+    val spyParameter = ParameterSpec.builder("spyInstance", parameterizedSourceClassName.copy(nullable = false))
         .build()
 
     val modifiers = buildList {
@@ -27,13 +29,25 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
     }
 
     val functionTypeVariables = typeVariables.map { it.withoutVariance() }
+    val functionName = if (isSpy) "spy" else "mock"
 
-    return FunSpec.builder("mock")
+    val parameters = if (isSpy) {
+        listOf(typeParameter, spyParameter)
+    } else {
+        listOf(typeParameter)
+    }
+    val addInitializer = if (isSpy) {
+        "spyInstance"
+    } else {
+        "null"
+    }
+
+    return FunSpec.builder(functionName)
         .addModifiers(modifiers)
         .addTypeVariables(functionTypeVariables)
-        .addParameter(type)
+        .addParameters(parameters)
         .returns(parameterizedSourceClassName)
-        .addStatement("return %M(%T()) { stubsUnitByDefault = %L }", CONFIGURE, parameterizedMockClassName, stubsUnitByDefault)
+        .addStatement("return %M(%T(%L)) { stubsUnitByDefault=%L; isSpy=%L }", CONFIGURE, parameterizedMockClassName, addInitializer, stubsUnitByDefault, isSpy)
         .addOriginatingKSFiles(usages)
         .build()
 }

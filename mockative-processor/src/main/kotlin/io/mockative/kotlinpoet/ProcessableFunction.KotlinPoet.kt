@@ -44,9 +44,6 @@ private fun ProcessableFunction.buildCallSpyInstanceBlock(
     hasReceiver: Boolean
 ): String {
     return buildString {
-        if (isSuspend) {
-            append("kotlinx.coroutines.runBlocking{")
-        }
         if (hasReceiver) {
             append("this.${name}(")
         } else {
@@ -60,9 +57,6 @@ private fun ProcessableFunction.buildCallSpyInstanceBlock(
             }
         }
         append(")")
-        if (isSuspend) {
-            append(" }")
-        }
     }
 
 }

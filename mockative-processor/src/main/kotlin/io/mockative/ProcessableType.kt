@@ -25,7 +25,8 @@ data class ProcessableType(
     val typeVariables: List<TypeVariableName>,
     val stubsUnitByDefault: Boolean,
     private var children: List<ProcessableType>,
-    val constructorParameters: List<KSValueParameter>
+    val constructorParameters: List<KSValueParameter>,
+    val isSpy: Boolean,
 ) {
     companion object {
         private var stubsUnitByDefault by Delegates.notNull<Boolean>()
@@ -59,6 +60,7 @@ data class ProcessableType(
                     fromDeclaration(
                         declaration = parameterDeclaration,
                         usages = containingFilesOfClass,
+                        isSpy = false,
                     )
                 } else null
             }
@@ -69,6 +71,7 @@ data class ProcessableType(
         private fun fromDeclaration(
             declaration: KSClassDeclaration,
             usages: List<KSFile>,
+            isSpy: Boolean,
         ): ProcessableType {
             val sourceClassName = declaration.toClassName()
             val sourcePackageName = sourceClassName.packageName
@@ -112,7 +115,8 @@ data class ProcessableType(
                 typeVariables = typeVariables,
                 stubsUnitByDefault = stubsUnitByDefault,
                 children = children,
-                constructorParameters = constructorParameters
+                constructorParameters = constructorParameters,
+                isSpy = isSpy,
             )
 
             functions.forEach { it.parent = processableType }
@@ -126,15 +130,20 @@ data class ProcessableType(
             val processableTypes = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
                 .mapNotNull { symbol -> symbol as? KSPropertyDeclaration }
                 .mapNotNull { property ->
+                    val mockAnnotation = property.annotations.find { it.shortName.asString() == MOCK_ANNOTATION.simpleName }
+                    val isSpy = mockAnnotation?.arguments?.find { it.name?.asString() == "isSpy" }?.value as? Boolean ?: false
+
                     (property.type.resolve().declaration as? KSClassDeclaration)
-                        ?.let { it to property.containingFile }
+                        ?.let { Triple(it, property.containingFile, isSpy) }
                 }
-                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
-                .groupBy({ (classDec, _) -> classDec }, { (_, file) -> file })
-                .map { (classDec, usages) ->
+                .filter { (classDec, _, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
+                .groupBy({ (classDec, _, isSpy) -> Pair(classDec, isSpy) }, { (_, file, _) -> file })
+                .map { (key, usages) ->
+                    val (classDec, isSpy) = key
                     fromDeclaration(
                         declaration = classDec,
                         usages = usages.filterNotNull(),
+                        isSpy = isSpy,
                     )
                 }
             // want to filter out all of processable types which appear more than one time.

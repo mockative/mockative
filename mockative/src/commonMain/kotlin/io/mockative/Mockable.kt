@@ -14,6 +14,7 @@ class Mockable(val instance: Any) {
     private val verifiedInvocations = AtomicSet<Invocation>()
 
     internal var stubsUnitsByDefault: Boolean by atomic(false)
+    internal var isSpy: Boolean by atomic(false)
 
     internal fun reset() {
         blockingStubs.clear()
@@ -38,11 +39,11 @@ class Mockable(val instance: Any) {
         }
     }
 
-    private fun getBlockingStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): BlockingStub {
+    private fun getBlockingStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): BlockingStub? {
         return when (val blockingStub = getBlockingStubOrNull(invocation)) {
             null -> {
                 when (fallback) {
-                    null -> throwMissingBlockingStubException(invocation)
+                    null -> null
                     else -> {
                         val fallbackStub = OpenBlockingStub(invocation.toOpenExpectation(), fallback)
                         addBlockingStub(fallbackStub)
@@ -73,11 +74,11 @@ class Mockable(val instance: Any) {
     private val expectations: List<Expectation>
         get() = suspendStubs.map { it.expectation } + blockingStubs.map { it.expectation }
 
-    private fun getSuspendStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): SuspendStub {
+    private fun getSuspendStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): SuspendStub? {
         return when (val suspendStub = getSuspendStubOrNull(invocation)) {
             null -> {
                 when (fallback) {
-                    null -> throwMissingSuspendStubException(invocation)
+                    null -> null
                     else -> {
                         val fallbackStub = OpenSuspendStub(invocation.toOpenExpectation(), fallback)
                         addSuspendStub(fallbackStub)
@@ -145,15 +146,17 @@ class Mockable(val instance: Any) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
+    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean, spyBlock: () -> R): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
             val fallback = getUnitFallbackOrNull(returnsUnit)
             val stub = getBlockingStub(invocation, fallback)
+            if (stub == null && !isSpy) throwMissingSuspendStubException(invocation)
+            else if (stub == null && isSpy) return spyBlock()
 
             try {
-                val result = stub.invoke(invocation)
+                val result = stub!!.invoke(invocation)
                 invocation.result = InvocationResult.Return(result)
                 return result as R
             } catch (e: Throwable) {
@@ -164,27 +167,29 @@ class Mockable(val instance: Any) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <R> invoke(invocation: Invocation, default: () -> R): R {
+    internal fun <R> invoke(invocation: Invocation, default: () -> R, spyBlock: () -> R): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
             return when (val stub = getBlockingStubOrNull(invocation)) {
-                null -> default()
+                null -> if (isSpy) spyBlock() else default()
                 else -> stub.invoke(invocation) as R
             }
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
+    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean, spyBlock: suspend () -> R): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
             val fallback = getUnitFallbackOrNull(returnsUnit)
             val stub = getSuspendStub(invocation, fallback)
+            if (stub == null && !isSpy) throwMissingSuspendStubException(invocation)
+            else if (stub == null && isSpy) return spyBlock()
 
             try {
-                val result = stub.invoke(invocation)
+                val result = stub!!.invoke(invocation)
                 invocation.result = InvocationResult.Return(result)
                 return result as R
             } catch (e: Throwable) {
@@ -263,15 +268,15 @@ class Mockable(val instance: Any) {
         }
 
         fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBLock: () -> R): R {
-            return mockable(instance).invoke(invocation, returnsUnit)
+            return mockable(instance).invoke(invocation, returnsUnit, spyBLock)
         }
 
         fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R, spyBLock: () -> R): R {
-            return mockable(instance).invoke(invocation, default)
+            return mockable(instance).invoke(invocation, default, spyBLock)
         }
 
-        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBLock: () -> R): R {
-            return mockable(instance).suspend(invocation, returnsUnit)
+        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBLock: suspend () -> R): R {
+            return mockable(instance).suspend(invocation, returnsUnit, spyBLock)
         }
 
         /**
