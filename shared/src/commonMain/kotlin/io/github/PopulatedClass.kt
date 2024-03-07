@@ -34,7 +34,7 @@ class PopulatedClass(
 }
 
 @MockativeMockable
-class Class2(val class3: Class3) {
+class Class2(var class3: Class3) {
     val message1 = "message1"
     val message2 = "message2"
 }

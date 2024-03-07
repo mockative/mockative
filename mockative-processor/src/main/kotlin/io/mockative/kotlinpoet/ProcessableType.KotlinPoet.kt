@@ -43,8 +43,22 @@ private fun TypeVariableName.withoutVariance(): TypeVariableName {
 }
 
 internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
-    val properties = buildPropertySpecs()
-    val functions = buildFunSpecs()
+    val spyInstanceName = "instance"
+    val properties = buildPropertySpecs(spyInstanceName)
+    val functions = buildFunSpecs(spyInstanceName)
+    val constructorSpec = FunSpec.constructorBuilder()
+        .addParameter(
+            ParameterSpec.builder(spyInstanceName, sourceClassName.parameterizedByAny(typeVariables).copy(nullable = true))
+                .defaultValue("null")
+                .build()
+        )
+        .build()
+    val instanceInitializer = PropertySpec.builder(
+        spyInstanceName, sourceClassName.parameterizedByAny(typeVariables).copy(nullable = true)
+    )
+        .initializer("instance")
+        .addModifiers(KModifier.PRIVATE)
+        .build()
 
     val modifiers = buildList {
         if (declaration.isEffectivelyInternal()) {
@@ -69,21 +83,22 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     }
 
     return typeSpec
-        .addProperties(properties)
+        .primaryConstructor(constructorSpec)
+        .addProperties(properties.plus(instanceInitializer))
         .addFunctions(functions)
         .addKdoc(declaration.docString?.trim() ?: "")
         .addOriginatingKSFiles(usages)
         .build()
 }
 
-private fun ProcessableType.buildPropertySpecs(): List<PropertySpec> {
+private fun ProcessableType.buildPropertySpecs(spyInstanceName: String): List<PropertySpec> {
     return properties
-        .map { it.buildPropertySpec() }
+        .map { it.buildPropertySpec(spyInstanceName) }
         .toList()
 }
 
-private fun ProcessableType.buildFunSpecs(): List<FunSpec> {
+private fun ProcessableType.buildFunSpecs(spyInstanceName: String): List<FunSpec> {
     return functions
-        .map { it.buildFunSpec() }
+        .map { it.buildFunSpec(spyInstanceName) }
         .toList()
 }

@@ -6,7 +6,7 @@ import io.mockative.LIST_OF
 import io.mockative.MOCKABLE
 import io.mockative.ProcessableFunction
 
-internal fun ProcessableFunction.buildFunSpec(): FunSpec {
+internal fun ProcessableFunction.buildFunSpec(spyInstanceName: String): FunSpec {
     val modifiers = buildModifiers()
     val returnsUnit = if (returnType == UNIT) "true" else "false"
 
@@ -32,10 +32,39 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
     if (isFromAny) {
         builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), { super.%L(%L) })", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, name, argumentsList)
     } else {
-        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), %L)", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, returnsUnit)
+        val callSpyInstance = buildCallSpyInstanceBlock(spyInstanceName, receiver != null)
+        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), %L){%L}", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, returnsUnit, callSpyInstance)
     }
 
     return builder.build()
+}
+
+private fun ProcessableFunction.buildCallSpyInstanceBlock(
+    spyInstanceName: String,
+    hasReceiver: Boolean
+): String {
+    return buildString {
+        if (isSuspend) {
+            append("kotlinx.coroutines.runBlocking{")
+        }
+        if (hasReceiver) {
+            append("this.${name}(")
+        } else {
+            append("$spyInstanceName!!.${name}(")
+        }
+        declaration.parameters.forEach {
+            if (it.isVararg) {
+                append("*`${it.name?.asString()}`,")
+            } else {
+                append("`${it.name?.asString()}`,")
+            }
+        }
+        append(")")
+        if (isSuspend) {
+            append(" }")
+        }
+    }
+
 }
 
 private fun ProcessableFunction.buildModifiers() = buildList {
