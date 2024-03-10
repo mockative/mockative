@@ -152,7 +152,7 @@ class Mockable(val instance: Any) {
         } else {
             val fallback = getUnitFallbackOrNull(returnsUnit)
             val stub = getBlockingStub(invocation, fallback)
-            if (stub == null && !isSpy) throwMissingSuspendStubException(invocation)
+            if (stub == null && !isSpy) throwMissingBlockingStubException(invocation)
             else if (stub == null && isSpy) return spyBlock()
 
             try {

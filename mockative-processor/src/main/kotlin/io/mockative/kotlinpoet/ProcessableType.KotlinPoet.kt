@@ -6,7 +6,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import io.mockative.*
 import io.mockative.ksp.addOriginatingKSFiles
 
-internal fun ProcessableType.buildMockFunSpec(): FunSpec {
+internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
     val suppressUnusedParameter = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
         .addMember("%S", "UNUSED_PARAMETER")
         .build()
@@ -29,18 +29,55 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
     }
 
     val functionTypeVariables = typeVariables.map { it.withoutVariance() }
-    val functionName = if (isSpy) "spy" else "mock"
 
-    val parameters = if (isSpy) {
-        listOf(typeParameter, spyParameter)
-    } else {
-        listOf(typeParameter)
+    val mockFunSpecBuild = {
+        buildMockFunSpec(
+            functionName = "mock",
+            isSpy = false,
+            parameterizedSourceClassName,
+            parameterizedMockClassName,
+            typeParameter,
+            spyParameter,
+            modifiers,
+            functionTypeVariables,
+            stubsUnitByDefault
+        )
     }
-    val addInitializer = if (isSpy) {
-        "spyInstance"
-    } else {
-        "null"
+    val spyFunSpecBuild = {
+        buildMockFunSpec(
+            functionName = "spy",
+            isSpy = true,
+            parameterizedSourceClassName,
+            parameterizedMockClassName,
+            typeParameter,
+            spyParameter,
+            modifiers,
+            functionTypeVariables,
+            stubsUnitByDefault
+        )
     }
+
+    return when(generateTypeFunctions) {
+        listOf(ProcessableType.ShouldGenerateTypeFunction.MOCK) -> listOf(mockFunSpecBuild())
+        listOf(ProcessableType.ShouldGenerateTypeFunction.SPY) -> listOf(spyFunSpecBuild())
+        listOf(ProcessableType.ShouldGenerateTypeFunction.NONE) -> listOf()
+        else  -> listOf(mockFunSpecBuild(), spyFunSpecBuild())
+    }
+}
+
+internal fun ProcessableType.buildMockFunSpec(
+    functionName: String,
+    isSpy: Boolean,
+    parameterizedSourceClassName: TypeName,
+    parameterizedMockClassName: TypeName,
+    typeParameter: ParameterSpec,
+    spyParameter: ParameterSpec,
+    modifiers: List<KModifier>,
+    functionTypeVariables: List<TypeVariableName>,
+    stubsUnitByDefault: Boolean
+): FunSpec {
+    val parameters = if (isSpy) listOf(typeParameter, spyParameter) else listOf(typeParameter)
+    val addInitializer = if (isSpy) spyParameter.name else "null"
 
     return FunSpec.builder(functionName)
         .addModifiers(modifiers)
