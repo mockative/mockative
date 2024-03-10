@@ -26,8 +26,25 @@ data class ProcessableType(
     val stubsUnitByDefault: Boolean,
     private var children: List<ProcessableType>,
     val constructorParameters: List<KSValueParameter>,
-    val isSpy: Boolean,
+    val generateTypeFunctions: List<ShouldGenerateTypeFunction>,
 ) {
+    enum class ShouldGenerateTypeFunction {
+        MOCK,
+        SPY,
+        NONE;
+    }
+
+    private enum class ClassDeclMockType {
+        MOCK,
+        SPY;
+    }
+
+    private data class SymbolProcessingInformation(
+        val classDeclaration: KSClassDeclaration,
+        val usage: KSFile?,
+        val mockType: ClassDeclMockType,
+    )
+
     companion object {
         private var stubsUnitByDefault by Delegates.notNull<Boolean>()
 
@@ -60,7 +77,7 @@ data class ProcessableType(
                     fromDeclaration(
                         declaration = parameterDeclaration,
                         usages = containingFilesOfClass,
-                        isSpy = false,
+                        generateTypeFunctions = listOf(ShouldGenerateTypeFunction.NONE),
                     )
                 } else null
             }
@@ -71,7 +88,7 @@ data class ProcessableType(
         private fun fromDeclaration(
             declaration: KSClassDeclaration,
             usages: List<KSFile>,
-            isSpy: Boolean,
+            generateTypeFunctions: List<ShouldGenerateTypeFunction>,
         ): ProcessableType {
             val sourceClassName = declaration.toClassName()
             val sourcePackageName = sourceClassName.packageName
@@ -116,7 +133,7 @@ data class ProcessableType(
                 stubsUnitByDefault = stubsUnitByDefault,
                 children = children,
                 constructorParameters = constructorParameters,
-                isSpy = isSpy,
+                generateTypeFunctions = generateTypeFunctions,
             )
 
             functions.forEach { it.parent = processableType }
@@ -127,33 +144,72 @@ data class ProcessableType(
         fun fromResolver(resolver: Resolver, stubsUnitByDefault: Boolean): List<ProcessableType> {
             this.stubsUnitByDefault = stubsUnitByDefault
 
-            val processableTypes = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
-                .mapNotNull { symbol -> symbol as? KSPropertyDeclaration }
+            val declarations = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
+                .filterIsInstance<KSPropertyDeclaration>()
                 .mapNotNull { property ->
                     val mockAnnotation = property.annotations.find { it.shortName.asString() == MOCK_ANNOTATION.simpleName }
                     val isSpy = mockAnnotation?.arguments?.find { it.name?.asString() == "isSpy" }?.value as? Boolean ?: false
+                    val mockType = if (isSpy) ClassDeclMockType.SPY else ClassDeclMockType.MOCK
 
                     (property.type.resolve().declaration as? KSClassDeclaration)
-                        ?.let { Triple(it, property.containingFile, isSpy) }
+                        ?.let { SymbolProcessingInformation(it, property.containingFile, mockType) }
                 }
                 .filter { (classDec, _, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
-                .groupBy({ (classDec, _, isSpy) -> Pair(classDec, isSpy) }, { (_, file, _) -> file })
-                .map { (key, usages) ->
-                    val (classDec, isSpy) = key
-                    fromDeclaration(
-                        declaration = classDec,
-                        usages = usages.filterNotNull(),
-                        isSpy = isSpy,
-                    )
-                }
-            // want to filter out all of processable types which appear more than one time.
-            // That is, we dont want to create mock classes for the same type more than once
-            return processableTypes.flatten().distinctBy { it.mockClassName }
+                .groupBy({ Pair(it.classDeclaration, it.mockType) }) { it.usage }
+
+            val processableTypes = declarations.map { (classDecToIsSpy, _) ->
+                /**
+                 * TODO: Move this to a sepearate function. Also,
+                 * right now we are still processing the same class twice, once for mock and once for spy.
+                 * We need to process it only once and then add the mock/spy to the same class.
+                 *
+                 * Make shouldGenerateType() more generic such that it can be used with all of the mock-types that may come.
+                 *
+                 * Also in ProcessableType.KotlinPoet, we need to handle the cases for which functions to generate more generically.
+                 * Maaybe through an axiluary function in the enum class based on the given:
+                 *                  generateTypeFunctions: List<ShouldGenerateTypeFunction>
+                 */
+
+                val (classDec, _) = classDecToIsSpy
+                val containsMock = declarations.getOrElse(Pair(classDec, ClassDeclMockType.MOCK)) { null }
+                val containsSpy = declarations.getOrElse(Pair(classDec, ClassDeclMockType.SPY)) { null }
+
+                val generateTypeFunctions = shouldGenerateType(containsSpy != null, containsMock != null)
+
+                val mockFiles = containsMock ?: emptyList()
+                val spyFiles = containsSpy ?: emptyList()
+                val combinedFiles = (mockFiles + spyFiles).filterNotNull().distinct()
+
+                fromDeclaration(
+                    declaration = classDec,
+                    usages = combinedFiles,
+                    generateTypeFunctions = generateTypeFunctions,
+                )
+            }
+                .flatten()
+                .distinctBy { it.mockClassName }
+                .removeChildren()
+
+            return processableTypes
         }
 
+        private fun List<ProcessableType>.removeChildren(): List<ProcessableType> {
+            return this.onEach { it.children = emptyList() }
+        }
+
+
         private fun List<ProcessableType>.flatten(): List<ProcessableType> {
-            return this.flatMap { type ->
-                listOf(type) + type.children.flatten()
+            return this + this.flatMap { type ->
+                type.children.flatten()
+            }
+        }
+        
+        private fun shouldGenerateType(isSpy: Boolean, isMock: Boolean): List<ShouldGenerateTypeFunction> {
+            return when {
+                isSpy && isMock -> listOf(ShouldGenerateTypeFunction.SPY, ShouldGenerateTypeFunction.MOCK)
+                isSpy -> listOf(ShouldGenerateTypeFunction.SPY)
+                isMock -> listOf(ShouldGenerateTypeFunction.MOCK)
+                else -> listOf(ShouldGenerateTypeFunction.NONE)
             }
         }
     }

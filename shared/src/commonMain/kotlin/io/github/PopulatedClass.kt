@@ -6,7 +6,7 @@ class PopulatedClass(
     private val inner2: InnerClass,
     internal val internalVal: String,
     protected val protectedVal: String,
-    val class3: Class3,
+    //val class3: Class3,
     val number: Int?,
     val map: Map<String, String>?,
     val list: List<String>,
