@@ -9,9 +9,9 @@ class SpyClass(val name: String) {
     fun functionWithManyArgumented(
         string: String,
         int: Int,
-        double: Double,
+        long: Long,
         list: List<String>
     ): String {
-        return "$string $int $double $list"
+        return "$string $int $long $list"
     }
 }
