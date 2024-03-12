@@ -40,7 +40,6 @@ data class ProcessableType(
         NONE;
     }
 
-
     private data class SymbolProcessingInformation(
         val classDeclaration: KSClassDeclaration,
         val usage: KSFile?,
@@ -176,7 +175,6 @@ data class ProcessableType(
                 .flatten()
                 .distinctBy { it.mockClassName }
                 .removeChildren()
-
 
             return processableTypes
         }

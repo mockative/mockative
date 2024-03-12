@@ -42,6 +42,7 @@ class Mockable(val instance: Any) {
     private fun getBlockingStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): BlockingStub? {
         return when (val blockingStub = getBlockingStubOrNull(invocation)) {
             null -> {
+                if (isSpy) return null
                 when (fallback) {
                     null -> null
                     else -> {
@@ -77,6 +78,7 @@ class Mockable(val instance: Any) {
     private fun getSuspendStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): SuspendStub? {
         return when (val suspendStub = getSuspendStubOrNull(invocation)) {
             null -> {
+                if (isSpy) return null
                 when (fallback) {
                     null -> null
                     else -> {
@@ -267,16 +269,16 @@ class Mockable(val instance: Any) {
             return mockables.getOrPut(instance) { Mockable(instance) }
         }
 
-        fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBLock: () -> R): R {
-            return mockable(instance).invoke(invocation, returnsUnit, spyBLock)
+        fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBlock: () -> R): R {
+            return mockable(instance).invoke(invocation, returnsUnit, spyBlock)
         }
 
-        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R, spyBLock: () -> R): R {
-            return mockable(instance).invoke(invocation, default, spyBLock)
+        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R, spyBlock: () -> R): R {
+            return mockable(instance).invoke(invocation, default, spyBlock)
         }
 
-        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBLock: suspend () -> R): R {
-            return mockable(instance).suspend(invocation, returnsUnit, spyBLock)
+        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean, spyBlock: suspend () -> R): R {
+            return mockable(instance).suspend(invocation, returnsUnit, spyBlock)
         }
 
         /**
