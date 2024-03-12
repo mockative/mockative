@@ -10,7 +10,8 @@ data class ProcessableProperty(
     val declaration: KSPropertyDeclaration,
     val name: String,
     val type: TypeName,
-    val typeParameterResolver: TypeParameterResolver
+    val typeParameterResolver: TypeParameterResolver,
+    val spyInstanceName: String = "spyInstance"
 ) {
     companion object {
         fun fromDeclaration(

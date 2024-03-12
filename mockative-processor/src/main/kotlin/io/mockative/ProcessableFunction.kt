@@ -19,6 +19,7 @@ data class ProcessableFunction(
     val typeParameterResolver: TypeParameterResolver,
     val isFromAny: Boolean,
     var parent: ProcessableType? = null,
+    val spyInstanceName: String = "spyInstance"
 ) {
     companion object {
         fun fromDeclaration(

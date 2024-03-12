@@ -6,7 +6,7 @@ import io.mockative.LIST_OF
 import io.mockative.MOCKABLE
 import io.mockative.ProcessableFunction
 
-internal fun ProcessableFunction.buildFunSpec(spyInstanceName: String): FunSpec {
+internal fun ProcessableFunction.buildFunSpec(): FunSpec {
     val modifiers = buildModifiers()
     val returnsUnit = if (returnType == UNIT) "true" else "false"
 
@@ -32,7 +32,7 @@ internal fun ProcessableFunction.buildFunSpec(spyInstanceName: String): FunSpec 
     if (isFromAny) {
         builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), { super.%L(%L) })", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, name, argumentsList)
     } else {
-        val callSpyInstance = buildCallSpyInstanceBlock(spyInstanceName, receiver != null)
+        val callSpyInstance = buildCallSpyInstanceBlock(receiver != null, argumentsList)
         builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), %L){%L}", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, returnsUnit, callSpyInstance)
     }
 
@@ -40,25 +40,13 @@ internal fun ProcessableFunction.buildFunSpec(spyInstanceName: String): FunSpec 
 }
 
 private fun ProcessableFunction.buildCallSpyInstanceBlock(
-    spyInstanceName: String,
-    hasReceiver: Boolean
-): String {
-    return buildString {
-        if (hasReceiver) {
-            append("this.${name}(")
-        } else {
-            append("$spyInstanceName!!.${name}(")
-        }
-        declaration.parameters.forEach {
-            if (it.isVararg) {
-                append("*`${it.name?.asString()}`,")
-            } else {
-                append("`${it.name?.asString()}`,")
-            }
-        }
-        append(")")
-    }
-
+    hasReceiver: Boolean,
+    argumentsList: CodeBlock
+): CodeBlock {
+    val callSpyInstance = if (hasReceiver) "this.`${name}`" else "$spyInstanceName!!.`${name}`"
+    return CodeBlock.builder()
+        .add("%L(%L)", callSpyInstance, argumentsList)
+        .build()
 }
 
 private fun ProcessableFunction.buildModifiers() = buildList {
@@ -70,7 +58,9 @@ private fun ProcessableFunction.buildModifiers() = buildList {
 }
 
 private fun ProcessableFunction.buildArgumentList(): CodeBlock {
-    val argumentsListFormat = declaration.parameters.joinToString(", ") { "`%L`" }
+    val argumentsListFormat = declaration.parameters.joinToString(", ") {
+        if (it.isVararg) "*`%L`" else "`%L`"
+    }
     val arguments = declaration.parameters.map { it.name!!.asString() }
 
     return CodeBlock.builder()

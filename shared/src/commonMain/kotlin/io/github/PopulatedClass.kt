@@ -11,7 +11,7 @@ class PopulatedClass(
     val map: Map<String, String>?,
     val list: List<String>,
     val sequence: List<List<List<String>>>,
-    val charSequence: CharSequence,
+    var charSequence: CharSequence,
     val string: String,
     val bArray: BooleanArray,
     val inner: InnerClass,
