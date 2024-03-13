@@ -11,4 +11,4 @@ package io.mockative
  */
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
-annotation class Mock
+annotation class Mock(val isSpy: Boolean = false)

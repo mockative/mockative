@@ -6,9 +6,10 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ksp.writeTo
-import io.mockative.kotlinpoet.buildMockFunSpec
+import io.mockative.kotlinpoet.buildMockFunSpecs
 import io.mockative.kotlinpoet.buildMockTypeSpec
 import io.mockative.kotlinpoet.fullSimpleName
+import io.mockative.ksp.addFunctions
 
 class MockativeSymbolProcessor(
     private val codeGenerator: CodeGenerator,
@@ -23,7 +24,7 @@ class MockativeSymbolProcessor(
         // Resolve the processable types
         val processableTypes = ProcessableType.fromResolver(resolver, stubsUnitByDefault)
 
-        // Generate Mock classes
+        // Generate Mock Classes
         processableTypes
             .forEach { type ->
                 val packageName = type.mockClassName.packageName
@@ -37,12 +38,13 @@ class MockativeSymbolProcessor(
 
         // Generate Mock Functions
         processableTypes
+            .filter { ProcessableType.ShouldGenerateTypeFunction.NONE !in it.generateTypeFunctions }
             .forEach { type ->
                 val reflectionName = type.sourceClassName.reflectionName()
                 val fileName = "${reflectionName}.Mockative"
 
                 FileSpec.builder("io.mockative", fileName)
-                    .addFunction(type.buildMockFunSpec())
+                    .addFunctions(type.buildMockFunSpecs())
                     .build()
                     .writeTo(codeGenerator, aggregating = false)
             }

@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.allopen")
+
     id("com.android.library")
 
     id("com.google.devtools.ksp")
@@ -128,4 +130,13 @@ dependencies {
         .forEach {
             add(it.name, project(":mockative-processor"))
         }
+}
+
+val taskIsRunningTest = gradle.startParameter.taskNames.any {
+    it == "check" || it.startsWith("test") || it.contains("Test")
+}
+if (taskIsRunningTest) {
+    allOpen {
+        annotation("io.github.MockativeMockable")
+    }
 }
