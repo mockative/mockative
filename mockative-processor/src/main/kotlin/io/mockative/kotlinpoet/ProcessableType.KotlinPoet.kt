@@ -77,14 +77,14 @@ internal fun ProcessableType.buildMockFunSpec(
     stubsUnitByDefault: Boolean
 ): FunSpec {
     val parameters = if (isSpy) listOf(typeParameter, spyParameter) else listOf(typeParameter)
-    val addInitializer = if (isSpy) spyParameter.name else "null"
+    val addSpyInitializer = if (isSpy) spyParameter.name else "null"
 
     return FunSpec.builder(functionName)
         .addModifiers(modifiers)
         .addTypeVariables(functionTypeVariables)
         .addParameters(parameters)
         .returns(parameterizedSourceClassName)
-        .addStatement("return %M(%T(%L)) { stubsUnitByDefault=%L; isSpy=%L }", CONFIGURE, parameterizedMockClassName, addInitializer, stubsUnitByDefault, isSpy)
+        .addStatement("return %M(%T(%L)) { stubsUnitByDefault=%L; isSpy=%L }", CONFIGURE, parameterizedMockClassName, addSpyInitializer, stubsUnitByDefault, isSpy)
         .addOriginatingKSFiles(usages)
         .build()
 }
