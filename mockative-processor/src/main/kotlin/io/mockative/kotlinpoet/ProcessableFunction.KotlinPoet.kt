@@ -30,9 +30,8 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
         builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), { super.%L(%L) })", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, name, argumentsList)
     } else {
         val callSpyInstance = buildCallSpyInstanceBlock(receiver != null, argumentsList)
-        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), %L){%L}", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, returnsUnit, callSpyInstance)
+        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), %L){ %L }", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, returnsUnit, callSpyInstance)
     }
-
 
     return builder.build()
 }

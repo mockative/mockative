@@ -10,14 +10,14 @@ internal fun ProcessableProperty.buildPropertySpec(): PropertySpec {
     return PropertySpec.builder(name, type, KModifier.OVERRIDE)
         .mutable(declaration.isMutable)
         .getter(buildGetter())
-        .setter(if (declaration.isMutable) { buildSetter(spyInstanceName) } else null)
+        .setter(if (declaration.isMutable) { buildSetter() } else null)
         .build()
 }
 
-private fun ProcessableProperty.buildSetter(spyInstanceName: String): FunSpec {
+private fun ProcessableProperty.buildSetter(): FunSpec {
     val value = ParameterSpec.builder("value", type)
         .build()
-    val callSpyInstance = "`${spyInstanceName}`!!.`${name}`=value; return@invoke value"
+    val callSpyInstance = "${spyInstanceName}!!.`${name}`=value; return@invoke value"
 
     return FunSpec.setterBuilder()
         .addParameter(value)
@@ -27,7 +27,7 @@ private fun ProcessableProperty.buildSetter(spyInstanceName: String): FunSpec {
 
 private fun ProcessableProperty.buildGetter(): FunSpec {
     val returnsUnit = if (type == UNIT) "true" else "false"
-    val callSpyInstance = "`${spyInstanceName}`!!.`$name`"
+    val callSpyInstance = "${spyInstanceName}!!.`$name`"
 
     return FunSpec.getterBuilder()
         .addStatement("return %T.invoke<%T>(this, %T(%S), %L){ %L }", MOCKABLE, type, INVOCATION_GETTER, name, returnsUnit, callSpyInstance)
