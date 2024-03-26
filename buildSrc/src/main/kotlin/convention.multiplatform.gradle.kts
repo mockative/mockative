@@ -37,10 +37,15 @@ kotlin {
     mingwX64()
 
     @OptIn(ExperimentalWasmDsl::class)
-    wasm {
+    wasmJs {
         browser()
         nodejs()
         generateTypeScriptDefinitions()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmWasi {
+        nodejs()
     }
 
     @Suppress("UNUSED_VARIABLE")
@@ -101,6 +106,8 @@ kotlin {
         val mingwX64Main by getting { dependsOn(mingwMain) }
 
         // wasm
-        val wasmJsMain by getting { dependsOn(commonMain) }
+        val wasmMain by creating { dependsOn(commonMain) }
+        val wasmJsMain by getting { dependsOn(wasmMain) }
+        val wasmWasiMain by getting { dependsOn(wasmMain) }
     }
 }
