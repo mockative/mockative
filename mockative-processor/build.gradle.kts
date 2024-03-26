@@ -8,6 +8,7 @@ version = findProperty("project.version") as String
 
 kotlin {
     jvm()
+    jvmToolchain(8)
 
     sourceSets {
         named("jvmMain") {
