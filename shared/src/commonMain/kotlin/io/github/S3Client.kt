@@ -1,4 +1,4 @@
-package io.mockative
+package io.github
 
 data class GetObjectRequest(val id: String)
 data class GetObjectResponse(val body: String)

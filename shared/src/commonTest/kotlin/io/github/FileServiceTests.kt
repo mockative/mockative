@@ -1,5 +1,13 @@
-package io.mockative
+package io.github
 
+import io.mockative.Fun1
+import io.mockative.Mock
+import io.mockative.any
+import io.mockative.classOf
+import io.mockative.coEvery
+import io.mockative.eq
+import io.mockative.every
+import io.mockative.mock
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

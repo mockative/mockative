@@ -5,16 +5,15 @@ import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
 import kotlin.native.concurrent.ThreadLocal
 
-abstract class Mockable(stubsUnitByDefault: Boolean) {
-
+class Mockable(val instance: Any) {
     // Serves as a workaround for getting default implementations to work with Kotlin/JS
-    private val instance = Any()
+    private val instanceToken = Any()
 
     private val blockingStubs = AtomicList<BlockingStub>()
     private val suspendStubs = AtomicList<SuspendStub>()
     private val verifiedInvocations = AtomicSet<Invocation>()
 
-    internal var stubsUnitsByDefault: Boolean by atomic(stubsUnitByDefault)
+    internal var stubsUnitsByDefault: Boolean by atomic(false)
 
     internal fun reset() {
         blockingStubs.clear()
@@ -51,14 +50,15 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
                     }
                 }
             }
+
             else -> blockingStub
         }
     }
 
     private fun throwMissingBlockingStubException(invocation: Invocation): Nothing {
         when (getSuspendStubOrNull(invocation)) {
-            null -> throw MissingExpectationException(this, invocation, false, expectations)
-            else -> throw InvalidExpectationException(this, invocation, false, expectations)
+            null -> throw MissingExpectationException(instanceToken, invocation, false, expectations)
+            else -> throw InvalidExpectationException(instanceToken, invocation, false, expectations)
         }
     }
 
@@ -85,14 +85,15 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
                     }
                 }
             }
+
             else -> suspendStub
         }
     }
 
     private fun throwMissingSuspendStubException(invocation: Invocation): Nothing {
         when (getBlockingStubOrNull(invocation)) {
-            null -> throw MissingExpectationException(this, invocation, true, expectations)
-            else -> throw InvalidExpectationException(this, invocation, true, expectations)
+            null -> throw MissingExpectationException(instance, invocation, true, expectations)
+            else -> throw InvalidExpectationException(instance, invocation, true, expectations)
         }
     }
 
@@ -144,7 +145,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    protected fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
+    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
@@ -163,7 +164,19 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    protected suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
+    internal fun <R> invoke(invocation: Invocation, default: () -> R): R {
+        if (isRecording) {
+            throw StubbingInProgressException(this, invocation)
+        } else {
+            return when (val stub = getBlockingStubOrNull(invocation)) {
+                null -> default()
+                else -> stub.invoke(invocation) as R
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
@@ -181,41 +194,11 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
         }
     }
 
-    private inline fun <reified R> invokeWithFallback(invocation: Invocation, default: () -> R): R {
-        if (isRecording) {
-            throw StubbingInProgressException(this, invocation)
-        } else {
-            return when (val stub = getBlockingStubOrNull(invocation)) {
-                null -> default()
-                else -> stub.invoke(invocation) as R
-            }
-        }
-    }
-
-    @Suppress("ReplaceCallWithBinaryOperator")
-    override fun equals(other: Any?): Boolean {
-        return invokeWithFallback(Invocation.Function("equals", listOf(other))) {
-            instance.equals((other as? Mockable)?.instance)
-        }
-    }
-
-    override fun hashCode(): Int {
-        return invokeWithFallback(Invocation.Function("hashCode", emptyList())) {
-            instance.hashCode()
-        }
-    }
-
-    override fun toString(): String {
-        return invokeWithFallback(Invocation.Function("toString", emptyList())) {
-            "io.mockative.Mockable@${instance.hashCode()}"
-        }
-    }
-
     fun debug() {
         val debugString = buildString {
             appendLine(this@Mockable.getClassName())
             appendLine("-----")
-            appendLine( "  Blocking Stubs")
+            appendLine("  Blocking Stubs")
 
             val blockingStubs = blockingStubs.reversed()
             if (blockingStubs.isEmpty()) {
@@ -231,7 +214,7 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
             }
 
             appendLine("-----")
-            appendLine( "  Suspend Stubs")
+            appendLine("  Suspend Stubs")
 
             val suspendStubs = suspendStubs.reversed()
             if (suspendStubs.isEmpty()) {
@@ -269,6 +252,27 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
     companion object {
         var isRecording: Boolean = false
 
+        private val mockables = mutableMapOf<Any, Mockable>()
+
+        internal fun mockable(instance: Any): Mockable {
+            if (!isMock(instance)) {
+                throw ReceiverNotMockedException(instance)
+            }
+
+            return mockables.getOrPut(instance) { Mockable(instance) }
+        }
+
+        fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
+            return mockable(instance).invoke(invocation, returnsUnit)
+        }
+
+        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R): R {
+            return mockable(instance).invoke(invocation, default)
+        }
+
+        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
+            return mockable(instance).suspend(invocation, returnsUnit)
+        }
 
         /**
          * Records the invocation of a single member on this mock.
@@ -368,9 +372,8 @@ abstract class Mockable(stubsUnitByDefault: Boolean) {
          * -----
          * ```
          */
-        fun debug(target: Any) {
-            val mock = target.asMockable()
-            mock.debug()
+        fun debug(instance: Any) {
+            mockable(instance).debug()
         }
     }
 }
