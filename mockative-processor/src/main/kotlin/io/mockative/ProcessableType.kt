@@ -66,8 +66,10 @@ data class ProcessableType(
 
             val constructorParameters = constructor.parameters
             val processableTypes = constructorParameters.mapNotNull { parameter ->
-                val parameterDeclaration = parameter.type.resolve().declaration as? KSClassDeclaration ?: return@mapNotNull null
-                if (parameterDeclaration.classKind == ClassKind.CLASS) parameterDeclaration.getPublicConstructor() ?: return@mapNotNull null
+                val parameterDeclaration =
+                    parameter.type.resolve().declaration as? KSClassDeclaration ?: return@mapNotNull null
+                if (parameterDeclaration.classKind == ClassKind.CLASS) parameterDeclaration.getPublicConstructor()
+                    ?: return@mapNotNull null
 
                 val modifiers = parameterDeclaration.modifiers
                 val isNotFinal = !modifiers.contains(Modifier.FINAL) && !modifiers.contains(Modifier.SEALED)
@@ -148,15 +150,17 @@ data class ProcessableType(
             val processableTypes = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
                 .filterIsInstance<KSPropertyDeclaration>()
                 .mapNotNull { property ->
-                    val mockAnnotation = property.annotations.find { it.shortName.asString() == MOCK_ANNOTATION.simpleName }
-                    val isSpy = mockAnnotation?.arguments?.find { it.name?.asString() == "isSpy" }?.value as? Boolean ?: false
+                    val mockAnnotation =
+                        property.annotations.find { it.shortName.asString() == MOCK_ANNOTATION.simpleName }
+                    val isSpy =
+                        mockAnnotation?.arguments?.find { it.name?.asString() == "isSpy" }?.value as? Boolean ?: false
                     val mockType = if (isSpy) ClassDeclMockType.SPY else ClassDeclMockType.MOCK
 
                     (property.type.resolve().declaration as? KSClassDeclaration)
                         ?.let { SymbolProcessingInformation(it, property.containingFile, mockType) }
                 }
                 .filter { (classDec, _, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
-                .groupBy({ it.classDeclaration }) { it.usage to it.mockType}
+                .groupBy({ it.classDeclaration }) { it.usage to it.mockType }
                 .mapValues { (_, fileAndMockTypesInformation) ->
                     val (usages, mockTypes) = fileAndMockTypesInformation.unzip()
                     val combinedMockTypes = mockTypes.map { it.generateTypeFunction }.distinct()
