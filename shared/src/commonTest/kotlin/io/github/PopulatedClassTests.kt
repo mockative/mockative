@@ -12,7 +12,8 @@ import kotlin.test.assertTrue
 class PopulatedClassTests {
     @Mock
     val class2Mock = mock(classOf<Class2>())
-    
+
+    @Mock
     val mock: PopulatedClass = mock(classOf<PopulatedClass>())
 
     @Mock
