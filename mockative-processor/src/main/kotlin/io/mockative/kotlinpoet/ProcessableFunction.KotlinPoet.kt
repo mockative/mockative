@@ -54,13 +54,9 @@ private fun ProcessableFunction.buildCallSpyInstanceBlock(
     } else null
 
     val builder = CodeBlock.builder()
-    if (suppressError != null) {
-        builder
-            .add("%L%L(%L)", suppressError, callSpyInstance, argumentsList)
-    } else {
-        builder
-            .add("%L(%L)", callSpyInstance, argumentsList)
-    }
+    if (suppressError != null) builder.add("%L%L(%L)", suppressError, callSpyInstance, argumentsList)
+    else builder.add("%L(%L)", callSpyInstance, argumentsList)
+
 
     return builder.build()
 }
