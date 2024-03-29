@@ -12,12 +12,11 @@ import kotlin.test.assertTrue
 class PopulatedClassTests {
     @Mock
     val class2Mock = mock(classOf<Class2>())
-    @Mock
+    
     val mock: PopulatedClass = mock(classOf<PopulatedClass>())
 
     @Mock
     val class3Mock = mock(classOf<Class3>())
-
 
     @Test
     fun isMockEmptyClass() {
@@ -49,18 +48,18 @@ class PopulatedClassTests {
         assertTrue(exception is MissingExpectationException)
     }
 
-//    @Test
-//    fun givenExpectationOnMockedConstrcutorParameter_thenExpectationIsReturned() {
-//        // Given
-//        every { mock.class3 }.returns(class3Mock)
-//        every { class3Mock.message1 }.returns("something not message1 in class3")
-//
-//        // When
-//        val getClass2FromMockResult = mock.class3
-//        val resultGetPropertyInClass2 = getClass2FromMockResult.message1
-//
-//        // Then
-//        assertTrue(getClass2FromMockResult == class3Mock)
-//        assertTrue(resultGetPropertyInClass2 == "something not message1 in class3")
-//    }
+    @Test
+    fun givenExpectationOnMockedConstrcutorParameter_thenExpectationIsReturned() {
+        // Given
+        every { mock.class3 }.returns(class3Mock)
+        every { class3Mock.message1 }.returns("something not message1 in class3")
+
+        // When
+        val getClass2FromMockResult = mock.class3
+        val resultGetPropertyInClass2 = getClass2FromMockResult.message1
+
+        // Then
+        assertTrue(getClass2FromMockResult == class3Mock)
+        assertTrue(resultGetPropertyInClass2 == "something not message1 in class3")
+    }
 }

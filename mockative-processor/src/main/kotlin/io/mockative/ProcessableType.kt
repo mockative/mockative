@@ -187,7 +187,6 @@ data class ProcessableType(
         private fun List<ProcessableType>.flatten(): List<ProcessableType> {
             return this + this.flatMap { type ->
                 type.children.flatten()
-            }
         }
     }
 }

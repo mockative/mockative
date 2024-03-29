@@ -56,6 +56,8 @@ dependencies {
 }
 ```
 
+> 💡 I have plans to introduce a Gradle plugin that will take care of most of the configuration specified above and below
+
 ## Gradle configuration for mocking classes
 To utilize Mockative effectively in your Kotlin project, it's essential to configure your Gradle build script to open classes for mocking. Mockative requires classes to be open for subclassing, as Kotlin classes are final by default. This is achieved using the Kotlin `all-open` compiler plugin.
 
@@ -106,7 +108,7 @@ import some.packagename.MockativeMockable
 
 @MockativeMockable
 class MyService {
-    // Class implementation
+    // ...
 }
 ```
 
