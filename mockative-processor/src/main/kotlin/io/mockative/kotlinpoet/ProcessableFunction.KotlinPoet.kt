@@ -36,29 +36,18 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
     return builder.build()
 }
 
-private val spyKnownAnnotationsOnFunctionProblemsNames = listOf(
-    "sort", // list of annotations are empty
-)
 private fun ProcessableFunction.buildCallSpyInstanceBlock(
     hasReceiver: Boolean,
     argumentsList: CodeBlock
 ): CodeBlock {
     val callSpyInstance = if (hasReceiver) "this.`${name}`" else "$spyInstanceName!!.`${name}`"
-    val containsDeprecatedAnnotation = declaration.annotations.toList().any { annotation ->
-        annotation.shortName.asString() == "Deprecated"
-    }
-    val suppressError = if (containsDeprecatedAnnotation || name in spyKnownAnnotationsOnFunctionProblemsNames) {
-        AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+    val suppressDeprecationError = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
             .addMember("%S", "DEPRECATION_ERROR")
             .build()
-    } else null
 
-    val builder = CodeBlock.builder()
-    if (suppressError != null) builder.add("%L%L(%L)", suppressError, callSpyInstance, argumentsList)
-    else builder.add("%L(%L)", callSpyInstance, argumentsList)
-
-
-    return builder.build()
+    return CodeBlock.builder()
+        .add("%L%L(%L)", suppressDeprecationError, callSpyInstance, argumentsList)
+        .build()
 }
 
 private fun ProcessableFunction.buildModifiers() = buildList {
