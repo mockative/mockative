@@ -23,4 +23,9 @@ fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)
  * @param value The value to check
  * @return `true` if the [value] is a Mockative mock; `false` otherwise.
  */
-fun <T : Any> isMock(value: T): Boolean = value is Mockable
+fun <T : Any> isMock(value: T): Boolean {
+    val name = value.getClassName()
+    return name.endsWith("Mock")
+}
+
+fun <T : Any> spy(type: KClass<T>, instance: T): T = throw NoSuchMockException(type)

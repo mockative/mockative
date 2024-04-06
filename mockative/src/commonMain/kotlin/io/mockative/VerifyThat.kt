@@ -1,11 +1,11 @@
 package io.mockative
 
 fun verifyNoUnverifiedExpectations(receiver: Any) {
-    receiver.asMockable().confirmVerified()
+    Mockable.mockable(receiver).confirmVerified()
 }
 
 fun verifyNoUnmetExpectations(receiver: Any) {
-    receiver.asMockable().verifyNoUnmetExpectations()
+    Mockable.mockable(receiver).verifyNoUnmetExpectations()
 }
 
 fun <R> verify(block: () -> R): Verification {

@@ -3,6 +3,7 @@ package io.mockative.kotlinpoet
 import com.squareup.kotlinpoet.*
 import io.mockative.INVOCATION_GETTER
 import io.mockative.INVOCATION_SETTER
+import io.mockative.MOCKABLE
 import io.mockative.ProcessableProperty
 
 internal fun ProcessableProperty.buildPropertySpec(): PropertySpec {
@@ -16,17 +17,19 @@ internal fun ProcessableProperty.buildPropertySpec(): PropertySpec {
 private fun ProcessableProperty.buildSetter(): FunSpec {
     val value = ParameterSpec.builder("value", type)
         .build()
+    val callSpyInstance = "${spyInstanceName}!!.`${name}`=value; return@invoke value"
 
     return FunSpec.setterBuilder()
         .addParameter(value)
-        .addStatement("invoke<%T>(%T(%S, %N), true)", type, INVOCATION_SETTER, name, value)
+        .addStatement("%T.invoke<%T>(this, %T(%S, %N), true) { %L }", MOCKABLE, type, INVOCATION_SETTER, name, value, callSpyInstance)
         .build()
 }
 
 private fun ProcessableProperty.buildGetter(): FunSpec {
     val returnsUnit = if (type == UNIT) "true" else "false"
+    val callSpyInstance = "${spyInstanceName}!!.`$name`"
 
     return FunSpec.getterBuilder()
-        .addStatement("return invoke<%T>(%T(%S), %L)", type, INVOCATION_GETTER, name, returnsUnit)
+        .addStatement("return %T.invoke<%T>(this, %T(%S), %L){ %L }", MOCKABLE, type, INVOCATION_GETTER, name, returnsUnit, callSpyInstance)
         .build()
 }
