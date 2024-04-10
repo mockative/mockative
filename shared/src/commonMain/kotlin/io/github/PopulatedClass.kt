@@ -31,6 +31,8 @@ class PopulatedClass(
     val notConstructorParam = "notConstructorParam"
 
     fun greet() = "Hello"
+
+    fun withParameters(param1: String, param2: Int) = "Hello $param1 $param2"
 }
 
 @MockativeMockable

@@ -1,18 +1,10 @@
 package io.github
 
-import io.mockative.MissingExpectationException
-import io.mockative.Mock
-import io.mockative.classOf
-import io.mockative.every
-import io.mockative.isMock
-import io.mockative.mock
+import io.mockative.*
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class PopulatedClassTests {
-    @Mock
-    val class2Mock = mock(classOf<Class2>())
-
     @Mock
     val mock: PopulatedClass = mock(classOf<PopulatedClass>())
 
@@ -23,6 +15,59 @@ class PopulatedClassTests {
     @Test
     fun isMockEmptyClass() {
         assertTrue(isMock(mock))
+    }
+
+    @Test
+    fun givenEqValuesForFunctionWithReturnValue_whenCalledWithExactValues_ThenValueIsReturned() {
+        // Given
+        every { mock.withParameters("Hello", 1) }.returns("This is not Hello Hello 1")
+
+        // When
+        val result = mock.withParameters("Hello", 1)
+
+        // Then
+        assertTrue(result == "This is not Hello Hello 1")
+    }
+
+    @Test
+    fun givenEqValuesForFunctionWithReturnValue_whenCalledWithDifferentValues_ThenMissingExpectationExceptionIsThrown() {
+        // Given
+        every { mock.withParameters("Hello", 1) }.returns("This is not Hello Hello 1")
+
+        // When / then
+        val result = kotlin.runCatching { mock.withParameters("Hello", 2) }
+        assertTrue(result.exceptionOrNull() is MissingExpectationException)
+    }
+
+    @Test
+    fun givenMatchersForFunctionWithReturnValue_whenCalledWithMatchingValues_ThenValueIsReturned() {
+        // Given
+        every { mock.withParameters(any(), gt(4)) }.returns("This is not Hello Hello 1")
+
+        // When
+        val result = mock.withParameters("Hello", 10)
+
+        // Then
+        assertTrue(result == "This is not Hello Hello 1")
+    }
+
+    @Test
+    fun givenMatchersForFunctionWithReturnValue_whenCalledWithNonMatchingValues_ThenMissingExpectationExceptionIsThrown() {
+        // Given
+        every { mock.withParameters(any(), gt(4)) }.returns("This is not Hello Hello 1")
+
+        // When / then
+        val result = kotlin.runCatching { mock.withParameters("Hello", 1) }
+        assertTrue(result.exceptionOrNull() is MissingExpectationException)
+    }
+
+    @Test
+    fun testSetter() {
+        // Given
+        mock.charSequence = "Hello"
+
+        // when / Then
+        verify{ mock.charSequence = "Hello" }.wasInvoked(exactly = 1)
     }
 
     @Test
@@ -40,14 +85,10 @@ class PopulatedClassTests {
     @Test
     fun givenNoExpectationOnMockedConstrcutorParameter_thenMissingExpectationIsThrown() {
         // Given / when
-        val exception = try {
-            mock.inner
-        } catch (e: Exception) {
-            e
-        }
+        val result = runCatching { mock.inner }
 
         // Then
-        assertTrue(exception is MissingExpectationException)
+        assertTrue(result.exceptionOrNull() is MissingExpectationException)
     }
 
 //    @Test
