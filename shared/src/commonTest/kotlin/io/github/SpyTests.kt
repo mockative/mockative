@@ -15,7 +15,7 @@ class SpyTests {
 
 
     @Test
-    fun noMockingspy() {
+    fun givenNoStubbing_WhenSpyMethodIsInvoked_ReturnsRealImplementation() {
         // Given / When
         val spyOutput = spy.greet()
         val realOutput = realSpy.greet()
@@ -25,7 +25,7 @@ class SpyTests {
     }
 
     @Test
-    fun mockingSpy() {
+    fun givenStubbingOnSpy_whenStubbedFunctionisCalled_ReturnsStubbedValue() {
         // Given
         every {
             spy.greet()
@@ -39,7 +39,7 @@ class SpyTests {
     }
 
     @Test
-    fun mockingList() {
+    fun givenStubbingGetterOverwritingInsertedElement_WhenStubbedFunctionIsInvoked_StubbedValueIsReturned() {
         // Given
         every {
             spyList[0]
@@ -53,7 +53,7 @@ class SpyTests {
     }
 
     @Test
-    fun noMockingList() {
+    fun givenNoStubbingOnSpy_WhenSpyFunctionIsCalled_ThenRealImplementationIsCalled() {
         // Given
         spyList.addAll(listOf("I", "am"))
 
@@ -65,7 +65,7 @@ class SpyTests {
     }
 
     @Test
-    fun mockingListWithReal() {
+    fun givenSomeOfGettersAreStubbed_WhenInsertingValuesAtStubbedIndexes_ThenValuesAreStillStubbed() {
         // Given
         every {
             spyList[0]
@@ -130,19 +130,5 @@ class SpyTests {
 
         // Then
         assertEquals("hej 1 10 [hello there, I am not stubbed]", output)
-    }
-
-    @Test
-    fun givenCallMatchingStub_whenCallingWithDifferentArguments_thenExpectFallbackToRealImplementation() {
-        // Given
-        every {
-            spy.functionWithManyArgumented(string = "hej", int = 1, long = 1, list = listOf("hello there"))
-        }.returns("stubbed")
-
-        // When
-        val output = spy.functionWithManyArgumented(string = "hej", int = 1, long = 1, list = listOf("hello there"))
-
-        // Then
-        assertEquals("stubbed", output)
     }
 }
