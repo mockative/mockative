@@ -33,7 +33,7 @@ internal fun ProcessableType.buildMockFunSpec(): FunSpec {
         .addTypeVariables(functionTypeVariables)
         .addParameter(type)
         .returns(parameterizedSourceClassName)
-        .addStatement("return %M(%T()) { stubsUnitByDefault = %L }", CONFIGURE, parameterizedMockClassName, stubsUnitByDefault)
+        .addStatement("return %M(%T()) { stubsUnitByDefault·=·%L }", CONFIGURE, parameterizedMockClassName, stubsUnitByDefault)
         .addOriginatingKSFiles(usages)
         .build()
 }
