@@ -15,5 +15,3 @@ interface AnySuspendResultBuilder<R> {
 
     fun throwsMany(vararg throwables: Throwable) = invokesMany(*throwables.map { suspendFun { throw it } }.toTypedArray())
 }
-
-fun AnySuspendResultBuilder<Unit>.doesNothing() = invokes { }

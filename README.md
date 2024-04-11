@@ -137,7 +137,7 @@ Then, to stub a function or property on the mock there is a couple of options:
 ### Stubbing using values
 
 To begin stubbing a function you may simply pass the values to the function call inside a block 
-passed to the `every` or `coEvery` (when stubbing a `suspend` function) functions:
+passed to the `every`/`justRun` or `coEvery`/`coJustRun` (when stubbing a `suspend` function) functions:
 
 ```kotlin
 // Stub a blocking function
@@ -152,9 +152,8 @@ coEvery { repositoryMapper.mapResponseToRepository(response) }
 every { repository.maintainer }
     .returns("Nillerr")
 
-// Stub a property setter (these are stubbed by default)
-every { repository.stars = repository.stars + 1 }
-    .doesNothing()
+// Stub a property setter (functions returning `Unit` are stubbed by default)
+justRun { repository.stars = repository.stars + 1 }
 ```
 
 ### Stubbing using matchers
@@ -229,13 +228,6 @@ The following functions are available to provide a stub implementation for every
 | `returnsMany(vararg value: R)`                        | Returns the specified values in sequence. Once the last value in the sequence has been returned, this stubbing will no longer match any invocation.                                                                              |
 | `throws(throwable: Throwable)`                        | Throws the specified exception.                                                                                                                                                                                                  |
 | `throwsMany(throwable: Throwable)`                    | Throws the specified exceptions in sequence. Once the last exception in the sequence has been thrown, this stubbing will no longer match any invocation.                                                                         |
-
-When the return type of the function or property being stubbed is `Unit`, the following additional
-then function is available:
-
-| Function        | Description     |
-|-----------------|-----------------|
-| `doesNothing()` | Returns `Unit`. |
 
 ### Implicit stubbing of functions returning Unit
 

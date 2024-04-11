@@ -3,8 +3,7 @@ package io.github
 import io.mockative.Mock
 import io.mockative.any
 import io.mockative.classOf
-import io.mockative.doesNothing
-import io.mockative.every
+import io.mockative.justRun
 import io.mockative.mock
 import io.mockative.once
 import io.mockative.verify
@@ -17,7 +16,7 @@ class SealedInterfaceServiceTests {
     @Test
     fun sealedInterfaceTest() {
         // Given
-        every { sis.acceptSealedInterface(any()) }.doesNothing()
+        justRun { sis.acceptSealedInterface(any()) }
 
         val value = SealedInterfaceImplementation("Mockative")
 

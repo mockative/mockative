@@ -13,5 +13,3 @@ interface AnyResultBuilder<R> {
 
     fun throwsMany(vararg throwables: Throwable) = invokesMany(*throwables.map { { throw it } }.toTypedArray())
 }
-
-fun AnyResultBuilder<Unit>.doesNothing() = invokes { }
