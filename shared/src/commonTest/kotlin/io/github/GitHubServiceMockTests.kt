@@ -10,6 +10,7 @@ import io.mockative.eq
 import io.mockative.every
 import io.mockative.justRun
 import io.mockative.mock
+import io.mockative.never
 import io.mockative.once
 import io.mockative.verify
 import io.mockative.verifyNoUnmetExpectations
@@ -24,12 +25,6 @@ internal class GitHubServiceMockTests {
 
     @Mock
     val github: GitHubAPI = mock(classOf<GitHubAPI>())
-
-    @Mock
-    val expected: ExpectedAPI = mock(classOf<ExpectedAPI>())
-
-    @Mock
-    val nested: GitHubService.NestedAPI = mock(classOf<GitHubService.NestedAPI>())
 
     @Mock
     val configuration: GitHubConfiguration = mock(classOf<GitHubConfiguration>())
@@ -55,7 +50,6 @@ internal class GitHubServiceMockTests {
 
         // then
         coVerify { github.create(repository) }
-            .wasInvoked(atLeast = once)
     }
 
     @Test
@@ -103,8 +97,7 @@ internal class GitHubServiceMockTests {
         service.repository(id)
 
         // then
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
 
         verifyNoUnmetExpectations(github)
     }
@@ -123,8 +116,7 @@ internal class GitHubServiceMockTests {
         // then
         assertNotNull(actual.exceptionOrNull())
 
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
     }
 
     @Test
@@ -140,8 +132,7 @@ internal class GitHubServiceMockTests {
 
         assertSame(mockative, firstRepository)
 
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
 
         val mockito = Repository(id, "Mockito")
         coEvery { github.repository(id) }
@@ -153,8 +144,7 @@ internal class GitHubServiceMockTests {
         // Then
         assertSame(mockito, secondRepository)
 
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
     }
 
     @Test
@@ -181,7 +171,6 @@ internal class GitHubServiceMockTests {
 
         // Then
         verify { configuration.token = token }
-            .wasInvoked()
     }
 
     @Test
@@ -195,7 +184,11 @@ internal class GitHubServiceMockTests {
 
         // Then
         verify { configuration.token = token }
-            .wasInvoked()
+    }
+
+    @Test
+    fun testNeverCalled() = runTest {
+        coVerify(exactly = never) { github.repository(any()) }
     }
 
     @Test

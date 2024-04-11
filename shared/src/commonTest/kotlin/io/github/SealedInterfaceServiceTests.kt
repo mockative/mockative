@@ -24,6 +24,6 @@ class SealedInterfaceServiceTests {
         sis.acceptSealedInterface(value)
 
         // Then
-        verify { sis.acceptSealedInterface(value) }.wasInvoked(exactly = once)
+        verify(exactly = once) { sis.acceptSealedInterface(value) }
     }
 }

@@ -207,7 +207,6 @@ s3Client.getObject(request, block::invoke)
 
 // Verify the call to the mock function
 verify { block.invoke(response) }
-    .wasInvoked(exactly = once)
 ```
 
 ### Stubbing implementations
@@ -289,28 +288,23 @@ using either values or matchers as per the stubbing (`every`) API:
 
 ```kotlin
 // Verify a `suspend` function (notice the use of `coVerify`)
-coVerify { githubApi.getRepository("mockative/mockative") }
-    .wasNotInvoked()
+coVerify(exactly = never) { githubApi.getRepository("mockative/mockative") }
 
 // Verify a blocking function
-verify { repositoryMapper.mapResponseToRepository(response) }
-    .wasInvoked(atLeast = 1)
+verify(atLeast = 1) { repositoryMapper.mapResponseToRepository(response) }
 
 // Verify a property getter
-verify { repository.maintainer }
-    .wasInvoked(atLeast = once, atMost = 6)
+verify(atLeast = once, atMost = 6) { repository.maintainer }
 
 // Verify a property setter
-verify { repository.stars = repository.stars + 1 }
-    .wasInvoked(exactly = 1)
+verify(exactly = 1) { repository.stars = repository.stars + 1 }
 ```
 
 ### Verification using matchers
 
 ```kotlin
 // Verify a suspend function (notice the use of `coVerify`)
-coVerify { s3Client.getObject<File>(eq(request), any()) }
-    .wasInvoked(exactly = once)
+coVerify(exactly = once) { s3Client.getObject<File>(eq(request), any()) }
 ```
 
 ## Validation
@@ -323,7 +317,7 @@ usually in the `@AfterEach` function of your tests:
 ```kotlin
 @AfterEach
 fun afterEach() {
-  // Verifies that all expectations were verified through a call to `verify { ... }.wasInvoked()`.
+  // Verifies that all expectations were verified through a call to `verify`.
   verifyNoUnverifiedExpectations(githubApi)
   
   // Verifies that the mock has no expectations that weren't invoked at least once.
