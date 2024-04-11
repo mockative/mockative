@@ -318,7 +318,7 @@ usually in the `@AfterEach` function of your tests:
 @AfterEach
 fun afterEach() {
   // Verifies that all expectations were verified through a call to `verify`.
-  verifyNoUnverifiedExpectations(githubApi)
+  confirmVerified(githubApi)
   
   // Verifies that the mock has no expectations that weren't invoked at least once.
   checkUnnecessaryStub(s3Client)

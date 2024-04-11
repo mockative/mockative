@@ -1,6 +1,6 @@
 package io.mockative
 
-fun verifyNoUnverifiedExpectations(receiver: Any) {
+fun confirmVerified(receiver: Any) {
     Mockable.mockable(receiver).confirmVerified()
 }
 
