@@ -4,8 +4,8 @@ fun verifyNoUnverifiedExpectations(receiver: Any) {
     Mockable.mockable(receiver).confirmVerified()
 }
 
-fun verifyNoUnmetExpectations(receiver: Any) {
-    Mockable.mockable(receiver).verifyNoUnmetExpectations()
+fun checkUnnecessaryStub(receiver: Any) {
+    Mockable.mockable(receiver).checkUnnecessaryStub()
 }
 
 fun <R> verify(block: () -> R) {

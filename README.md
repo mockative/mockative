@@ -321,6 +321,6 @@ fun afterEach() {
   verifyNoUnverifiedExpectations(githubApi)
   
   // Verifies that the mock has no expectations that weren't invoked at least once.
-  verifyNoUnmetExpectations(s3Client)
+  checkUnnecessaryStub(s3Client)
 }
 ```

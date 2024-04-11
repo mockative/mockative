@@ -13,7 +13,7 @@ import io.mockative.mock
 import io.mockative.never
 import io.mockative.once
 import io.mockative.verify
-import io.mockative.verifyNoUnmetExpectations
+import io.mockative.checkUnnecessaryStub
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -37,7 +37,7 @@ internal class GitHubServiceMockTests {
 
     @AfterTest
     fun validateMocks() {
-        verifyNoUnmetExpectations(github)
+        checkUnnecessaryStub(github)
     }
 
     @Test
@@ -99,7 +99,7 @@ internal class GitHubServiceMockTests {
         // then
         coVerify(exactly = once) { github.repository(id) }
 
-        verifyNoUnmetExpectations(github)
+        checkUnnecessaryStub(github)
     }
 
     @Test
