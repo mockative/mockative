@@ -141,16 +141,13 @@ passed to the `every`/`justRun` or `coEvery`/`coJustRun` (when stubbing a `suspe
 
 ```kotlin
 // Stub a blocking function
-every { githubApi.getRepository("mockative/mockative") }
-    .invokes { response }
+every { githubApi.getRepository("mockative/mockative") } invokes { response }
 
 // Stub a `suspend` function (notice the use of `coEvery`)
-coEvery { repositoryMapper.mapResponseToRepository(response) }
-    .invokes { repository }
+coEvery { repositoryMapper.mapResponseToRepository(response) } invokes { repository }
 
 // Stub a property getter
-every { repository.maintainer }
-    .returns("Nillerr")
+every { repository.maintainer } returns "Nillerr"
 
 // Stub a property setter (functions returning `Unit` are stubbed by default)
 justRun { repository.stars = repository.stars + 1 }
@@ -203,8 +200,7 @@ pass as a mock to other functions in order to stub and verify invocations on it:
 val block = mock(classOf<Fun1<GetObjectResponse, File>>())
 
 // Stub the mock function
-every { block.invoke(response) }
-  .returns(file)
+every { block.invoke(response) } returns file
 
 // Call something that calls the mock function
 s3Client.getObject(request, block::invoke)
