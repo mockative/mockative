@@ -101,8 +101,7 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-        every { s3Client.getObjectSync<File>(eq(request), any()) }
-            .returns(expected)
+        every { s3Client.getObjectSync<File>(eq(request), any()) } returns expected
 
         // When
         val file = fileService.getFileRawSync(id, block::invoke)

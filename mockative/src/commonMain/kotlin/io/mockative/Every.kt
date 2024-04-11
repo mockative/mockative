@@ -16,6 +16,10 @@ fun <R> every(block: () -> R): ResultBuilder<R> {
     }
 }
 
+fun justRun(block: () -> Unit) {
+    every(block) returns Unit
+}
+
 /**
  * Executes the given block and records the invocation on any mock object created within the block.
  *
@@ -31,4 +35,8 @@ suspend fun <R> coEvery(block: suspend () -> R): SuspendResultBuilder<R> {
     } finally {
         Matchers.clear()
     }
+}
+
+suspend fun coJustRun(block: suspend () -> Unit) {
+    coEvery(block) returns Unit
 }

@@ -6,13 +6,14 @@ import io.mockative.any
 import io.mockative.classOf
 import io.mockative.coEvery
 import io.mockative.coVerify
-import io.mockative.doesNothing
 import io.mockative.eq
 import io.mockative.every
+import io.mockative.justRun
 import io.mockative.mock
+import io.mockative.never
 import io.mockative.once
 import io.mockative.verify
-import io.mockative.verifyNoUnmetExpectations
+import io.mockative.checkUnnecessaryStub
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -26,12 +27,6 @@ internal class GitHubServiceMockTests {
     val github: GitHubAPI = mock(classOf<GitHubAPI>())
 
     @Mock
-    val expected: ExpectedAPI = mock(classOf<ExpectedAPI>())
-
-    @Mock
-    val nested: GitHubService.NestedAPI = mock(classOf<GitHubService.NestedAPI>())
-
-    @Mock
     val configuration: GitHubConfiguration = mock(classOf<GitHubConfiguration>())
 
     @Mock
@@ -42,7 +37,7 @@ internal class GitHubServiceMockTests {
 
     @AfterTest
     fun validateMocks() {
-        verifyNoUnmetExpectations(github)
+        checkUnnecessaryStub(github)
     }
 
     @Test
@@ -55,7 +50,6 @@ internal class GitHubServiceMockTests {
 
         // then
         coVerify { github.create(repository) }
-            .wasInvoked(atLeast = once)
     }
 
     @Test
@@ -103,10 +97,9 @@ internal class GitHubServiceMockTests {
         service.repository(id)
 
         // then
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
 
-        verifyNoUnmetExpectations(github)
+        checkUnnecessaryStub(github)
     }
 
     @Test
@@ -123,8 +116,7 @@ internal class GitHubServiceMockTests {
         // then
         assertNotNull(actual.exceptionOrNull())
 
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
     }
 
     @Test
@@ -140,8 +132,7 @@ internal class GitHubServiceMockTests {
 
         assertSame(mockative, firstRepository)
 
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
 
         val mockito = Repository(id, "Mockito")
         coEvery { github.repository(id) }
@@ -153,15 +144,14 @@ internal class GitHubServiceMockTests {
         // Then
         assertSame(mockito, secondRepository)
 
-        coVerify { github.repository(id) }
-            .wasInvoked(exactly = once)
+        coVerify(exactly = once) { github.repository(id) }
     }
 
     @Test
     fun getToken() {
         // Given
         val token = "the-token"
-        every { configuration.token }.returns(token)
+        every { configuration.token } returns token
 
         // When
         val result = service.getToken()
@@ -174,28 +164,31 @@ internal class GitHubServiceMockTests {
     fun setToken() {
         // Given
         val token = "the-token"
-        every { configuration.token = token }.doesNothing()
+        justRun { configuration.token = token }
 
         // When
         service.setToken(token)
 
         // Then
         verify { configuration.token = token }
-            .wasInvoked()
     }
 
     @Test
     fun setTokenWithAny() {
         // Given
         val token = "the-token"
-        every { configuration.token = any() }.doesNothing()
+        justRun { configuration.token = any() }
 
         // When
         service.setToken(token)
 
         // Then
         verify { configuration.token = token }
-            .wasInvoked()
+    }
+
+    @Test
+    fun testNeverCalled() = runTest {
+        coVerify(exactly = never) { github.repository(any()) }
     }
 
     @Test

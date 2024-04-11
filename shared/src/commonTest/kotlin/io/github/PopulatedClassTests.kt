@@ -24,7 +24,7 @@ class PopulatedClassTests {
     @Test
     fun givenExpectationSetup_thenExpectationIsReturned() {
         // Given
-        every { mock.greet() }.returns("This is not hello")
+        every { mock.greet() } returns "This is not hello"
 
         // When
         val result = mock.greet()
@@ -49,8 +49,8 @@ class PopulatedClassTests {
     @Test
     fun givenExpectationOnMockedConstrcutorParameter_thenExpectationIsReturned() {
         // Given
-        every { mock.class3 }.returns(class3Mock)
-        every { class3Mock.message1 }.returns("something not message1 in class3")
+        every { mock.class3 } returns class3Mock
+        every { class3Mock.message1 } returns "something not message1 in class3"
 
         // When
         val getClass2FromMockResult = mock.class3

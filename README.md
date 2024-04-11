@@ -137,24 +137,20 @@ Then, to stub a function or property on the mock there is a couple of options:
 ### Stubbing using values
 
 To begin stubbing a function you may simply pass the values to the function call inside a block 
-passed to the `every` or `coEvery` (when stubbing a `suspend` function) functions:
+passed to the `every`/`justRun` or `coEvery`/`coJustRun` (when stubbing a `suspend` function) functions:
 
 ```kotlin
 // Stub a blocking function
-every { githubApi.getRepository("mockative/mockative") }
-    .invokes { response }
+every { githubApi.getRepository("mockative/mockative") } invokes { response }
 
 // Stub a `suspend` function (notice the use of `coEvery`)
-coEvery { repositoryMapper.mapResponseToRepository(response) }
-    .invokes { repository }
+coEvery { repositoryMapper.mapResponseToRepository(response) } invokes { repository }
 
 // Stub a property getter
-every { repository.maintainer }
-    .returns("Nillerr")
+every { repository.maintainer } returns "Nillerr"
 
-// Stub a property setter (these are stubbed by default)
-every { repository.stars = repository.stars + 1 }
-    .doesNothing()
+// Stub a property setter (functions returning `Unit` are stubbed by default)
+justRun { repository.stars = repository.stars + 1 }
 ```
 
 ### Stubbing using matchers
@@ -204,15 +200,13 @@ pass as a mock to other functions in order to stub and verify invocations on it:
 val block = mock(classOf<Fun1<GetObjectResponse, File>>())
 
 // Stub the mock function
-every { block.invoke(response) }
-  .returns(file)
+every { block.invoke(response) } returns file
 
 // Call something that calls the mock function
 s3Client.getObject(request, block::invoke)
 
 // Verify the call to the mock function
 verify { block.invoke(response) }
-    .wasInvoked(exactly = once)
 ```
 
 ### Stubbing implementations
@@ -229,13 +223,6 @@ The following functions are available to provide a stub implementation for every
 | `returnsMany(vararg value: R)`                        | Returns the specified values in sequence. Once the last value in the sequence has been returned, this stubbing will no longer match any invocation.                                                                              |
 | `throws(throwable: Throwable)`                        | Throws the specified exception.                                                                                                                                                                                                  |
 | `throwsMany(throwable: Throwable)`                    | Throws the specified exceptions in sequence. Once the last exception in the sequence has been thrown, this stubbing will no longer match any invocation.                                                                         |
-
-When the return type of the function or property being stubbed is `Unit`, the following additional
-then function is available:
-
-| Function        | Description     |
-|-----------------|-----------------|
-| `doesNothing()` | Returns `Unit`. |
 
 ### Implicit stubbing of functions returning Unit
 
@@ -301,28 +288,23 @@ using either values or matchers as per the stubbing (`every`) API:
 
 ```kotlin
 // Verify a `suspend` function (notice the use of `coVerify`)
-coVerify { githubApi.getRepository("mockative/mockative") }
-    .wasNotInvoked()
+coVerify(exactly = never) { githubApi.getRepository("mockative/mockative") }
 
 // Verify a blocking function
-verify { repositoryMapper.mapResponseToRepository(response) }
-    .wasInvoked(atLeast = 1)
+verify(atLeast = 1) { repositoryMapper.mapResponseToRepository(response) }
 
 // Verify a property getter
-verify { repository.maintainer }
-    .wasInvoked(atLeast = once, atMost = 6)
+verify(atLeast = once, atMost = 6) { repository.maintainer }
 
 // Verify a property setter
-verify { repository.stars = repository.stars + 1 }
-    .wasInvoked(exactly = 1)
+verify(exactly = 1) { repository.stars = repository.stars + 1 }
 ```
 
 ### Verification using matchers
 
 ```kotlin
 // Verify a suspend function (notice the use of `coVerify`)
-coVerify { s3Client.getObject<File>(eq(request), any()) }
-    .wasInvoked(exactly = once)
+coVerify(exactly = once) { s3Client.getObject<File>(eq(request), any()) }
 ```
 
 ## Validation
@@ -335,10 +317,10 @@ usually in the `@AfterEach` function of your tests:
 ```kotlin
 @AfterEach
 fun afterEach() {
-  // Verifies that all expectations were verified through a call to `verify { ... }.wasInvoked()`.
-  verifyNoUnverifiedExpectations(githubApi)
+  // Verifies that all expectations were verified through a call to `verify`.
+  confirmVerified(githubApi)
   
   // Verifies that the mock has no expectations that weren't invoked at least once.
-  verifyNoUnmetExpectations(s3Client)
+  checkUnnecessaryStub(s3Client)
 }
 ```

@@ -130,7 +130,7 @@ class Mockable(val instance: Any) {
         }
     }
 
-    internal fun verifyNoUnmetExpectations() {
+    internal fun checkUnnecessaryStub() {
         val unusedBlockingStubs = blockingStubs.filter { it.invocations.isEmpty() }
         val unusedSuspendStubs = suspendStubs.filter { it.invocations.isEmpty() }
 
