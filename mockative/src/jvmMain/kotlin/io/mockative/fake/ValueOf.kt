@@ -11,19 +11,12 @@ import kotlin.reflect.KClass
 
 private val objenesis = ObjenesisStd()
 
-@Suppress("UNCHECKED_CAST")
-private fun <T> Any.invoke(methodName: String, defaultValue: T): T {
-    val method =
-        this::class.java.methods.firstOrNull { it.name == methodName } ?: return defaultValue
-    return method.invoke(this) as T
-}
-
 private fun isSealed(clazz: Class<*>): Boolean {
-    return clazz.invoke("isSealed", false)
+    return clazz.kotlin.isSealed
 }
 
-private fun getPermittedSubclasses(clazz: Class<*>): kotlin.Array<Class<*>> {
-    return clazz.invoke("getPermittedSubclasses", emptyArray())
+private fun getPermittedSubclasses(clazz: Class<*>): List<Class<*>> {
+    return clazz.kotlin.sealedSubclasses.map { it.java }
 }
 
 @Suppress("UNCHECKED_CAST")
