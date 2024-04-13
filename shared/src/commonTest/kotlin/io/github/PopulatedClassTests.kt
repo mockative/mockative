@@ -2,6 +2,7 @@ package io.github
 
 import io.mockative.*
 import kotlin.test.Test
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class PopulatedClassTests {
@@ -88,7 +89,8 @@ class PopulatedClassTests {
         val result = runCatching { mock.inner }
 
         // Then
-        assertTrue(result.exceptionOrNull() is MissingExpectationException)
+        val exception = result.exceptionOrNull()
+        assertIs<MissingExpectationException>(exception)
     }
 
 //    @Test

@@ -29,3 +29,5 @@ fun <T : Any> isMock(value: T): Boolean {
 }
 
 fun <T : Any> spy(type: KClass<T>, instance: T): T = throw NoSuchMockException(type)
+
+fun <T : Any> spyOn(instance: T): T = throw NoSuchMockException(instance::class)

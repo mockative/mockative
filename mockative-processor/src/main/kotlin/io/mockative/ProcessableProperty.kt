@@ -11,7 +11,7 @@ data class ProcessableProperty(
     val name: String,
     val type: TypeName,
     val typeParameterResolver: TypeParameterResolver,
-    val spyInstanceName: String = "spyInstance"
+    val receiver: TypeName?,
 ) {
     companion object {
         fun fromDeclaration(
@@ -25,7 +25,8 @@ data class ProcessableProperty(
                 declaration = declaration,
                 name = declaration.simpleName.asString(),
                 type = declaration.type.toTypeNameMockative(typeParameterResolver),
-                typeParameterResolver = typeParameterResolver
+                typeParameterResolver = typeParameterResolver,
+                receiver = declaration.extensionReceiver?.toTypeNameMockative(typeParameterResolver),
             )
         }
     }

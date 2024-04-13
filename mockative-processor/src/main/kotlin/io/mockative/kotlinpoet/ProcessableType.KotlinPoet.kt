@@ -19,7 +19,7 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
     val typeParameter = ParameterSpec.builder("type", typeType)
         .addAnnotation(suppressUnusedParameter)
         .build()
-    val spyParameter = ParameterSpec.builder("spyInstance", parameterizedSourceClassName.copy(nullable = false))
+    val spyParameter = ParameterSpec.builder("on", parameterizedSourceClassName.copy(nullable = false))
         .build()
 
     val modifiers = buildList {
@@ -30,61 +30,59 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
 
     val functionTypeVariables = typeVariables.map { it.withoutVariance() }
 
-    val mockFunSpecBuild = {
-        buildMockFunSpec(
-            functionName = "mock",
-            isSpy = false,
-            parameterizedSourceClassName,
-            parameterizedMockClassName,
-            typeParameter,
-            spyParameter,
-            modifiers,
-            functionTypeVariables,
-            stubsUnitByDefault
-        )
-    }
-    val spyFunSpecBuild = {
-        buildMockFunSpec(
-            functionName = "spy",
-            isSpy = true,
-            parameterizedSourceClassName,
-            parameterizedMockClassName,
-            typeParameter,
-            spyParameter,
-            modifiers,
-            functionTypeVariables,
-            stubsUnitByDefault
-        )
-    }
+    val mock = buildMockFunSpec(
+        functionName = "mock",
+        returnType = parameterizedSourceClassName,
+        mockClassName = parameterizedMockClassName,
+        typeParameter = typeParameter,
+        modifiers = modifiers,
+        functionTypeVariables = functionTypeVariables,
+        stubsUnitByDefault = stubsUnitByDefault
+    )
 
-    return when(generateTypeFunctions) {
-        listOf(ProcessableType.ShouldGenerateTypeFunction.MOCK) -> listOf(mockFunSpecBuild())
-        listOf(ProcessableType.ShouldGenerateTypeFunction.SPY) -> listOf(spyFunSpecBuild())
-        listOf(ProcessableType.ShouldGenerateTypeFunction.NONE) -> listOf()
-        else  -> listOf(mockFunSpecBuild(), spyFunSpecBuild())
-    }
+    val spy1 = buildMockFunSpec(
+        functionName = "spy",
+        returnType = parameterizedSourceClassName,
+        mockClassName = parameterizedMockClassName,
+        typeParameter = typeParameter,
+        spyParameter = spyParameter,
+        modifiers = modifiers,
+        functionTypeVariables = functionTypeVariables,
+        stubsUnitByDefault = stubsUnitByDefault
+    )
+
+    val spy2 = buildMockFunSpec(
+        functionName = "spyOn",
+        returnType = parameterizedSourceClassName,
+        mockClassName = parameterizedMockClassName,
+        spyParameter = spyParameter,
+        modifiers = modifiers,
+        functionTypeVariables = functionTypeVariables,
+        stubsUnitByDefault = stubsUnitByDefault,
+    )
+
+    return listOf(mock, spy1, spy2)
 }
 
 internal fun ProcessableType.buildMockFunSpec(
     functionName: String,
-    isSpy: Boolean,
-    parameterizedSourceClassName: TypeName,
-    parameterizedMockClassName: TypeName,
-    typeParameter: ParameterSpec,
-    spyParameter: ParameterSpec,
+    returnType: TypeName,
+    mockClassName: TypeName,
+    typeParameter: ParameterSpec? = null,
+    spyParameter: ParameterSpec? = null,
     modifiers: List<KModifier>,
     functionTypeVariables: List<TypeVariableName>,
-    stubsUnitByDefault: Boolean
+    stubsUnitByDefault: Boolean,
 ): FunSpec {
-    val parameters = if (isSpy) listOf(typeParameter, spyParameter) else listOf(typeParameter)
-    val addSpyInitializer = if (isSpy) spyParameter.name else "null"
+    val parameters = listOfNotNull(typeParameter, spyParameter)
+    val addSpyInitializer = spyParameter?.name ?: "null"
 
     return FunSpec.builder(functionName)
         .addModifiers(modifiers)
         .addTypeVariables(functionTypeVariables)
         .addParameters(parameters)
-        .returns(parameterizedSourceClassName)
-        .addStatement("return %M(%T(%L)) { stubsUnitByDefault=%L; isSpy=%L }", CONFIGURE, parameterizedMockClassName, addSpyInitializer, stubsUnitByDefault, isSpy)
+        .returns(returnType)
+        .addStatement("return %M(%T(%L)) { stubsUnitByDefault·=·%L }", CONFIGURE, mockClassName, addSpyInitializer, stubsUnitByDefault)
         .addOriginatingKSFiles(usages)
         .build()
 }
@@ -96,16 +94,18 @@ private fun TypeVariableName.withoutVariance(): TypeVariableName {
 internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     val properties = buildPropertySpecs()
     val functions = buildFunSpecs()
-    val constructorSpec = FunSpec.constructorBuilder()
-        .addParameter(
-            ParameterSpec.builder(spyInstanceName, sourceClassName.parameterizedByAny(typeVariables).copy(nullable = true))
-                .defaultValue("null")
-                .build()
-        )
+
+    val spyInstanceType = sourceClassName.parameterizedByAny(typeVariables).copy(nullable = true)
+    val spyInstanceParam = ParameterSpec.builder(spyInstanceName, spyInstanceType)
+        .defaultValue("null")
         .build()
-    val instanceInitializer = PropertySpec.builder(
-        spyInstanceName, sourceClassName.parameterizedByAny(typeVariables).copy(nullable = true)
-    )
+
+    val constructorSpec = FunSpec.constructorBuilder()
+        .addParameter(spyInstanceParam)
+        .build()
+
+    val instanceInitializer = PropertySpec
+        .builder(spyInstanceName, spyInstanceType)
         .initializer(spyInstanceName)
         .addModifiers(KModifier.PRIVATE)
         .build()
@@ -132,10 +132,15 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
         typeSpec.addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))
     }
 
+    val suppressDeprecationError = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+        .addMember("%S", "DEPRECATION_ERROR")
+        .build()
+
     return typeSpec
         .primaryConstructor(constructorSpec)
         .addProperties(properties.plus(instanceInitializer))
         .addFunctions(functions)
+        .addAnnotation(suppressDeprecationError)
         .addKdoc(declaration.docString?.trim() ?: "")
         .addOriginatingKSFiles(usages)
         .build()

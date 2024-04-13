@@ -24,28 +24,10 @@ data class ProcessableType(
     val typeParameterResolver: TypeParameterResolver,
     val typeVariables: List<TypeVariableName>,
     val stubsUnitByDefault: Boolean,
-    private var children: List<ProcessableType>,
+    private val children: List<ProcessableType>,
     val constructorParameters: List<KSValueParameter>,
-    val generateTypeFunctions: List<ShouldGenerateTypeFunction>,
     val spyInstanceName: String = "spyInstance",
 ) {
-    private enum class ClassDeclMockType(val generateTypeFunction: ShouldGenerateTypeFunction) {
-        MOCK(ShouldGenerateTypeFunction.MOCK),
-        SPY(ShouldGenerateTypeFunction.SPY);
-    }
-
-    enum class ShouldGenerateTypeFunction {
-        MOCK,
-        SPY,
-        NONE;
-    }
-
-    private data class SymbolProcessingInformation(
-        val classDeclaration: KSClassDeclaration,
-        val usage: KSFile?,
-        val mockType: ClassDeclMockType,
-    )
-
     companion object {
         private var stubsUnitByDefault by Delegates.notNull<Boolean>()
 
@@ -61,26 +43,32 @@ data class ProcessableType(
             declaration: KSClassDeclaration,
         ): Pair<List<KSValueParameter>, List<ProcessableType>> {
             val constructor = declaration.getPublicConstructor()
-                ?: return emptyList<KSValueParameter>() to emptyList<ProcessableType>()
-
+            if (constructor == null) {
+                return emptyList<KSValueParameter>() to emptyList()
+            }
 
             val constructorParameters = constructor.parameters
             val processableTypes = constructorParameters.mapNotNull { parameter ->
-                val parameterDeclaration =
-                    parameter.type.resolve().declaration as? KSClassDeclaration ?: return@mapNotNull null
-                if (parameterDeclaration.classKind == ClassKind.CLASS) parameterDeclaration.getPublicConstructor()
-                    ?: return@mapNotNull null
+                val paramDec = parameter.type.resolve().declaration as? KSClassDeclaration
+                if (paramDec == null) {
+                    return@mapNotNull null
+                }
 
-                val modifiers = parameterDeclaration.modifiers
+                if (paramDec.classKind == ClassKind.CLASS) {
+                    if (paramDec.getPublicConstructor() == null) {
+                        return@mapNotNull null
+                    }
+                }
+
+                val modifiers = paramDec.modifiers
                 val isNotFinal = !modifiers.contains(Modifier.FINAL) && !modifiers.contains(Modifier.SEALED)
 
-                val containingFilesOfClass = parameterDeclaration.containingFile?.let { listOf(it) } ?: emptyList()
+                val usages = listOfNotNull(paramDec.containingFile)
 
                 return@mapNotNull if (isNotFinal) {
                     fromDeclaration(
-                        declaration = parameterDeclaration,
-                        usages = containingFilesOfClass,
-                        generateTypeFunctions = listOf(ShouldGenerateTypeFunction.NONE),
+                        declaration = paramDec,
+                        usages = usages,
                     )
                 } else null
             }
@@ -91,7 +79,6 @@ data class ProcessableType(
         private fun fromDeclaration(
             declaration: KSClassDeclaration,
             usages: List<KSFile>,
-            generateTypeFunctions: List<ShouldGenerateTypeFunction>,
         ): ProcessableType {
             val sourceClassName = declaration.toClassName()
             val sourcePackageName = sourceClassName.packageName
@@ -111,7 +98,7 @@ data class ProcessableType(
 
             val functions = declaration.getAllFunctions()
                 // Functions from Any are manually implemented in [Mockable]
-                .filter { it.isPublic() && !it.isConstructor() && !it.isFromAny() && !it.modifiers.contains(Modifier.FINAL) }
+                .filter { it.isPublic() && !it.isConstructor() && !it.modifiers.contains(Modifier.FINAL) }
                 .map { ProcessableFunction.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 
@@ -136,7 +123,6 @@ data class ProcessableType(
                 stubsUnitByDefault = stubsUnitByDefault,
                 children = children,
                 constructorParameters = constructorParameters,
-                generateTypeFunctions = generateTypeFunctions,
             )
 
             functions.forEach { it.parent = processableType }
@@ -150,48 +136,20 @@ data class ProcessableType(
             val processableTypes = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
                 .filterIsInstance<KSPropertyDeclaration>()
                 .mapNotNull { property ->
-                    val mockAnnotation =
-                        property.annotations.find { it.shortName.asString() == MOCK_ANNOTATION.simpleName }
-                    val isSpy =
-                        mockAnnotation?.arguments?.find { it.name?.asString() == "isSpy" }?.value as? Boolean ?: false
-                    val mockType = if (isSpy) ClassDeclMockType.SPY else ClassDeclMockType.MOCK
-
                     (property.type.resolve().declaration as? KSClassDeclaration)
-                        ?.let { SymbolProcessingInformation(it, property.containingFile, mockType) }
+                        ?.let { classDec -> property.containingFile?.let { classDec to it }  }
                 }
-                .filter { (classDec, _, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
-                .groupBy({ it.classDeclaration }) { it.usage to it.mockType }
-                .mapValues { (_, fileAndMockTypesInformation) ->
-                    val (usages, mockTypes) = fileAndMockTypesInformation.unzip()
-                    val combinedMockTypes = mockTypes.map { it.generateTypeFunction }.distinct()
-                    val combinedUsages = usages.filterNotNull().distinct()
-
-                    return@mapValues combinedUsages to combinedMockTypes
-                }.map { (classDec, fileAndMockTypesInformation) ->
-                    val (usages, mockTypes) = fileAndMockTypesInformation
-
-                    fromDeclaration(
-                        declaration = classDec,
-                        usages = usages,
-                        generateTypeFunctions = mockTypes,
-                    )
-                }
+                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
+                .groupBy({ (classDec, _) -> classDec }, { (_, usage) -> usage })
+                .map { (classDec, usages) -> fromDeclaration(classDec, usages) }
                 .flatten()
                 .distinctBy { it.mockClassName }
-                .removeChildren()
 
             return processableTypes
         }
 
-        private fun List<ProcessableType>.removeChildren(): List<ProcessableType> {
-            return this.onEach { it.children = emptyList() }
-        }
-
-
         private fun List<ProcessableType>.flatten(): List<ProcessableType> {
-            return this + this.flatMap { type ->
-                type.children.flatten()
-            }
+            return this + flatMap { type -> type.children }
         }
     }
 }

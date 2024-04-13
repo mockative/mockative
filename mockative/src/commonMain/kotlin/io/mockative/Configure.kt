@@ -8,8 +8,4 @@ class MockConfiguration(private val mock: Mockable) {
     var stubsUnitByDefault: Boolean
         get() = mock.stubsUnitsByDefault
         set(value) { mock.stubsUnitsByDefault = value }
-
-    var isSpy: Boolean
-        get() = mock.isSpy
-        set(value) { mock.isSpy = value }
 }

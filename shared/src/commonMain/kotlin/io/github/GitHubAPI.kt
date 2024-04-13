@@ -5,6 +5,8 @@ typealias MyList<T> = List<T>
 typealias MyStringMap<T> = Map<String, T>
 
 internal interface GitHubAPI {
+    var String.wtf: Int
+
     suspend fun create(repository: Repository)
 
     suspend fun repositories(): MyList<Repository>
