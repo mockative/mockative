@@ -1,10 +1,7 @@
 package io.mockative.kotlinpoet
 
 import com.squareup.kotlinpoet.*
-import io.mockative.INVOCATION_FUNCTION
-import io.mockative.LIST_OF
-import io.mockative.MOCKABLE
-import io.mockative.ProcessableFunction
+import io.mockative.*
 
 internal fun ProcessableFunction.buildFunSpec(): FunSpec {
     val modifiers = buildModifiers()
@@ -18,7 +15,6 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
 
     val builder = FunSpec.builder(name)
 
-    val receiver = declaration.extensionReceiver?.toTypeNameMockative(typeParameterResolver)
     if (receiver != null) {
         builder.receiver(receiver)
     }
@@ -29,13 +25,35 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
         .addParameters(parameterSpecs)
         .addTypeVariables(typeVariables)
 
+    // Mockable.invoke<Int>
+    val invocationCall = CodeBlock.of("%T.%L<%T>", MOCKABLE, invocation, returnType)
+
+    // Invocation.Function("count", listOf<Any?>(*`strings`))
+    val invocationConstruction = CodeBlock.of("%T(%S, %L)", INVOCATION_FUNCTION, name, listOfArguments)
+
+    // spyInstance?.let { { ... } }
+    val spy = buildSpyBlock(argumentsList)
+
     if (isFromAny) {
-        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), { super.%L(%L) })", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, name, argumentsList)
+        val superCall = CodeBlock.of("{ super.%L(%L) }", name, argumentsList)
+        builder.addStatement("return %L(this, %L, %L, %L)", invocationCall, invocationConstruction, superCall, spy)
     } else {
-        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), %L)", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, returnsUnit)
+        builder.addStatement("return %L(this, %L, %L, %L)", invocationCall, invocationConstruction, returnsUnit, spy)
     }
 
     return builder.build()
+}
+
+private fun ProcessableFunction.buildSpyBlock(argumentsList: CodeBlock): CodeBlock {
+    val invocation = if (receiver != null) {
+        // with(it) { this@doStuffToString.`doStuffToString`() }
+        CodeBlock.of("with(it) { this@%L.`%L`(%L) }", name, name, argumentsList)
+    } else {
+        // it.`doStuffToString`()
+        CodeBlock.of("it.`%L`(%L)", name, argumentsList)
+    }
+
+    return CodeBlock.of("spyInstance?.let { { %L } }", invocation)
 }
 
 private fun ProcessableFunction.buildModifiers() = buildList {
@@ -47,7 +65,9 @@ private fun ProcessableFunction.buildModifiers() = buildList {
 }
 
 private fun ProcessableFunction.buildArgumentList(): CodeBlock {
-    val argumentsListFormat = declaration.parameters.joinToString(", ") { "`%L`" }
+    val argumentsListFormat = declaration.parameters.joinToString(", ") {
+        if (it.isVararg) "*`%L`" else "`%L`"
+    }
     val arguments = declaration.parameters.map { it.name!!.asString() }
 
     return CodeBlock.builder()
@@ -55,6 +75,7 @@ private fun ProcessableFunction.buildArgumentList(): CodeBlock {
         .build()
 }
 
+@Suppress("UnusedReceiverParameter")
 private fun ProcessableFunction.buildListOfArgument(argumentList: CodeBlock): CodeBlock {
     return CodeBlock.builder()
         .add("%M<%T?>(%L)", LIST_OF, ANY, argumentList)
