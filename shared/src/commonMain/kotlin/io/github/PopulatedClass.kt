@@ -1,6 +1,6 @@
 package io.github
 
-@MockativeMockable
+@Mockable
 class PopulatedClass(
     private val class2: Class2,
     private val inner2: InnerClass,
@@ -24,7 +24,7 @@ class PopulatedClass(
     // val block: () -> Unit,
 ) {
 
-    @MockativeMockable
+    @Mockable
     class InnerClass(val s: String) {
         fun wassup() = "Hello"
     }
@@ -35,13 +35,13 @@ class PopulatedClass(
     fun withParameters(param1: String, param2: Int) = "Hello $param1 $param2"
 }
 
-@MockativeMockable
+@Mockable
 class Class2(var class3: Class3) {
     val message1 = "message1"
     val message2 = "message2"
 }
 
-@MockativeMockable
+@Mockable
 class Class3 {
     val message1 = "message1"
     val message2 = "message2"

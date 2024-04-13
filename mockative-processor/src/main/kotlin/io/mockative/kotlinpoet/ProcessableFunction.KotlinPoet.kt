@@ -15,7 +15,6 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
 
     val builder = FunSpec.builder(name)
 
-    val receiver = declaration.extensionReceiver?.toTypeNameMockative(typeParameterResolver)
     if (receiver != null) {
         builder.receiver(receiver)
     }
@@ -26,28 +25,35 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
         .addParameters(parameterSpecs)
         .addTypeVariables(typeVariables)
 
+    // Mockable.invoke<Int>
+    val invocationCall = CodeBlock.of("%T.%L<%T>", MOCKABLE, invocation, returnType)
+
+    // Invocation.Function("count", listOf<Any?>(*`strings`))
+    val invocationConstruction = CodeBlock.of("%T(%S, %L)", INVOCATION_FUNCTION, name, listOfArguments)
+
+    // spyInstance?.let { { ... } }
+    val spy = buildSpyBlock(argumentsList)
+
     if (isFromAny) {
-        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), { super.%L(%L) })", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, name, argumentsList)
+        val superCall = CodeBlock.of("{ super.%L(%L) }", name, argumentsList)
+        builder.addStatement("return %L(this, %L, %L, %L)", invocationCall, invocationConstruction, superCall, spy)
     } else {
-        val callSpyInstance = buildCallSpyInstanceBlock(receiver != null, argumentsList)
-        builder.addStatement("return %T.%L<%T>(this, %T(%S, %L), %L){ %L }", MOCKABLE, invocation, returnType, INVOCATION_FUNCTION, name, listOfArguments, returnsUnit, callSpyInstance)
+        builder.addStatement("return %L(this, %L, %L, %L)", invocationCall, invocationConstruction, returnsUnit, spy)
     }
 
     return builder.build()
 }
 
-private fun ProcessableFunction.buildCallSpyInstanceBlock(
-    hasReceiver: Boolean,
-    argumentsList: CodeBlock
-): CodeBlock {
-    val callSpyInstance = if (hasReceiver) "this.`${name}`" else "$spyInstanceName!!.`${name}`"
-    val suppressDeprecationError = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-            .addMember("%S", "DEPRECATION_ERROR")
-            .build()
+private fun ProcessableFunction.buildSpyBlock(argumentsList: CodeBlock): CodeBlock {
+    val invocation = if (receiver != null) {
+        // with(it) { this@doStuffToString.`doStuffToString`() }
+        CodeBlock.of("with(it) { this@%L.`%L`(%L) }", name, name, argumentsList)
+    } else {
+        // it.`doStuffToString`()
+        CodeBlock.of("it.`%L`(%L)", name, argumentsList)
+    }
 
-    return CodeBlock.builder()
-        .add("%L%L(%L)", suppressDeprecationError, callSpyInstance, argumentsList)
-        .build()
+    return CodeBlock.of("spyInstance?.let { { %L } }", invocation)
 }
 
 private fun ProcessableFunction.buildModifiers() = buildList {
@@ -69,6 +75,7 @@ private fun ProcessableFunction.buildArgumentList(): CodeBlock {
         .build()
 }
 
+@Suppress("UnusedReceiverParameter")
 private fun ProcessableFunction.buildListOfArgument(argumentList: CodeBlock): CodeBlock {
     return CodeBlock.builder()
         .add("%M<%T?>(%L)", LIST_OF, ANY, argumentList)

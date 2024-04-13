@@ -5,13 +5,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SpyTests {
-    val realSpy = SpyClass("realSpy")
-    @Mock(isSpy = true)
-    val spy: SpyClass = spy(classOf<SpyClass>(), realSpy)
+    private val realSpy = SpyClass("realSpy")
 
-    val realList = mutableListOf("real")
-    @Mock(isSpy = true)
-    val spyList: MutableList<String> = spy(classOf<MutableList<String>>(), realList)
+    @Mock
+    val spy = spyOn(realSpy)
+
+    @Mock
+    val spyList = spyOn(mutableListOf("real"))
 
 
     @Test
@@ -25,11 +25,10 @@ class SpyTests {
     }
 
     @Test
-    fun givenStubbingOnSpy_whenStubbedFunctionisCalled_ReturnsStubbedValue() {
+    fun givenStubbingOnSpy_whenStubbedFunctionIsCalled_ReturnsStubbedValue() {
         // Given
-        every {
-            spy.greet()
-        }.returns("mocked")
+        every { spy.greet() }
+            .returns("mocked")
 
         // When
         val spyOutput = spy.greet()
@@ -41,9 +40,8 @@ class SpyTests {
     @Test
     fun givenStubbingGetterOverwritingInsertedElement_WhenStubbedFunctionIsInvoked_StubbedValueIsReturned() {
         // Given
-        every {
-            spyList[0]
-        }.returns("mocked")
+        every { spyList[0] }
+            .returns("mocked")
 
         // When
         val listOutput = spyList[0]
@@ -67,12 +65,11 @@ class SpyTests {
     @Test
     fun givenSomeOfGettersAreStubbed_WhenInsertingValuesAtStubbedIndexes_ThenValuesAreStillStubbed() {
         // Given
-        every {
-            spyList[0]
-        }.returns("mocked")
-        every {
-            spyList[2]
-        }.returns("I am not am")
+        every { spyList[0] }
+            .returns("mocked")
+
+        every { spyList[2] }
+            .returns("I am not am")
 
         // When
         spyList.addAll(listOf("hello there", "am"))
@@ -85,9 +82,8 @@ class SpyTests {
     @Test
     fun givenFiniteAmountOfAnswers_whenExhaustingAllStubs_thenExpectFallbackToRealImplementation() {
         // Given
-        every {
-            spyList.size
-        }.returnsMany(1312, 42132)
+        every { spyList.size }
+            .returnsMany(1312, 42132)
 
         // When
         val firstSize = spyList.size
@@ -104,9 +100,8 @@ class SpyTests {
     fun givenMatchers_whenUsingThem_thenExpectCorrectBehaviour() {
         // Given
         val initialSize = spyList.size
-        every {
-            spyList.add(any())
-        }.returnsMany(false)
+        every { spyList.add(any()) }
+            .returnsMany(false)
 
         // When
         val firstAdd = spyList.add("mocked")
@@ -121,12 +116,11 @@ class SpyTests {
     @Test
     fun givenCallNotMatchingStub_whenCallingWithDifferentArguments_thenExpectFallbackToRealImplementation() {
         // Given
-        every {
-            spy.functionWithManyArgumented(string = "hej", int = 1, long = 10, list = listOf("hello there"))
-        }.returns("stubbed")
+        every { spy.functionWithManyArgumented("hej", 1, 10, listOf("hello there")) }
+            .returns("stubbed")
 
         // When
-        val output = spy.functionWithManyArgumented(string = "hej", int = 1, long = 10, list = listOf("hello there", "I am not stubbed"))
+        val output = spy.functionWithManyArgumented("hej", 1, 10, listOf("hello there", "I am not stubbed"))
 
         // Then
         assertEquals("hej 1 10 [hello there, I am not stubbed]", output)

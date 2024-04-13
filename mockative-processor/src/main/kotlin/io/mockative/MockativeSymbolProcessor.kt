@@ -38,7 +38,6 @@ class MockativeSymbolProcessor(
 
         // Generate Mock Functions
         processableTypes
-            .filter { ProcessableType.ShouldGenerateTypeFunction.NONE !in it.generateTypeFunctions }
             .forEach { type ->
                 val reflectionName = type.sourceClassName.reflectionName()
                 val fileName = "${reflectionName}.Mockative"

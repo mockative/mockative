@@ -1,6 +1,6 @@
 package io.github
 
-@MockativeMockable
+@Mockable
 class SpyClass(val name: String) {
     fun greet(): String {
         return "Hello, $name"

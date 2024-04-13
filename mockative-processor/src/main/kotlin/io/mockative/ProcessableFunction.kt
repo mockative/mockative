@@ -18,8 +18,9 @@ data class ProcessableFunction(
     val typeVariables: List<TypeVariableName>,
     val typeParameterResolver: TypeParameterResolver,
     val isFromAny: Boolean,
+    val spyInstanceName: String,
+    val receiver: TypeName?,
     var parent: ProcessableType? = null,
-    val spyInstanceName: String = "spyInstance"
 ) {
     companion object {
         fun fromDeclaration(
@@ -37,7 +38,9 @@ data class ProcessableFunction(
                 typeVariables = declaration.typeParameters
                     .map { it.toTypeVariableName(typeParameterResolver) },
                 typeParameterResolver = typeParameterResolver,
-                isFromAny = declaration.isFromAny()
+                isFromAny = declaration.isFromAny(),
+                receiver = declaration.extensionReceiver?.toTypeNameMockative(typeParameterResolver),
+                spyInstanceName = "spyInstance",
             )
         }
     }
