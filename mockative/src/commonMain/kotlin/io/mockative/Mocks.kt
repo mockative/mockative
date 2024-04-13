@@ -27,3 +27,7 @@ fun <T : Any> isMock(value: T): Boolean {
     val name = value.getClassName()
     return name.endsWith("Mock")
 }
+
+fun <T : Any> spy(type: KClass<T>, instance: T): T = throw NoSuchMockException(type)
+
+fun <T : Any> spyOn(instance: T): T = throw NoSuchMockException(instance::class)

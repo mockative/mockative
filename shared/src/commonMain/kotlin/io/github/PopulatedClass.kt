@@ -1,17 +1,17 @@
 package io.github
 
-@MockativeMockable
+@Mockable
 class PopulatedClass(
     private val class2: Class2,
     private val inner2: InnerClass,
     internal val internalVal: String,
     protected val protectedVal: String,
-    val class3: Class3,
+    //val class3: Class3,
     val number: Int?,
     val map: Map<String, String>?,
     val list: List<String>,
     val sequence: List<List<List<String>>>,
-    val charSequence: CharSequence,
+    var charSequence: CharSequence,
     val string: String,
     val bArray: BooleanArray,
     val inner: InnerClass,
@@ -24,22 +24,24 @@ class PopulatedClass(
     // val block: () -> Unit,
 ) {
 
-    @MockativeMockable
+    @Mockable
     class InnerClass(val s: String) {
         fun wassup() = "Hello"
     }
     val notConstructorParam = "notConstructorParam"
 
     fun greet() = "Hello"
+
+    fun withParameters(param1: String, param2: Int) = "Hello $param1 $param2"
 }
 
-@MockativeMockable
-class Class2(val class3: Class3) {
+@Mockable
+class Class2(var class3: Class3) {
     val message1 = "message1"
     val message2 = "message2"
 }
 
-@MockativeMockable
+@Mockable
 class Class3 {
     val message1 = "message1"
     val message2 = "message2"

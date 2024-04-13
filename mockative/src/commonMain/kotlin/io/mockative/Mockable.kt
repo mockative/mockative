@@ -15,6 +15,9 @@ class Mockable(val instance: Any) {
 
     internal var stubsUnitsByDefault: Boolean by atomic(false)
 
+    @Deprecated("Delete me")
+    internal val isSpy = false
+
     internal fun reset() {
         blockingStubs.clear()
         suspendStubs.clear()
@@ -38,23 +41,6 @@ class Mockable(val instance: Any) {
         }
     }
 
-    private fun getBlockingStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): BlockingStub {
-        return when (val blockingStub = getBlockingStubOrNull(invocation)) {
-            null -> {
-                when (fallback) {
-                    null -> throwMissingBlockingStubException(invocation)
-                    else -> {
-                        val fallbackStub = OpenBlockingStub(invocation.toOpenExpectation(), fallback)
-                        addBlockingStub(fallbackStub)
-                        return fallbackStub
-                    }
-                }
-            }
-
-            else -> blockingStub
-        }
-    }
-
     private fun throwMissingBlockingStubException(invocation: Invocation): Nothing {
         when (getSuspendStubOrNull(invocation)) {
             null -> throw MissingExpectationException(instanceToken, invocation, false, expectations)
@@ -72,23 +58,6 @@ class Mockable(val instance: Any) {
 
     private val expectations: List<Expectation>
         get() = suspendStubs.map { it.expectation } + blockingStubs.map { it.expectation }
-
-    private fun getSuspendStub(invocation: Invocation, fallback: ((Array<Any?>) -> Any?)?): SuspendStub {
-        return when (val suspendStub = getSuspendStubOrNull(invocation)) {
-            null -> {
-                when (fallback) {
-                    null -> throwMissingSuspendStubException(invocation)
-                    else -> {
-                        val fallbackStub = OpenSuspendStub(invocation.toOpenExpectation(), fallback)
-                        addSuspendStub(fallbackStub)
-                        return fallbackStub
-                    }
-                }
-            }
-
-            else -> suspendStub
-        }
-    }
 
     private fun throwMissingSuspendStubException(invocation: Invocation): Nothing {
         when (getBlockingStubOrNull(invocation)) {
@@ -145,12 +114,28 @@ class Mockable(val instance: Any) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean): R {
+    internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean, spy: (() -> R)?): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
-            val fallback = getUnitFallbackOrNull(returnsUnit)
-            val stub = getBlockingStub(invocation, fallback)
+            val stub = getBlockingStubOrNull(invocation) ?: run {
+                if (spy != null) {
+                    // if spying, call spy block
+                    return@invoke spy()
+                } else {
+                    // else, look for a unit fallback
+                    val fallback = getUnitFallbackOrNull(returnsUnit)
+                    if (fallback != null) {
+                        // if unit fallback exists, implicitly stub the function to return unit
+                        val fallbackStub = OpenBlockingStub(invocation.toOpenExpectation(), fallback)
+                        addBlockingStub(fallbackStub)
+                        return@run fallbackStub
+                    } else {
+                        // else, throw a missing stub exception
+                        throwMissingBlockingStubException(invocation)
+                    }
+                }
+            }
 
             try {
                 val result = stub.invoke(invocation)
@@ -163,25 +148,47 @@ class Mockable(val instance: Any) {
         }
     }
 
+    /**
+     * This function is used to stub [equals], [hashCode] and [toString].
+     */
     @Suppress("UNCHECKED_CAST")
-    internal fun <R> invoke(invocation: Invocation, default: () -> R): R {
+    internal fun <R> invoke(invocation: Invocation, default: () -> R, spy: (() -> R)?): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
             return when (val stub = getBlockingStubOrNull(invocation)) {
-                null -> default()
+                null -> when (spy) {
+                    null -> default()
+                    else -> spy()
+                }
                 else -> stub.invoke(invocation) as R
             }
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean): R {
+    internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean, spy: (suspend () -> R)?): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
         } else {
-            val fallback = getUnitFallbackOrNull(returnsUnit)
-            val stub = getSuspendStub(invocation, fallback)
+            val stub = getSuspendStubOrNull(invocation) ?: run {
+                if (spy != null) {
+                    // if spying, call spy block
+                    return@suspend spy()
+                } else {
+                    // else, look for a unit fallback
+                    val fallback = getUnitFallbackOrNull(returnsUnit)
+                    if (fallback != null) {
+                        // if unit fallback exists, implicitly stub the function to return unit
+                        val fallbackStub = OpenSuspendStub(invocation.toOpenExpectation(), fallback)
+                        addSuspendStub(fallbackStub)
+                        return@run fallbackStub
+                    } else {
+                        // else, throw a missing stub exception
+                        throwMissingSuspendStubException(invocation)
+                    }
+                }
+            }
 
             try {
                 val result = stub.invoke(invocation)
@@ -252,26 +259,26 @@ class Mockable(val instance: Any) {
     companion object {
         var isRecording: Boolean = false
 
-        private val mockables = mutableMapOf<Any, Mockable>()
+        private val mockables = mutableMapOf<ByRef, Mockable>()
 
         internal fun mockable(instance: Any): Mockable {
             if (!isMock(instance)) {
                 throw ReceiverNotMockedException(instance)
             }
 
-            return mockables.getOrPut(instance) { Mockable(instance) }
+            return mockables.getOrPut(ByRef(instance)) { Mockable(instance) }
         }
 
-        fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
-            return mockable(instance).invoke(invocation, returnsUnit)
+        fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean, spy: (() -> R)?): R {
+            return mockable(instance).invoke(invocation, returnsUnit, spy)
         }
 
-        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R): R {
-            return mockable(instance).invoke(invocation, default)
+        fun <R> invoke(instance: Any, invocation: Invocation, default: () -> R, spy: (() -> R)?): R {
+            return mockable(instance).invoke(invocation, default, spy)
         }
 
-        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean): R {
-            return mockable(instance).suspend(invocation, returnsUnit)
+        suspend fun <R> suspend(instance: Any, invocation: Invocation, returnsUnit: Boolean, spy: (suspend () -> R)?): R {
+            return mockable(instance).suspend(invocation, returnsUnit, spy)
         }
 
         /**
