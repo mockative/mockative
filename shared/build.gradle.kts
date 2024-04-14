@@ -140,3 +140,9 @@ if (taskIsRunningTest) {
         annotation("io.github.Mockable")
     }
 }
+
+ksp {
+    arg("io.mockative:mockative:opt-in:io.github.OptInType", "kotlinx.cinterop.ExperimentalForeignApi")
+    arg("io.mockative:mockative:opt-in:io.github.*", "kotlin.ExperimentalStdlibApi")
+    arg("io.mockative:mockative:opt-in", "kotlin.ExperimentalUnsignedTypes")
+}
