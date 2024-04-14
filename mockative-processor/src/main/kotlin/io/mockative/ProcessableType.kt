@@ -26,7 +26,6 @@ data class ProcessableType(
     val stubsUnitByDefault: Boolean,
     private val children: List<ProcessableType>,
     val constructorParameters: List<KSValueParameter>,
-    val spyInstanceName: String = "spyInstance",
 ) {
     companion object {
         private var stubsUnitByDefault by Delegates.notNull<Boolean>()

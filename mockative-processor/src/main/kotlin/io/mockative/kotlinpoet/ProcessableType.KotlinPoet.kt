@@ -1,10 +1,23 @@
 package io.mockative.kotlinpoet
 
 import com.google.devtools.ksp.symbol.ClassKind
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import io.mockative.*
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeVariableName
+import io.mockative.CONFIGURE
+import io.mockative.KCLASS
+import io.mockative.OPT_IN
+import io.mockative.ProcessableType
+import io.mockative.SUPPRESS_ANNOTATION
 import io.mockative.ksp.addOriginatingKSFiles
+import io.mockative.options
 
 internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
     val suppressUnusedParameter = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
@@ -64,6 +77,32 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
     return listOf(mock, spy1, spy2)
 }
 
+internal fun ProcessableType.buildOptInAnnotationSpec(): AnnotationSpec? {
+    val globalFqns = options["io.mockative:mockative:opt-in"]?.split(",").orEmpty()
+    val typeFqns = options["io.mockative:mockative:opt-in:$sourceClassName"]?.split(",").orEmpty()
+
+    val sourceParts = sourceClassName.toString().split(".")
+
+    val wildcardFqns = sourceParts.indices
+        .map { index -> sourceParts.subList(0, index + 1).joinToString(".") }
+        .mapNotNull { fqn -> options["io.mockative:mockative:opt-in:$fqn.*"] }
+        .flatMap { fqns -> fqns.split(",") }
+
+    val fqns = (globalFqns + typeFqns + wildcardFqns).distinct()
+    val classNames = fqns.map { fqn -> ClassName.bestGuess(fqn) }
+    if (classNames.isEmpty()) {
+        return null
+    }
+
+    return AnnotationSpec.builder(OPT_IN)
+        .let { annotationSpec ->
+            classNames.fold(annotationSpec) { spec, className ->
+                spec.addMember("%T::class", className)
+            }
+        }
+        .build()
+}
+
 internal fun ProcessableType.buildMockFunSpec(
     functionName: String,
     returnType: TypeName,
@@ -82,7 +121,13 @@ internal fun ProcessableType.buildMockFunSpec(
         .addTypeVariables(functionTypeVariables)
         .addParameters(parameters)
         .returns(returnType)
-        .addStatement("return %M(%T(%L)) { stubsUnitByDefault·=·%L }", CONFIGURE, mockClassName, addSpyInitializer, stubsUnitByDefault)
+        .addStatement(
+            "return %M(%T(%L)) { stubsUnitByDefault·=·%L }",
+            CONFIGURE,
+            mockClassName,
+            addSpyInitializer,
+            stubsUnitByDefault
+        )
         .addOriginatingKSFiles(usages)
         .build()
 }
@@ -96,7 +141,7 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     val functions = buildFunSpecs()
 
     val spyInstanceType = sourceClassName.parameterizedByAny(typeVariables).copy(nullable = true)
-    val spyInstanceParam = ParameterSpec.builder(spyInstanceName, spyInstanceType)
+    val spyInstanceParam = ParameterSpec.builder("spyInstance", spyInstanceType)
         .defaultValue("null")
         .build()
 
@@ -105,8 +150,8 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
         .build()
 
     val instanceInitializer = PropertySpec
-        .builder(spyInstanceName, spyInstanceType)
-        .initializer(spyInstanceName)
+        .builder("spyInstance", spyInstanceType)
+        .initializer("spyInstance")
         .addModifiers(KModifier.PRIVATE)
         .build()
 
@@ -132,15 +177,25 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
         typeSpec.addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))
     }
 
-    val suppressDeprecationError = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-        .addMember("%S", "DEPRECATION_ERROR")
-        .build()
+    val annotations = buildList {
+        // why??
+        val suppressDeprecationError = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+            .addMember("%S", "DEPRECATION_ERROR")
+            .build()
+
+        add(suppressDeprecationError)
+
+        val optInSpec = buildOptInAnnotationSpec()
+        if (optInSpec != null) {
+            add(optInSpec)
+        }
+    }
 
     return typeSpec
         .primaryConstructor(constructorSpec)
         .addProperties(properties.plus(instanceInitializer))
         .addFunctions(functions)
-        .addAnnotation(suppressDeprecationError)
+        .addAnnotations(annotations)
         .addKdoc(declaration.docString?.trim() ?: "")
         .addOriginatingKSFiles(usages)
         .build()
