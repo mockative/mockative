@@ -85,9 +85,9 @@ annotation class Mockable
 Next, configure the `allOpen` plugin to recognize your custom `@Mockable` annotation. This step makes all classes annotated with `@Mockable` open during test, thus allowing Mockative to generate a mock implementation for each of them. An example configuration is shown below:
 
 ```kotlin
-val taskIsRunningTest = gradle.startParameter.taskNames.any {
-  it == "check" || it.startsWith("test") || it.contains("Test")
-}
+val taskIsRunningTest = gradle.startParameter.taskNames
+  .any { it == "check" || it.startsWith("test") || it.contains("Test") }
+
 if (taskIsRunningTest) {
   allOpen {
     annotation("io.github.Mockable")
