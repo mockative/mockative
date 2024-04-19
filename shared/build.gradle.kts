@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.allopen")
@@ -24,20 +22,18 @@ kotlin {
 
     androidTarget()
 
-    val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget = when {
-        System.getenv("SDK_NAME")?.startsWith("iphoneos") == true -> ::iosArm64
-        System.getenv("NATIVE_ARCH")?.startsWith("arm") == true -> ::iosSimulatorArm64
-        System.getProperty("os.arch") == "aarch64"-> ::iosSimulatorArm64
-        else -> ::iosX64
-    }
-
-    iosTarget("ios") {
+    val iosX64 = iosX64()
+    val iosArm64 = iosArm64()
+    val iosSimulatorArm64 = iosSimulatorArm64()
+    configure(listOf(iosX64, iosArm64, iosSimulatorArm64)) {
         binaries {
             framework {
                 baseName = "shared"
             }
         }
     }
+
+    applyDefaultHierarchyTemplate()
 
     sourceSets {
         named("commonMain") {
@@ -73,8 +69,8 @@ kotlin {
             dependsOn(androidUnitTest)
         }
 
-//        named("iosMain")
-        named("iosTest") {
+//        named("appleMain")
+        named("appleTest") {
             dependencies {
                 implementation(project(":mockative"))
             }
@@ -82,8 +78,6 @@ kotlin {
             languageSettings {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
             }
-
-            kotlin.srcDir(File(buildDir, "generated/ksp/ios/iosTest/kotlin"))
         }
 
 //        named("jsMain")
