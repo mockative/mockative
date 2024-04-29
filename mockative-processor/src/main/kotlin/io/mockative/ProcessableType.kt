@@ -134,10 +134,7 @@ data class ProcessableType(
 
             val processableTypes = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
                 .filterIsInstance<KSPropertyDeclaration>()
-                .mapNotNull { property ->
-                    (property.type.resolve().declaration as? KSClassDeclaration)
-                        ?.let { classDec -> property.containingFile?.let { classDec to it }  }
-                }
+                .mapNotNull { property -> resolvePropertyType(property) }
                 .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
                 .groupBy({ (classDec, _) -> classDec }, { (_, usage) -> usage })
                 .map { (classDec, usages) -> fromDeclaration(classDec, usages) }
@@ -145,6 +142,28 @@ data class ProcessableType(
                 .distinctBy { it.mockClassName }
 
             return processableTypes
+        }
+
+        private fun resolvePropertyType(property: KSPropertyDeclaration): Pair<KSClassDeclaration, KSFile>? {
+            val resolvedType = property.type.resolve()
+            if (resolvedType.isError) {
+                log.error("Failed to resolve type of property `$property`", property)
+                return null
+            }
+
+            val declaration = resolvedType.declaration
+            if (declaration !is KSClassDeclaration) {
+                log.error("The type of the property `$property` must be a class or interface", property)
+                return null
+            }
+
+            val containingFile = property.containingFile
+            if (containingFile == null) {
+                log.error("Could not resolve the containing file of property `$property`", property)
+                return null
+            }
+
+            return declaration to containingFile
         }
 
         private fun List<ProcessableType>.flatten(): List<ProcessableType> {
