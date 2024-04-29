@@ -5,6 +5,13 @@ import io.mockative.concurrency.AtomicSet
 import io.mockative.concurrency.atomic
 import kotlin.native.concurrent.ThreadLocal
 
+/**
+ * Determines whether the current thread is in recording mode. The [ThreadLocal] is probably a premature optimization,
+ * but it is intended to support parallel test execution within the same process.
+ */
+@ThreadLocal
+internal var isRecording: Boolean = false
+
 class Mockable(val instance: Any) {
     // Serves as a workaround for getting default implementations to work with Kotlin/JS
     private val instanceToken = Any()
@@ -255,10 +262,12 @@ class Mockable(val instance: Any) {
         println(debugString)
     }
 
-    @ThreadLocal
     companion object {
-        var isRecording: Boolean = false
-
+        /**
+         * While we're definitely leaking memory for every mocked instance here, we're doing so as a temporary measure
+         * until we re-implement in-instance state. Since test processes are short-lived this shouldn't be an issue in
+         * any application.
+         */
         private val mockables = mutableMapOf<ByRef, Mockable>()
 
         internal fun mockable(instance: Any): Mockable {
