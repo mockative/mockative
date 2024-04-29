@@ -8,7 +8,9 @@ import io.mockative.coEvery
 import io.mockative.eq
 import io.mockative.every
 import io.mockative.mock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -87,7 +89,9 @@ class FileServiceTests {
             .returnsMany(expected)
 
         // When
-        val file = fileService.getFile(id)
+        val file = withContext(Dispatchers.Default) {
+            fileService.getFile(id)
+        }
 
         // Then
         assertEquals(expected, file)
