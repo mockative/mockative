@@ -38,13 +38,13 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
             }
         }
         named("commonTest") {
             dependencies {
                 implementation(project(":mockative"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
