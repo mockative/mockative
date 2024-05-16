@@ -9,7 +9,7 @@ pluginManagement {
         kotlin("multiplatform") version "2.0.0-RC3" apply false
         kotlin("plugin.allopen") version "2.0.0-RC3" apply false
 
-        id("com.google.devtools.ksp") version "2.0.0-RC3-1.0.16" apply false
+        id("com.google.devtools.ksp") version "2.0.0-RC3-1.0.20" apply false
     }
 }
 
