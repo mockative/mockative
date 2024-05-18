@@ -1,6 +1,5 @@
 package io.github
 
-@Mockable
 class PopulatedClass(
     private val class2: Class2,
     private val inner2: InnerClass,
@@ -24,7 +23,6 @@ class PopulatedClass(
     // val block: () -> Unit,
 ) {
 
-    @Mockable
     class InnerClass(val s: String) {
         fun wassup() = "Hello"
     }
