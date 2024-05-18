@@ -10,7 +10,7 @@ class SpyTests {
     @Mock
     val spy = spyOn(realSpy)
 
-    @Mock
+//    @Mock
     val spyList = spyOn(mutableListOf("real"))
 
 

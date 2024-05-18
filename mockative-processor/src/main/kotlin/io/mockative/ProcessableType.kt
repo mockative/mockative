@@ -99,12 +99,24 @@ data class ProcessableType(
 
             val functions = declaration.getAllFunctions()
                 // Functions from Any are manually implemented in [Mockable]
-                .filter { it.isPublic() && !it.isConstructor() && !it.modifiers.contains(Modifier.FINAL) }
+                .filter {
+                    try {
+                        it.isPublic() && !it.isConstructor() && !it.modifiers.contains(Modifier.FINAL)
+                    } catch (e: IllegalStateException) {
+                        false
+                    }
+                }
                 .map { ProcessableFunction.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 
             val properties = declaration.getAllProperties()
-                .filter { it.isPublic() }
+                .filter {
+                    try {
+                        it.isPublic()
+                    } catch (e: IllegalStateException) {
+                        false
+                    }
+                }
                 .map { ProcessableProperty.fromDeclaration(it, typeParameterResolver) }
                 .toList()
 

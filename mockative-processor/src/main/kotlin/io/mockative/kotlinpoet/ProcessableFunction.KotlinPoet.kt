@@ -91,6 +91,13 @@ private fun ProcessableFunction.buildParameterSpecs() = declaration.parameters
     .map { parameter ->
         val name = parameter.name!!.asString()
         val type = parameter.type.toTypeNameMockative(typeParameterResolver)
+            .let {
+                if (it is ClassName && it.packageName == "kotlin.jvm.functions.kotlin") {
+                    ClassName("", it.simpleName)
+                } else {
+                    it
+                }
+            }
 
         val checkedType = type.applySafeAnnotations()
 
