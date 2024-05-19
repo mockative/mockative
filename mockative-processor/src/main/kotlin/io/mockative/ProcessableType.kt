@@ -2,6 +2,7 @@ package io.mockative
 
 import com.google.devtools.ksp.getConstructors
 import com.google.devtools.ksp.isConstructor
+import com.google.devtools.ksp.isInternal
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
@@ -35,7 +36,8 @@ data class ProcessableType(
         }
 
         private fun KSClassDeclaration.getPublicConstructor(): KSFunctionDeclaration? {
-            return getConstructors().firstOrNull { it.isPublic() }
+            val constructors = getConstructors()
+            return constructors.firstOrNull { it.isPublic() } ?: constructors.firstOrNull { it.isInternal() }
         }
 
         private fun processConstructorParameters(
