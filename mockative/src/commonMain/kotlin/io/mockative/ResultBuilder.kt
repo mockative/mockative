@@ -12,6 +12,8 @@ class ResultBuilder<R>(
         mock.addBlockingStub(ClosedBlockingStub(expectation, blocks))
     }
 
+    fun invokesMany(vararg blocks: () -> R) = invokesMany(blocks.map { block -> { _ -> block() } })
+
     fun returns(value: R) = invokes { value }
 
     fun returnsMany(vararg values: R) = invokesMany(values.map { value -> { value } })

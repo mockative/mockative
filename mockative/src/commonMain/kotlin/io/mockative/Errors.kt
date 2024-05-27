@@ -2,7 +2,7 @@ package io.mockative
 
 import kotlin.reflect.KClass
 
-abstract class MockativeException(message: String) : Exception(message)
+abstract class MockativeException(override val message: String) : Exception(message)
 
 class NoSuchMockException(type: KClass<*>) : MockativeException(
     buildString {
@@ -187,7 +187,7 @@ class InvalidExpectationException(
 )
 
 class MixedArgumentMatcherException :
-    Exception("Mixing values and matchers like `eq()` or `any()` in the same function call is not supported.")
+    MockativeException("Mixing values and matchers like `eq()` or `any()` in the same function call is not supported.")
 
 class StubbingInProgressException(val receiver: Mockable, val invocation: Invocation) : Exception()
 

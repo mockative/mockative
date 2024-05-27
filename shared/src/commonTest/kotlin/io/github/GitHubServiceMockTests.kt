@@ -75,6 +75,25 @@ internal class GitHubServiceMockTests {
     }
 
     @Test
+    fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed_invokesMany() = runTest {
+        // given
+        val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"
+        val repository1 = Repository(id, "Mockative")
+        val repository2 = Repository(id, "Kontinuity")
+
+        coEvery { github.repository(id) }
+            .invokesMany({ repository1 }, { repository2 })
+
+        // when
+        val result1 = service.repository(id)
+        val result2 = service.repository(id)
+
+        // then
+        assertEquals(repository1, result1)
+        assertEquals(repository2, result2)
+    }
+
+    @Test
     fun givenSetupOfSuspendingCommand_whenCallingCommand_thenMockIsUsed_dispatched() = runTest {
         // given
         val id = "0efb1b3b-f1b2-41f8-a1d8-368027cc86ee"

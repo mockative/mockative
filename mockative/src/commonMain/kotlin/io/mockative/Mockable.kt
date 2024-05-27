@@ -74,7 +74,7 @@ class Mockable(val instance: Any) {
     }
 
     private fun getSuspendStubOrNull(invocation: Invocation): SuspendStub? {
-        return suspendStubs.firstOrNull { stub -> stub.expectation.matches(invocation) }
+        return suspendStubs.firstOrNull { stub -> stub.matches(invocation) }
     }
 
     private val invocations: List<Invocation>
