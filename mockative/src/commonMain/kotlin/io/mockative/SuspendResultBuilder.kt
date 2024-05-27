@@ -12,6 +12,8 @@ class SuspendResultBuilder<R>(
         mock.addSuspendStub(ClosedSuspendStub(expectation, blocks))
     }
 
+    fun invokesMany(vararg blocks: suspend () -> R) = invokesMany(blocks.map { block -> { _ -> block() } })
+
     fun returns(value: R) = invokes { value }
 
     fun returnsMany(vararg values: R) = invokesMany(values.map { value -> { value } })
