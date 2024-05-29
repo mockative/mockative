@@ -6,10 +6,10 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("multiplatform") version "2.0.0-RC3" apply false
-        kotlin("plugin.allopen") version "2.0.0-RC3" apply false
+        kotlin("multiplatform") version "2.0.0" apply false
+        kotlin("plugin.allopen") version "2.0.0" apply false
 
-        id("com.google.devtools.ksp") version "2.0.0-RC3-1.0.20" apply false
+        id("com.google.devtools.ksp") version "2.0.0-1.0.21" apply false
     }
 }
 
