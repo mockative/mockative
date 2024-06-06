@@ -110,16 +110,6 @@ class MyService {
 }
 ```
 
-### Global Mocking
-
-If you prefer to make all classes in your project open (and thus also mockable by Mockative) without annotating them individually, you can adjust the `allOpen` configuration to apply to all classes. However, use this approach with caution, as it may have unintended side effects by making all your classes non-final.
-
-```kotlin
-allOpen {
-    annotation("kotlin.Metadata")
-}
-```
-
 ## Testing with Mockative
 
 To mock a given method on an interface or a class, annotate a property holding the interface- or class type with the
