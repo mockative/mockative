@@ -178,12 +178,12 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
     }
 
     val annotations = buildList {
-        // why??
-        val suppressDeprecationError = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+        val suppressDeprecation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+            .addMember("%S", "DEPRECATION")
             .addMember("%S", "DEPRECATION_ERROR")
             .build()
 
-        add(suppressDeprecationError)
+        add(suppressDeprecation)
 
         val optInSpec = buildOptInAnnotationSpec()
         if (optInSpec != null) {

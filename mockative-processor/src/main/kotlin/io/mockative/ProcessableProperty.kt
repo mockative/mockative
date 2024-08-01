@@ -1,5 +1,6 @@
 package io.mockative
 
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.TypeParameterResolver
@@ -12,6 +13,7 @@ data class ProcessableProperty(
     val type: TypeName,
     val typeParameterResolver: TypeParameterResolver,
     val receiver: TypeName?,
+    val deprecatedAnnotation: KSAnnotation?
 ) {
     companion object {
         fun fromDeclaration(
@@ -27,6 +29,7 @@ data class ProcessableProperty(
                 type = declaration.type.toTypeNameMockative(typeParameterResolver),
                 typeParameterResolver = typeParameterResolver,
                 receiver = declaration.extensionReceiver?.toTypeNameMockative(typeParameterResolver),
+                deprecatedAnnotation = declaration.annotations.firstOrNull { it.shortName.asString() == DEPRECATED_ANNOTATION.simpleName }
             )
         }
     }
