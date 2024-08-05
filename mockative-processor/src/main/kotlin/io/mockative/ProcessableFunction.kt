@@ -16,7 +16,7 @@ data class ProcessableFunction(
     val name: String,
     val returnType: TypeName,
     val isSuspend: Boolean,
-	val deprecatedAnnotation: KSAnnotation?,
+    val deprecatedAnnotation: KSAnnotation?,
     val typeVariables: List<TypeVariableName>,
     val typeParameterResolver: TypeParameterResolver,
     val isFromAny: Boolean,
@@ -37,7 +37,7 @@ data class ProcessableFunction(
                 name = declaration.simpleName.asString(),
                 returnType = declaration.returnType!!.toTypeNameMockative(typeParameterResolver),
                 isSuspend = declaration.modifiers.contains(Modifier.SUSPEND),
-				deprecatedAnnotation = declaration.annotations.firstOrNull { it.shortName.asString() == DEPRECATED_ANNOTATION.simpleName },
+                deprecatedAnnotation = declaration.annotations.firstOrNull { it.shortName.asString() == DEPRECATED_ANNOTATION.simpleName },
                 typeVariables = declaration.typeParameters
                     .map { it.toTypeVariableName(typeParameterResolver) },
                 typeParameterResolver = typeParameterResolver,

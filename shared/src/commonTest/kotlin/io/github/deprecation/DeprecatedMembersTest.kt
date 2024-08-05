@@ -9,19 +9,19 @@ import kotlin.test.assertTrue
 
 class DeprecatedMembersTest {
 
-	@Mock
-	private val classWithDeprecatedMembers = mock(classOf<ClassWithDeprecatedMembers>())
+    @Mock
+    private val classWithDeprecatedMembers = mock(classOf<ClassWithDeprecatedMembers>())
 
-	@Mock
-	private val interfaceWithDeprecatedMembers = mock(classOf<InterfaceWithDeprecatedMembers>())
+    @Mock
+    private val interfaceWithDeprecatedMembers = mock(classOf<InterfaceWithDeprecatedMembers>())
 
-	@Test
-	fun classWithDeprecatedMembersTest() {
-		assertTrue(isMock(classWithDeprecatedMembers))
-	}
+    @Test
+    fun classWithDeprecatedMembersTest() {
+        assertTrue(isMock(classWithDeprecatedMembers))
+    }
 
-	@Test
-	fun interfaceWithDeprecatedMembersTest() {
-		assertTrue(isMock(interfaceWithDeprecatedMembers))
-	}
+    @Test
+    fun interfaceWithDeprecatedMembersTest() {
+        assertTrue(isMock(interfaceWithDeprecatedMembers))
+    }
 }
