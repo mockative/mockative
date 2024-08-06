@@ -11,6 +11,7 @@ val KCLASS = ClassName("kotlin.reflect", "KClass")
 val MOCK_ANNOTATION = Mock::class.asClassName()
 val SUPPRESS_ANNOTATION = Suppress::class.asClassName()
 val OPT_IN = ClassName("kotlin", "OptIn")
+val DEPRECATED_ANNOTATION = Deprecated::class.asClassName()
 
 val MOCKABLE = Mockable::class.asClassName()
 

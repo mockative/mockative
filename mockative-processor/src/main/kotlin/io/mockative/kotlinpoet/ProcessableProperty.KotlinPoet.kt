@@ -1,6 +1,7 @@
 package io.mockative.kotlinpoet
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 import io.mockative.INVOCATION_GETTER
 import io.mockative.INVOCATION_SETTER
 import io.mockative.MOCKABLE
@@ -13,6 +14,10 @@ internal fun ProcessableProperty.buildPropertySpec(): PropertySpec {
 
     if (receiver != null) {
         builder.receiver(receiver)
+    }
+
+    if (deprecatedAnnotation != null) {
+        builder.addAnnotation(deprecatedAnnotation.toAnnotationSpec())
     }
 
     return builder
