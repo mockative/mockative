@@ -11,4 +11,8 @@ class ClassWithProperty(val propertyWithUnitReturningFunction: ClassUsedAsProper
 class ClassUsedAsPropertyWithUnitReturningFunction {
     fun doSomethingReturnUnit() {
     }
+
+    fun returnSomeString(): String {
+        return "abc"
+    }
 }
