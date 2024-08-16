@@ -1,11 +1,7 @@
 package io.github
 
 @Mockable
-class ClassWithProperty(val propertyWithUnitReturningFunction: ClassUsedAsPropertyWithUnitReturningFunction) {
-    init {
-        propertyWithUnitReturningFunction.doSomethingReturnUnit()
-    }
-}
+class ClassWithProperty(val propertyWithUnitReturningFunction: ClassUsedAsPropertyWithUnitReturningFunction)
 
 @Mockable
 class ClassUsedAsPropertyWithUnitReturningFunction {
