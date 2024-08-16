@@ -13,12 +13,12 @@ class MockWithNestedMockWithUnitReturningFunctionTests {
     val mockedClassWithProperty = mock(classOf<ClassWithProperty>())
 
     @Test
-    fun does_not_match_if_one_doesnt_match() {
+    fun stubs_units_by_default_works_for_recursive_mock() {
         verify { mockedClassWithProperty.propertyWithUnitReturningFunction.doSomethingReturnUnit() }.wasInvoked(1)
     }
 
     @Test
-    fun does_not_masdadatch_if_one_doesnt_match() {
+    fun stubs_units_by_default_doesnt_affect_function_not_returning_unit() {
         assertFailsWith<MissingExpectationException> { mockedClassWithProperty.propertyWithUnitReturningFunction.returnSomeString() }
     }
 }
