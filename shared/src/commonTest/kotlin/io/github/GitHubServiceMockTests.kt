@@ -180,7 +180,7 @@ internal class GitHubServiceMockTests {
     fun getToken() {
         // Given
         val token = "the-token"
-        every { configuration.token }.returns(token)
+        every { configuration.token } returns token
 
         // When
         val result = service.getToken()
