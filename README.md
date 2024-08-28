@@ -230,7 +230,9 @@ The following functions are available to provide a stub implementation for every
 | `throws(throwable: Throwable)`                        | Throws the specified exception.                                                                                                                                                                                                  |
 | `throwsMany(throwable: Throwable)`                    | Throws the specified exceptions in sequence. Once the last exception in the sequence has been thrown, this stubbing will no longer match any invocation.                                                                         |
 
-Mockative supports infix notation for `invokes`, `returns`, and `throws` functions:
+In order to provide familiarity to developers coming from MockK, who prefer using infix notation, 
+Mockative also supports infix notation for the `invokes`, `returns`, and `throws` functions:
+
 ```kotlin
 every { api.getUsers() } returns users
 ```
