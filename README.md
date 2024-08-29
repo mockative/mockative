@@ -337,11 +337,11 @@ coVerify { s3Client.getObject<File>(eq(request), any()) }
 In addition to verification of expectations there's also validation of the use of expectations, 
 which, if not used, can lead to both "under verification" and "over mocking" resulting in 
 inaccurate tests. To handle such cases Mockative provides 2 functions you can use on your mocks, 
-usually in the `@AfterEach` function of your tests:
+usually in the `@AfterTest` function of your tests:
 
 ```kotlin
-@AfterEach
-fun afterEach() {
+@AfterTest
+fun afterTest() {
   // Verifies that all expectations were verified through a call to `verify { ... }.wasInvoked()`.
   verifyNoUnverifiedExpectations(githubApi)
   
