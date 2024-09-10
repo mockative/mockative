@@ -1,6 +1,7 @@
 package io.mockative.kotlinpoet
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 import io.mockative.*
 
 internal fun ProcessableFunction.buildFunSpec(): FunSpec {
@@ -17,6 +18,10 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
 
     if (receiver != null) {
         builder.receiver(receiver)
+    }
+
+    if (deprecatedAnnotation != null) {
+        builder.addAnnotation(deprecatedAnnotation.toAnnotationSpec())
     }
 
     builder

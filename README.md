@@ -220,6 +220,13 @@ The following functions are available to provide a stub implementation for every
 | `throws(throwable: Throwable)`                        | Throws the specified exception.                                                                                                                                                                                                  |
 | `throwsMany(throwable: Throwable)`                    | Throws the specified exceptions in sequence. Once the last exception in the sequence has been thrown, this stubbing will no longer match any invocation.                                                                         |
 
+In order to provide familiarity to developers coming from MockK, who prefer using infix notation, 
+Mockative also supports infix notation for the `invokes`, `returns`, and `throws` functions:
+
+```kotlin
+every { api.getUsers() } returns users
+```
+
 When the return type of the function or property being stubbed is `Unit`, the following additional
 then function is available:
 
@@ -320,11 +327,11 @@ coVerify { s3Client.getObject<File>(eq(request), any()) }
 In addition to verification of expectations there's also validation of the use of expectations, 
 which, if not used, can lead to both "under verification" and "over mocking" resulting in 
 inaccurate tests. To handle such cases Mockative provides 2 functions you can use on your mocks, 
-usually in the `@AfterEach` function of your tests:
+usually in the `@AfterTest` function of your tests:
 
 ```kotlin
-@AfterEach
-fun afterEach() {
+@AfterTest
+fun afterTest() {
   // Verifies that all expectations were verified through a call to `verify { ... }.wasInvoked()`.
   verifyNoUnverifiedExpectations(githubApi)
   

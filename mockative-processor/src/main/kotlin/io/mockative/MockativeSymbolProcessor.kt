@@ -4,6 +4,7 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.mockative.kotlinpoet.buildMockFunSpecs
@@ -42,8 +43,14 @@ class MockativeSymbolProcessor(
                 val reflectionName = type.sourceClassName.reflectionName()
                 val fileName = "${reflectionName}.Mockative"
 
+                val suppressDeprecation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+                    .addMember("%S", "DEPRECATION")
+                    .addMember("%S", "DEPRECATION_ERROR")
+                    .build()
+
                 FileSpec.builder("io.mockative", fileName)
                     .addFunctions(type.buildMockFunSpecs())
+                    .addAnnotation(suppressDeprecation)
                     .build()
                     .writeTo(codeGenerator, aggregating = false)
             }
