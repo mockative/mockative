@@ -4,6 +4,11 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.mockative/mockative)](https://search.maven.org/artifact/io.mockative/mockative)
 
+> [!IMPORTANT]  
+> Call for new maintainers!
+>
+> I am giving up working on Mockative. See https://github.com/mockative/mockative/issues/129 if you would like to take over the project.
+
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 Notable features include:
 
