@@ -7,7 +7,6 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class ClassWithNestedPropertiesTests {
-//    @Mock
     val mock: ClassWithNestedProperties = mock(classOf<ClassWithNestedProperties>())
 
     @Test

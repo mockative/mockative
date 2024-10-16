@@ -11,6 +11,9 @@ kotlin {
         // Common
         named("commonMain") {
             kotlin.srcDirs("$buildDir/generated/mockative-code-generator")
+            dependencies {
+                implementation(project(":mockative"))
+            }
         }
 
         named("jvmMain") {

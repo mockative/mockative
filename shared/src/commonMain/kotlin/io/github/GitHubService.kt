@@ -1,5 +1,6 @@
 package io.github
 
+import io.mockative.Mockable
 import kotlinx.coroutines.withContext
 
 internal class GitHubService(
@@ -27,6 +28,7 @@ internal class GitHubService(
         configuration.token = token
     }
 
+    @Mockable
     interface NestedAPI {
         fun foo(): String
     }
