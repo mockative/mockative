@@ -4,6 +4,7 @@ import com.google.devtools.ksp.gradle.KspAATask
 import com.google.devtools.ksp.gradle.KspExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
@@ -11,6 +12,11 @@ abstract class MockativePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.pluginManager.apply("com.google.devtools.ksp")
         project.pluginManager.apply("org.jetbrains.kotlin.plugin.allopen")
+
+        // Configure the all-open plugin
+        project.extensions.configure(AllOpenExtension::class.java) { allOpen ->
+            allOpen.annotation("io.mockative.Mockable")
+        }
 
         // Configure sourceSets
         project.kotlinExtension.sourceSets.configureEach { sourceSet ->
@@ -22,16 +28,13 @@ abstract class MockativePlugin : Plugin<Project> {
         val mockative = project.extensions.create("mockative", MockativeExtension::class.java)
 
         // Prepare task to configure mockative
-        val mockativeConfigure = project.tasks.register("mockativeConfigure", ConfigureMockativeTask::class.java)
-
-        val mockativeCopyRuntime = project.tasks.register("mockativeCopyRuntime", MockativeCopyRuntimeTask::class.java)
+        val mockativeConfiguration = project.tasks.register("mockativeConfiguration", MockativeConfigurationTask::class.java)
+        val mockativeProcessRuntime = project.tasks.register("mockativeProcessRuntime", MockativeProcessRuntimeTask::class.java)
 
         // Assign mockative configuration task as dependency of KSP tasks
         project.tasks.withType(KspAATask::class.java) { ksp ->
-            ksp.dependsOn(mockativeConfigure)
-            ksp.dependsOn(mockativeCopyRuntime)
-
-//            ksp.inputs.file(project.mockativeConfigurationFile)
+            ksp.dependsOn(mockativeConfiguration)
+            ksp.dependsOn(mockativeProcessRuntime)
         }
 
         // Add `mockative-processor` as dependency of KSP configurations
@@ -40,11 +43,6 @@ abstract class MockativePlugin : Plugin<Project> {
                 val dependency = project.dependencies.project(mapOf("path" to ":mockative-processor"))
                 project.dependencies.add(configuration.name, dependency)
             }
-        }
-
-        project.kotlinExtension.sourceSets.configureEach { sourceSet ->
-            println("[MockativePlugin] sourceSet: ${sourceSet.name}")
-            sourceSet.kotlin.srcDir(project.mockativeConfigurationFile)
         }
 
         // Pass extension configuration to symbol processor through KSP `arg`s
