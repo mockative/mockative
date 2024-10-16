@@ -13,15 +13,9 @@ import java.io.File
  * builds.
  */
 abstract class ConfigureMockativeTask : DefaultTask() {
-    @get:Input
-    val generate: Boolean
-        get() = project.testTasks.isNotEmpty()
-
-    @get:OutputFile
-    val conf: File = project.mockativeConfigurationFile
-
-    private val confContent: String
-        get() = "io.mockative.enabled=$generate"
+    init {
+        outputs.upToDateWhen { false }
+    }
 
     @TaskAction
     fun run() {
@@ -35,7 +29,5 @@ abstract class ConfigureMockativeTask : DefaultTask() {
         } else {
             println("[Mockative] Disabling due to no test tasks detected")
         }
-
-        conf.writeText(confContent)
     }
 }

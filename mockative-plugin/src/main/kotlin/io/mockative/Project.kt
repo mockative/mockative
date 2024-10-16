@@ -9,3 +9,6 @@ internal val Project.mockativeConfigurationFile: File
 
 internal val Project.testTasks: List<AbstractTestTask>
     get() = gradle.taskGraph.allTasks.filterIsInstance<AbstractTestTask>()
+
+internal val Project.mockativeDir: File
+    get() = layout.buildDirectory.dir("generated/mockative").get().asFile
