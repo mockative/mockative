@@ -1,12 +1,10 @@
 package io.github
 
 import io.mockative.Fun1
-import io.mockative.Mock
 import io.mockative.any
 import io.mockative.classOf
 import io.mockative.coEvery
 import io.mockative.eq
-import io.mockative.every
 import io.mockative.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -15,10 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FileServiceTests {
-    @Mock
     private val s3Client = mock(classOf<S3Client>())
-
-    @Mock
     private val block = mock(classOf<Fun1<GetObjectResponse, File>>())
 
     private val fileService = FileService(s3Client)

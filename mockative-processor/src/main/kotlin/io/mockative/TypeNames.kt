@@ -8,12 +8,12 @@ val KOTLIN_THROWS = ClassName("kotlin", "Throws")
 val KOTLIN_ANY = ClassName("kotlin", "Any")
 val KCLASS = ClassName("kotlin.reflect", "KClass")
 
-val MOCK_ANNOTATION = Mock::class.asClassName()
+val MOCKABLE_ANNOTATION = Mockable::class.asClassName()
 val SUPPRESS_ANNOTATION = Suppress::class.asClassName()
 val OPT_IN = ClassName("kotlin", "OptIn")
 val DEPRECATED_ANNOTATION = Deprecated::class.asClassName()
 
-val MOCKABLE = Mockable::class.asClassName()
+val ANY_MOCK = MockState::class.asClassName()
 
 val INVOCATION_GETTER = Invocation.Getter::class.asClassName()
 val INVOCATION_SETTER = Invocation.Setter::class.asClassName()

@@ -146,9 +146,11 @@ data class ProcessableType(
         fun fromResolver(resolver: Resolver, stubsUnitByDefault: Boolean): List<ProcessableType> {
             this.stubsUnitByDefault = stubsUnitByDefault
 
-            val processableTypes = resolver.getSymbolsWithAnnotation(MOCK_ANNOTATION.canonicalName)
-                .filterIsInstance<KSPropertyDeclaration>()
-                .mapNotNull { property -> resolvePropertyType(property) }
+            val classDeclarations = resolver.getSymbolsWithAnnotation(MOCKABLE_ANNOTATION.canonicalName)
+                .filterIsInstance<KSClassDeclaration>()
+
+            val processableTypes = classDeclarations
+                .mapNotNull { classDec -> classDec.containingFile?.let { classDec to it } }
                 .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
                 .groupBy({ (classDec, _) -> classDec }, { (_, usage) -> usage })
                 .map { (classDec, usages) -> fromDeclaration(classDec, usages) }

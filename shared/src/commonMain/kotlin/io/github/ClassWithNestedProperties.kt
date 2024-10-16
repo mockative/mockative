@@ -1,5 +1,7 @@
 package io.github
 
+import io.mockative.Mockable
+
 @Mockable
 class ClassWithNestedProperties(
     private val prop: Level1
