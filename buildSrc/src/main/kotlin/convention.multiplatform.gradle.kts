@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+@file:OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 
 plugins {
     kotlin("multiplatform")
@@ -36,11 +36,15 @@ kotlin {
 
     mingwX64()
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasm {
+    wasmJs {
         browser()
         nodejs()
         generateTypeScriptDefinitions()
     }
+
+    wasmWasi {
+        nodejs()
+    }
+
     applyDefaultHierarchyTemplate()
 }

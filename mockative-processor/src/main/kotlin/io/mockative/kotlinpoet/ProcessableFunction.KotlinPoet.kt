@@ -31,7 +31,7 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
         .addTypeVariables(typeVariables)
 
     // Mockable.invoke<Int>
-    val invocationCall = CodeBlock.of("%T.%L<%T>", MOCKABLE, invocation, returnType)
+    val invocationCall = CodeBlock.of("%T.%L<%T>", ANY_MOCK, invocation, returnType)
 
     // Invocation.Function("count", listOf<Any?>(*`strings`))
     val invocationConstruction = CodeBlock.of("%T(%S, %L)", INVOCATION_FUNCTION, name, listOfArguments)

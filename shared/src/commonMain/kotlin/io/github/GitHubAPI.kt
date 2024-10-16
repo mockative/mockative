@@ -23,7 +23,7 @@ internal interface GitHubAPI {
 
     fun doList(list: MyList<Repository>)
 
-    fun doMaps(map: MyStringMap<Repository>)
+//    fun doMaps(map: MyStringMap<Repository>)
 
     fun count(vararg strings: String): Int
 }

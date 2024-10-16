@@ -93,7 +93,7 @@ val taskIsRunningTest = gradle.startParameter.taskNames
 
 if (taskIsRunningTest) {
   allOpen {
-    annotation("io.github.Mockable")
+    annotation("io.mockative.Mockable")
   }
 }
 ```
@@ -105,7 +105,7 @@ This configuration should be placed outside of and after the `plugins` block.
 To mock a class with Mockative, annotate the class with your annotation (interfaces are always open). This annotation indicates to Mockative (and the Kotlin compiler, with the above configuration) that the class should be open for subclassing and available for mocking during tests.
 
 ```kotlin
-import io.github.Mockable
+import io.mockative.Mockable
 
 @Mockable
 class MyService {
