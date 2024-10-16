@@ -1,5 +1,7 @@
 package io.github
 
+import io.mockative.Mockable
+
 class PopulatedClass(
     private val class2: Class2,
     private val inner2: InnerClass,

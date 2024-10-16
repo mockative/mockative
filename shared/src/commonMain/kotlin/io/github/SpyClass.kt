@@ -1,5 +1,7 @@
 package io.github
 
+import io.mockative.Mockable
+
 @Mockable
 class SpyClass(val name: String) {
     fun greet(): String {

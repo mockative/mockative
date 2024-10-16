@@ -1,6 +1,5 @@
 package io.github
 
-import io.mockative.Mock
 import io.mockative.classOf
 import io.mockative.doesNothing
 import io.mockative.every
@@ -11,7 +10,6 @@ import kotlin.test.assertEquals
 
 @OptIn(ExperimentalForeignApi::class)
 class OptInTypeTests {
-    @Mock
     val sut = mock(classOf<OptInType>())
 
     @Test

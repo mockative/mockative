@@ -13,13 +13,16 @@ kotlin {
         named("jvmMain") {
             dependencies {
                 implementation(project(":mockative"))
+                implementation(project(":mockative-test"))
+
+                implementation(kotlin("reflect"))
 
                 // KSP
-                implementation("com.google.devtools.ksp:symbol-processing-api:2.0.0-1.0.21")
+                implementation("com.google.devtools.ksp:symbol-processing-api:2.0.255-SNAPSHOT")
 
                 // KotlinPoet
-                implementation("com.squareup:kotlinpoet:1.16.0")
-                implementation("com.squareup:kotlinpoet-ksp:1.16.0")
+                implementation("com.squareup:kotlinpoet:1.18.1")
+                implementation("com.squareup:kotlinpoet-ksp:1.18.1")
             }
 
             kotlin.srcDir("src/main/kotlin")

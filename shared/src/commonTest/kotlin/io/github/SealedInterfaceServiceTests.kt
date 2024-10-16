@@ -1,6 +1,5 @@
 package io.github
 
-import io.mockative.Mock
 import io.mockative.any
 import io.mockative.classOf
 import io.mockative.every
@@ -10,7 +9,6 @@ import io.mockative.verify
 import kotlin.test.Test
 
 class SealedInterfaceServiceTests {
-    @Mock
     val sis = mock(classOf<SealedInterfaceService>())
 
     @Test
