@@ -5,6 +5,7 @@ import io.mockative.any
 import io.mockative.classOf
 import io.mockative.coEvery
 import io.mockative.eq
+import io.mockative.every
 import io.mockative.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -26,8 +27,8 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-//        every { s3Client.getObjectSync<File>(eq(request), any()) }
-//            .returns(expected)
+        every { s3Client.getObjectSync<File>(eq(request), any()) }
+            .returns(expected)
 
         // When
         val file = fileService.getFileSync(id)
@@ -44,8 +45,8 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-//        every { s3Client.getObjectSync<File>(eq(request), any()) }
-//            .returnsMany(expected)
+        every { s3Client.getObjectSync<File>(eq(request), any()) }
+            .returnsMany(expected)
 
         // When
         val file = fileService.getFileSync(id)
@@ -100,8 +101,8 @@ class FileServiceTests {
 
         val request = GetObjectRequest(id)
 
-//        every { s3Client.getObjectSync<File>(eq(request), any()) }
-//            .returns(expected)
+        every { s3Client.getObjectSync<File>(eq(request), any()) }
+            .returns(expected)
 
         // When
         val file = fileService.getFileRawSync(id, block::invoke)

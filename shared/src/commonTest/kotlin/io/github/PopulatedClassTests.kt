@@ -6,12 +6,8 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class PopulatedClassTests {
-//    @Mock
     val mock: PopulatedClass = mock(classOf<PopulatedClass>())
-
-//    @Mock
     val class3Mock = mock(classOf<Class3>())
-
 
     @Test
     fun isMockEmptyClass() {

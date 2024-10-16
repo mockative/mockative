@@ -1,9 +1,12 @@
 package io.github
 
+import io.mockative.Mockable
+
 typealias MyList<T> = List<T>
 
 typealias MyStringMap<T> = Map<String, T>
 
+@Mockable
 internal interface GitHubAPI {
     var String.wtf: Int
 
@@ -25,5 +28,5 @@ internal interface GitHubAPI {
 
 //    fun doMaps(map: MyStringMap<Repository>)
 
-    fun count(vararg strings: String): Int
+//    fun count(vararg strings: String): Int
 }

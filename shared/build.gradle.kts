@@ -1,10 +1,7 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.allopen")
 
     id("com.android.library")
-
-    id("com.google.devtools.ksp")
 
     id("io.mockative") version "1.0.0-SNAPSHOT"
 }
@@ -192,9 +189,9 @@ dependencies {
 //    }
 }
 
-allOpen {
-    annotation("io.mockative.Mockable")
-}
+//allOpen {
+//    annotation("io.mockative.Mockable")
+//}
 
 mockative {
     optIn("kotlin.ExperimentalUnsignedTypes")

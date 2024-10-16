@@ -1,7 +1,9 @@
 package io.github
 
 import io.mockative.any
+import io.mockative.classOf
 import io.mockative.every
+import io.mockative.spy
 import io.mockative.spyOn
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,8 +11,8 @@ import kotlin.test.assertEquals
 class SpyTests {
     private val realSpy = SpyClass("realSpy")
 
-    val spy = spyOn(realSpy)
-    val spyList = spyOn(mutableListOf("real"))
+    val spy = spy(classOf<SpyClass>(), realSpy)
+    val spyList = spy(classOf<MutableList<String>>(), mutableListOf("real"))
 
     @Test
     fun givenNoStubbing_WhenSpyMethodIsInvoked_ReturnsRealImplementation() {

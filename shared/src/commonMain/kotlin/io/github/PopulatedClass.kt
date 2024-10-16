@@ -2,6 +2,7 @@ package io.github
 
 import io.mockative.Mockable
 
+@Mockable
 class PopulatedClass(
     private val class2: Class2,
     private val inner2: InnerClass,
@@ -11,7 +12,7 @@ class PopulatedClass(
     val number: Int?,
     val map: Map<String, String>?,
     val list: List<String>,
-    val sequence: List<List<List<String>>>,
+    val sequence: MutableList<List<List<String>>>,
     var charSequence: CharSequence,
     val string: String,
     val bArray: BooleanArray,
@@ -24,7 +25,7 @@ class PopulatedClass(
     val hashSet: HashSet<String>,
     // val block: () -> Unit,
 ) {
-
+    @Mockable
     class InnerClass(val s: String) {
         fun wassup() = "Hello"
     }
