@@ -13,6 +13,14 @@ abstract class MockativePlugin : Plugin<Project> {
         project.pluginManager.apply("com.google.devtools.ksp")
         project.pluginManager.apply("org.jetbrains.kotlin.plugin.allopen")
 
+        // Prepare extension
+        val mockative = project.extensions.create("mockative", MockativeExtension::class.java)
+
+        // Exit if mockative is explicitly disabled
+        if (project.isMockativeDisabled) {
+            return
+        }
+
         // Configure the all-open plugin
         project.extensions.configure(AllOpenExtension::class.java) { allOpen ->
             allOpen.annotation("io.mockative.Mockable")
@@ -23,9 +31,6 @@ abstract class MockativePlugin : Plugin<Project> {
             val file = File(project.mockativeDir, "${sourceSet.name}/kotlin")
             sourceSet.kotlin.srcDir(file)
         }
-
-        // Prepare extension
-        val mockative = project.extensions.create("mockative", MockativeExtension::class.java)
 
         // Prepare task to configure mockative
         val mockativeConfiguration = project.tasks.register("mockativeConfiguration", MockativeConfigurationTask::class.java)

@@ -9,3 +9,6 @@ internal val Project.testTasks: List<AbstractTestTask>
 
 internal val Project.mockativeDir: File
     get() = layout.buildDirectory.dir("generated/mockative").get().asFile
+
+internal val Project.isMockativeDisabled: Boolean
+    get() = findProperty("io.mockative.disabled") == "true"
