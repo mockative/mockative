@@ -20,4 +20,5 @@ internal class AtomicRef<T>(value: T) {
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun <T> atomic(value: T): AtomicRef<T> = AtomicRef(value)
