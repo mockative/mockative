@@ -1,7 +1,6 @@
 package io.mockative
 
 import com.google.devtools.ksp.processing.CodeGenerator
-import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
@@ -11,21 +10,16 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import io.mockative.kotlinpoet.buildMockFunSpecs
 import io.mockative.kotlinpoet.buildMockTypeSpec
 import io.mockative.kotlinpoet.fullSimpleName
-import java.io.File
 
 class MockativeSymbolProcessor(
     private val codeGenerator: CodeGenerator,
     private val options: Map<String, String>,
-    private val platform: MockativePlatform,
 ) : SymbolProcessor {
-
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        println("[MockativeSymbolProcessor]")
-        println("options: $options")
-        println("platform: $platform")
+        log.info("options: $options")
 
         val tasks = options["io.mockative:tasks"]
-        println("io.mockative:tasks=$tasks")
+        log.info("io.mockative:tasks=$tasks")
 
         if (tasks == null) {
             return emptyList()
@@ -43,101 +37,53 @@ class MockativeSymbolProcessor(
             throw e
         }
 
-        println("Found '${processableTypes.size}' processable types")
+        log.info("Found '${processableTypes.size}' processable types")
 
         // Generate Mock Classes
         processableTypes
             .forEach { type ->
-                val packageName = type.mockClassName.packageName
-                val fileName = type.mockClassName.fullSimpleName
+                val sourceClassName = type.sourceClassName
+                val mockClassName = type.mockClassName
 
-                println("Processing '${type.mockClassName}'")
+                val packageName = mockClassName.packageName
+                val fileName = mockClassName.fullSimpleName
 
-                FileSpec.builder(packageName, fileName)
+                log.info("Generating mock class '$mockClassName' for '$sourceClassName'")
+
+                val file = FileSpec.builder(packageName, fileName)
                     .addType(type.buildMockTypeSpec())
                     .build()
-                    .writeTo(codeGenerator, aggregating = false)
+
+                log.info("  Writing mock class '$mockClassName' to '${file.relativePath}'")
+
+                file.writeTo(codeGenerator, aggregating = false)
             }
 
         // Generate Mock Functions
         processableTypes
             .forEach { type ->
+                val mockClassName = type.mockClassName
+
                 val reflectionName = type.sourceClassName.reflectionName()
                 val fileName = "${reflectionName}.Mockative"
+
+                log.info("Generating function for '$mockClassName'")
 
                 val suppressDeprecation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
                     .addMember("%S", "DEPRECATION")
                     .addMember("%S", "DEPRECATION_ERROR")
                     .build()
 
-                FileSpec.builder("io.mockative", fileName)
+                val file = FileSpec.builder("io.mockative", fileName)
                     .addFunctions(type.buildMockFunSpecs())
                     .addAnnotation(suppressDeprecation)
                     .build()
-                    .writeTo(codeGenerator, aggregating = false)
-            }
 
-        // Copy `mockative-test` library
-//        try {
-//            writeMockativeTest()
-//        } catch (e: Throwable) {
-//            e.printStackTrace()
-//            throw e
-//        }
+                log.info("  Writing function for '$mockClassName' to '${file.relativePath}'")
+
+                file.writeTo(codeGenerator, aggregating = false)
+            }
 
         return emptyList()
-    }
-
-    private fun writeMockativeTest() {
-        val directory = File("/Users/nicklas/git/Mockative/mockative/mockative-test/src/commonMain/kotlin")
-
-        val platformSourceSet = when (platform) {
-            MockativePlatform.JVM -> "jvmMain"
-            MockativePlatform.JS -> "jsMain"
-            MockativePlatform.WASM -> "wasmJsMain"
-            MockativePlatform.NATIVE -> "nativeMain"
-        }
-
-        val platformDirectory = File("/Users/nicklas/git/Mockative/mockative/mockative-test/src/$platformSourceSet/kotlin")
-
-        val kotlinDir = codeGenerator::class.java.declaredFields
-            .first { it.name == "kotlinDir" }
-            .also { it.isAccessible = true }
-            .get(codeGenerator) as File
-
-        if (kotlinDir.parentFile.name.endsWith("Test")) {
-            return
-        }
-
-        directory.walkTopDown()
-            .filter { it.isFile }
-            .map { file ->
-                val path = file.toRelativeString(directory)
-                if (file.name == "MakeValueOf.kt" || file.name == "AtomicReference.kt") {
-                    Triple(path, File(platformDirectory, path), true)
-                } else {
-                    Triple(path, file, true)
-                }
-            }
-            .forEach { (path, file, replace) ->
-                println("Processing '$path'")
-                try {
-                    codeGenerator.createNewFileByPath(Dependencies(false), path).use { os ->
-                        var content = file.readText()
-
-                        if (replace) {
-                            content = content
-                                .replace(" actual class", " class")
-                                .replace(" actual constructor", " constructor")
-                                .replace("actual var", "var ")
-                                .replace("actual fun ", "fun ")
-                        }
-
-                        os.bufferedWriter().use { it.write(content) }
-                    }
-                } catch (e: FileAlreadyExistsException) {
-                    // Nothing
-                }
-            }
     }
 }
