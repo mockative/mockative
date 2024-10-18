@@ -1,13 +1,7 @@
 package io.mockative
 
 /**
- * Enables mocking of the type specified by an annotated property.
- *
- * Using this annotation only enables code generation for mocking the specified type, and as such
- * must be used in combination with [mock] and [classOf] to instantiate an instance of the mock.
- *
- * @see mock
- * @see classOf
+ * Enables mocking of the annotated type during test tasks.
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
