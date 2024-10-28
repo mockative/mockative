@@ -54,9 +54,6 @@ jobs:
       - name: Initialize Gradle
         run: ./gradlew
 
-      - name: Run code generator
-        run: ./gradlew :mockative-code-generator:run
-
       - name: Publish
         shell: bash
         run: |

@@ -9,14 +9,21 @@ version = findProperty("project.version") as String
 kotlin {
     sourceSets {
         // Common
-        named("commonMain") {
-            kotlin.srcDirs("$buildDir/generated/mockative-code-generator")
+        commonMain.configure {
             dependencies {
                 implementation(project(":mockative"))
             }
         }
 
-        named("jvmMain") {
+        jvmMain.configure {
+            dependencies {
+                implementation(kotlin("reflect"))
+                implementation("org.objenesis:objenesis:3.3")
+                implementation("org.javassist:javassist:3.29.2-GA")
+            }
+        }
+
+        androidMain.configure {
             dependencies {
                 implementation(kotlin("reflect"))
                 implementation("org.objenesis:objenesis:3.3")
@@ -27,7 +34,6 @@ kotlin {
         all {
             languageSettings {
                 optIn("kotlin.RequiresOptIn")
-                optIn("kotlin.native.FreezingIsDeprecated")
             }
         }
     }

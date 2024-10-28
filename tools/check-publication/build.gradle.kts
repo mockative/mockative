@@ -1,20 +1,9 @@
 plugins {
     id("convention.multiplatform")
-    id("com.android.library")
-
     id("com.google.devtools.ksp")
 }
 
 version = findProperty("project.version") as String
-
-kotlin {
-    androidTarget()
-}
-
-android {
-    compileSdk = 33
-    namespace = "io.mockative"
-}
 
 inline fun <reified T> getProperty(key: String): T {
     return findProperty(key) as T? ?: throw NoSuchElementException("A project property with key '$key' was not found.")
@@ -49,7 +38,6 @@ dependencies {
     configurations
         .filter { it.name.startsWith("ksp") && it.name.contains("Test") }
         .forEach {
-            println("$it")
             add(it.name, "io.mockative:mockative-processor:$version")
         }
 }

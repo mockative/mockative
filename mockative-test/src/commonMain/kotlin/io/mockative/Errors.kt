@@ -4,6 +4,14 @@ import kotlin.reflect.KClass
 
 abstract class MockativeException(override val message: String) : Exception(message)
 
+class ValueCreationNotSupportedException(type: KClass<*>) : MockativeException(
+    buildString {
+        appendLine("Cannot create a placeholder value of type '$type'")
+        appendLine()
+        appendLine(1, "Placeholder values (and thus some matchers) are not supported when targeting Kotlin/Wasm")
+    }
+)
+
 class NoSuchMockException(type: KClass<*>) : MockativeException(
     buildString {
         appendLine("A mock for the type ${type.name} was not generated.")

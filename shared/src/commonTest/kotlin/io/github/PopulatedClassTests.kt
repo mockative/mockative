@@ -39,7 +39,7 @@ class PopulatedClassTests {
     @Test
     fun givenMatchersForFunctionWithReturnValue_whenCalledWithMatchingValues_ThenValueIsReturned() {
         // Given
-        every { mock.withParameters(any(), gt(4)) }.returns("This is not Hello Hello 1")
+        every { mock.withParameters(any("TODO"), gt(4)) }.returns("This is not Hello Hello 1")
 
         // When
         val result = mock.withParameters("Hello", 10)
@@ -51,7 +51,7 @@ class PopulatedClassTests {
     @Test
     fun givenMatchersForFunctionWithReturnValue_whenCalledWithNonMatchingValues_ThenMissingExpectationExceptionIsThrown() {
         // Given
-        every { mock.withParameters(any(), gt(4)) }.returns("This is not Hello Hello 1")
+        every { mock.withParameters(any("TODO"), gt(4)) }.returns("This is not Hello Hello 1")
 
         // When / then
         val result = kotlin.runCatching { mock.withParameters("Hello", 1) }

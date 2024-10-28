@@ -16,6 +16,7 @@ interface S3Client {
     fun testAbstract(abstract: AbstractParameter)
 }
 
+@Mockable
 abstract class AbstractParameter {
     abstract fun foo()
 }

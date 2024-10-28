@@ -1,6 +1,0 @@
-package io.mockative
-
-@Suppress("unused") object KFunction0
-@Suppress("unused") inline fun fun0() = KFunction0
-
-#functions#

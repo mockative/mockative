@@ -8,6 +8,7 @@ import io.mockative.coVerify
 import io.mockative.doesNothing
 import io.mockative.eq
 import io.mockative.every
+import io.mockative.fake.valueOf
 import io.mockative.mock
 import io.mockative.once
 import io.mockative.verify
@@ -195,7 +196,7 @@ internal class GitHubServiceMockTests {
     fun setTokenWithAny() {
         // Given
         val token = "the-token"
-        every { configuration.token = any() }.doesNothing()
+        every { configuration.token = any("TODO") }.doesNothing()
 
         // When
         service.setToken(token)

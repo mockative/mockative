@@ -2,6 +2,7 @@ package io.github.fake
 
 import io.github.AbstractParameter
 import io.github.Repository
+import io.github.ignoreKotlinWasm
 import io.mockative.fake.valueOf
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -42,7 +43,7 @@ class ValueOfTests {
     }
 
     @Test
-    fun makeValueOfReturnsOtherStuff() {
+    fun makeValueOfReturnsOtherStuff() = ignoreKotlinWasm {
         assertNotNull(valueOf<() -> Unit>())
         assertNotNull(valueOf<Repository>())
         assertNotNull(valueOf<AbstractParameter>())

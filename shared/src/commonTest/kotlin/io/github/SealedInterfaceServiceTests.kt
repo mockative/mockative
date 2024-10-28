@@ -12,7 +12,7 @@ class SealedInterfaceServiceTests {
     val sis = mock(classOf<SealedInterfaceService>())
 
     @Test
-    fun sealedInterfaceTest() {
+    fun sealedInterfaceTest() = ignoreKotlinWasm {
         // Given
         every { sis.acceptSealedInterface(any()) }
             .returnsMany()

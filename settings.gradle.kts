@@ -26,7 +26,6 @@ if (startParameter.projectProperties.containsKey("check_publication")) {
     include(":shared")
     include(":mockative")
     include(":mockative-processor")
-    include(":mockative-code-generator")
     include(":mockative-plugin")
     include(":mockative-test")
 }
