@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
 abstract class MockativeProcessRuntimeTask : DefaultTask() {
-    private val runtimeSrcDir = File("/Users/nicklas/git/Mockative/mockative/mockative-test/src")
+    private val runtimeSrcDir = File(javaClass.getResource("/src").toURI())
 
     init {
         outputs.upToDateWhen { false }
@@ -24,7 +24,6 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
         if (testTasks.isNotEmpty()) {
             println("Running test tasks '${testTasks.joinToString { it.name }}' - copying runtime from resources")
             for (sourceSet in project.kotlinExtension.sourceSets) {
-                // TODO Move content of `runtimeSrcDir` to `/resources` of Gradle plugin
                 val src = File(runtimeSrcDir, sourceSet.name)
                 if (src.exists()) {
                     val dst = File(project.mockativeDir, sourceSet.name)
@@ -49,6 +48,6 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
     }
 
     private fun println(message: String) {
-//        kotlin.io.println("[MockativeProcessRuntimeTask] $message")
+        kotlin.io.println("[MockativeProcessRuntimeTask] $message")
     }
 }

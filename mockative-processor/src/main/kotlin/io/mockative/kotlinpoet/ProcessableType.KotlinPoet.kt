@@ -169,13 +169,12 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
             .map { it.type.toTypeNameMockative(typeParameterResolver).copy(nullable = false).rawType() }
             .forEach { type ->
                 val codeBlockWithInfo = valueOf(type)
-                if (codeBlockWithInfo.isMock) typeSpec.addSuperclassConstructorParameter(
-                        "%M(%L) { stubsUnitByDefault·=·%L }",
-                        CONFIGURE,
-                        codeBlockWithInfo.codeBlock,
-                        stubsUnitByDefault
-                )
-                else typeSpec.addSuperclassConstructorParameter("%L", codeBlockWithInfo.codeBlock)
+                if (codeBlockWithInfo.isMock) {
+                    val statement = "%M(%L) { stubsUnitByDefault·=·%L }"
+                    typeSpec.addSuperclassConstructorParameter(statement, CONFIGURE, codeBlockWithInfo.codeBlock, configuration.stubsUnitByDefault)
+                } else {
+                    typeSpec.addSuperclassConstructorParameter("%L", codeBlockWithInfo.codeBlock)
+                }
             }
     } else if (declaration.classKind == ClassKind.INTERFACE) {
         typeSpec.addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))

@@ -3,7 +3,7 @@ plugins {
     id("com.gradle.plugin-publish") version "1.2.1"
 }
 
-version = "1.0.0-SNAPSHOT"
+version = "3.0.0-SNAPSHOT"
 
 repositories {
     mavenLocal()
@@ -19,7 +19,22 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(11)
+}
+
+val copySourcesToResources by tasks.registering(Copy::class) {
+    from("$rootDir/mockative-test/src")
+    into("src/main/resources/src/")
+}
+
+tasks.named("processResources") {
+    dependsOn(copySourcesToResources)
+}
+
+tasks.whenObjectAdded {
+    if (name == "sourcesJar") {
+        dependsOn(copySourcesToResources)
+    }
 }
 
 gradlePlugin {
