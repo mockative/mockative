@@ -3,6 +3,7 @@ plugins {
     id("com.gradle.plugin-publish") version "1.2.1"
 }
 
+group = "io.mockative"
 version = "3.0.0-SNAPSHOT"
 
 repositories {
@@ -38,12 +39,16 @@ tasks.whenObjectAdded {
 }
 
 gradlePlugin {
+    website = "https://github.com/mockative/mockative"
+    vcsUrl = "https://github.com/mockative/mockative.git"
+
     plugins {
         create("mockative") {
             id = "io.mockative"
             displayName = "Mockative Gradle Plugin"
-            implementationClass = "io.mockative.MockativePlugin"
             description = "Gradle Plugin for Mockative"
+            tags = listOf("testing", "mocking", "mock", "kmp", "native")
+            implementationClass = "io.mockative.MockativePlugin"
         }
     }
 }
