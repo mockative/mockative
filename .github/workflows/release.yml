@@ -17,7 +17,7 @@ jobs:
     steps:
       - id: create
         name: Create staging repository
-        uses: nexus-actions/create-nexus-staging-repo@v1.1
+        uses: nexus-actions/create-nexus-staging-repo@v1.3.0
         with:
           username: ${{ secrets.SONATYPE_USERNAME }}
           password: ${{ secrets.SONATYPE_PASSWORD }}
@@ -26,17 +26,17 @@ jobs:
           description: Created by Release (Create staging repository) for mockative/mockative
 
   publish-on-macos:
-    runs-on: macos-12
+    runs-on: macos-15
     needs:
       - create-staging-repository
     env:
-      DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_16.app/Contents/Developer
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -47,7 +47,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
           java-version: 17
 
@@ -67,16 +67,16 @@ jobs:
 
   macos-host-check:
     name: Check on macOS
-    runs-on: macos-12
+    runs-on: macos-15
     needs:
       - create-staging-repository
       - publish-on-macos
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -87,7 +87,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
           java-version: 17
 
@@ -117,7 +117,7 @@ jobs:
 
       - name: Close
         if: ${{ needs.macos-host-check.result == 'success' }}
-        uses: nexus-actions/release-nexus-staging-repo@v1.2
+        uses: nexus-actions/release-nexus-staging-repo@v1.3.0
         with:
           username: ${{ secrets.SONATYPE_USERNAME }}
           password: ${{ secrets.SONATYPE_PASSWORD }}
