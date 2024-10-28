@@ -23,7 +23,7 @@ abstract class MockativeConfigurationTask : DefaultTask() {
             println("Enabling due to test tasks detected: $testTaskString")
 
             val ksp = project.extensions.getByType(KspExtension::class.java)
-            ksp.arg("io.mockative:tasks", testTasks.joinToString { it.name })
+            ksp.arg("io.mockative:mockative:tasks", testTasks.joinToString(",") { it.name })
         } else {
             println("Disabling due to no test tasks detected")
         }

@@ -16,22 +16,19 @@ class MockativeSymbolProcessor(
     private val options: Map<String, String>,
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        log.info("options: $options")
-
-        val tasks = options["io.mockative:tasks"]
-        log.info("io.mockative:tasks=$tasks")
-
-        if (tasks == null) {
-            return emptyList()
-        }
-
-        val stubsUnitByDefault = options["mockative.stubsUnitByDefault"]
-            ?.let { !it.equals("false", ignoreCase = true) }
-            ?: true
-
         // Resolve the processable types
         val processableTypes = try {
-            ProcessableType.fromResolver(resolver, stubsUnitByDefault)
+            log.info("options: $options")
+
+            val configuration = MockativeConfiguration.fromOptions(options)
+            log.info("configuration: $configuration")
+
+            if (configuration.tasks.isEmpty()) {
+                log.info("No test tasks detected. No mock code is generated.")
+                return emptyList()
+            }
+
+            ProcessableType.fromResolver(configuration, resolver)
         } catch (e: Throwable) {
             e.printStackTrace()
             throw e

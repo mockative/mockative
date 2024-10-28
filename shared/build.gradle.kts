@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("multiplatform")
 
@@ -21,7 +24,11 @@ kotlin {
         nodejs()
     }
 
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+        }
+    }
 
     androidTarget()
 
@@ -94,7 +101,7 @@ kotlin {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 33
     namespace = "io.mockative"
 }
 
@@ -195,6 +202,14 @@ dependencies {
 
 mockative {
     optIn("kotlin.ExperimentalUnsignedTypes")
-    optIn("io.github.OptInType", "kotlinx.cinterop.ExperimentalForeignApi")
-    optIn("io.github.*", "kotlin.ExperimentalStdlibApi")
+//    optIn("io.github.OptInType", "kotlinx.cinterop.ExperimentalForeignApi")
+//    optIn("io.github.*", "kotlin.ExperimentalStdlibApi")
+
+    forPackage("io.github") {
+        optIn("kotlin.ExperimentalStdlibApi")
+
+        type("OptInType") {
+            optIn("kotlinx.cinterop.ExperimentalForeignApi")
+        }
+    }
 }

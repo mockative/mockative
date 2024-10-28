@@ -1,13 +1,20 @@
 @file:OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+
 plugins {
     kotlin("multiplatform")
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(17)
 
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+        }
+    }
 
     js(IR) {
         browser()

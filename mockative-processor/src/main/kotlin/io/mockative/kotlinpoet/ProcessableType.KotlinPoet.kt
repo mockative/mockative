@@ -5,15 +5,18 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
+import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockative.CONFIGURE
 import io.mockative.KCLASS
 import io.mockative.OPT_IN
+import io.mockative.ProcessableFunction
 import io.mockative.ProcessableType
 import io.mockative.SUPPRESS_ANNOTATION
 import io.mockative.ksp.addOriginatingKSFiles
@@ -50,7 +53,7 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
         typeParameter = typeParameter,
         modifiers = modifiers,
         functionTypeVariables = functionTypeVariables,
-        stubsUnitByDefault = stubsUnitByDefault
+        stubsUnitByDefault = configuration.stubsUnitByDefault
     )
 
     val spy1 = buildMockFunSpec(
@@ -61,7 +64,7 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
         spyParameter = spyParameter,
         modifiers = modifiers,
         functionTypeVariables = functionTypeVariables,
-        stubsUnitByDefault = stubsUnitByDefault
+        stubsUnitByDefault = configuration.stubsUnitByDefault
     )
 
     val spy2 = buildMockFunSpec(
@@ -71,32 +74,21 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
         spyParameter = spyParameter,
         modifiers = modifiers,
         functionTypeVariables = functionTypeVariables,
-        stubsUnitByDefault = stubsUnitByDefault,
+        stubsUnitByDefault = configuration.stubsUnitByDefault,
     )
 
     return listOf(mock, spy1, spy2)
 }
 
 internal fun ProcessableType.buildOptInAnnotationSpec(): AnnotationSpec? {
-    val globalFqns = options["io.mockative:mockative:opt-in"]?.split(",").orEmpty()
-    val typeFqns = options["io.mockative:mockative:opt-in:$sourceClassName"]?.split(",").orEmpty()
-
-    val sourceParts = sourceClassName.toString().split(".")
-
-    val wildcardFqns = sourceParts.indices
-        .map { index -> sourceParts.subList(0, index + 1).joinToString(".") }
-        .mapNotNull { fqn -> options["io.mockative:mockative:opt-in:$fqn.*"] }
-        .flatMap { fqns -> fqns.split(",") }
-
-    val fqns = (globalFqns + typeFqns + wildcardFqns).distinct()
-    val classNames = fqns.map { fqn -> ClassName.bestGuess(fqn) }
-    if (classNames.isEmpty()) {
+    val annotations = configuration.optIn.annotations(sourceClassName)
+    if (annotations.isEmpty()) {
         return null
     }
 
     return AnnotationSpec.builder(OPT_IN)
         .let { annotationSpec ->
-            classNames.fold(annotationSpec) { spec, className ->
+            annotations.fold(annotationSpec) { spec, className ->
                 spec.addMember("%T::class", className)
             }
         }
@@ -116,18 +108,13 @@ internal fun ProcessableType.buildMockFunSpec(
     val parameters = listOfNotNull(typeParameter, spyParameter)
     val addSpyInitializer = spyParameter?.name ?: "null"
 
+    val statement = "return %M(%T(%L)) { stubsUnitByDefault·=·%L }"
     return FunSpec.builder(functionName)
         .addModifiers(modifiers)
         .addTypeVariables(functionTypeVariables)
         .addParameters(parameters)
         .returns(returnType)
-        .addStatement(
-            "return %M(%T(%L)) { stubsUnitByDefault·=·%L }",
-            CONFIGURE,
-            mockClassName,
-            addSpyInitializer,
-            stubsUnitByDefault
-        )
+        .addStatement(statement, CONFIGURE, mockClassName, addSpyInitializer, stubsUnitByDefault)
         .addOriginatingKSFiles(usages)
         .build()
 }
@@ -215,7 +202,21 @@ private fun ProcessableType.buildPropertySpecs(): List<PropertySpec> {
 }
 
 private fun ProcessableType.buildFunSpecs(): List<FunSpec> {
+    if (configuration.excludeKotlinDefaultMembers) {
+        // When targeting the JVM certain functions introduced in later versions of the JDK appears to the symbol
+        // processor, despite them not being present in the targeting JDK version. This logic ignores non-abstract
+        // members (interface methods with default implementations) of types in the `kotlin` and `java` packages.
+        val topLevelPackageName = declaration.packageName.asString().split(".").firstOrNull()
+        if (topLevelPackageName == "kotlin" || topLevelPackageName == "java") {
+            return functions
+                .filter { it.declaration.isAbstract }
+                .map { it.buildFunSpec() }
+                .toList()
+        }
+    }
+
     return functions
+        .filter { MemberName(sourceClassName, it.name) !in configuration.excludeMembers }
         .map { it.buildFunSpec() }
         .toList()
 }

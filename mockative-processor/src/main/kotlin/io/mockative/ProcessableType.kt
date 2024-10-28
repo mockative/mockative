@@ -5,17 +5,21 @@ import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isInternal
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
-import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSValueParameter
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.ksp.TypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toTypeVariableName
-import io.mockative.ksp.isFromAny
-import kotlin.properties.Delegates
 
 data class ProcessableType(
+    val configuration: MockativeConfiguration,
     val declaration: KSClassDeclaration,
     val sourceClassName: ClassName,
     val mockClassName: ClassName,
@@ -24,13 +28,10 @@ data class ProcessableType(
     val usages: List<KSFile>,
     val typeParameterResolver: TypeParameterResolver,
     val typeVariables: List<TypeVariableName>,
-    val stubsUnitByDefault: Boolean,
     private val children: List<ProcessableType>,
     val constructorParameters: List<KSValueParameter>,
 ) {
     companion object {
-        private var stubsUnitByDefault by Delegates.notNull<Boolean>()
-
         private fun isKotlinPackage(packageName: String): Boolean {
             return packageName == "kotlin" || packageName.startsWith("kotlin.")
         }
@@ -41,6 +42,7 @@ data class ProcessableType(
         }
 
         private fun processConstructorParameters(
+            configuration: MockativeConfiguration,
             declaration: KSClassDeclaration,
         ): Pair<List<KSValueParameter>, List<ProcessableType>> {
             val constructor = declaration.getPublicConstructor()
@@ -62,22 +64,25 @@ data class ProcessableType(
                 }
 
                 val modifiers = paramDec.modifiers
-                val isNotFinal = !modifiers.contains(Modifier.FINAL) && !modifiers.contains(Modifier.SEALED)
+                val isFinal = modifiers.contains(Modifier.FINAL) || modifiers.contains(Modifier.SEALED)
+                if (isFinal) {
+                    return@mapNotNull null
+                }
 
                 val usages = listOfNotNull(paramDec.containingFile)
 
-                return@mapNotNull if (isNotFinal) {
-                    fromDeclaration(
-                        declaration = paramDec,
-                        usages = usages,
-                    )
-                } else null
+                return@mapNotNull fromDeclaration(
+                    configuration,
+                    declaration = paramDec,
+                    usages = usages,
+                )
             }
 
             return constructorParameters to processableTypes
         }
 
         private fun fromDeclaration(
+            configuration: MockativeConfiguration,
             declaration: KSClassDeclaration,
             usages: List<KSFile>,
         ): ProcessableType {
@@ -123,8 +128,9 @@ data class ProcessableType(
             val typeVariables = declaration.typeParameters
                 .map { it.toTypeVariableName(typeParameterResolver) }
 
-            val (constructorParameters, children) = processConstructorParameters(declaration)
+            val (constructorParameters, children) = processConstructorParameters(configuration, declaration)
             val processableType = ProcessableType(
+                configuration = configuration,
                 declaration = declaration,
                 sourceClassName = sourceClassName,
                 mockClassName = mockClassName,
@@ -133,7 +139,6 @@ data class ProcessableType(
                 usages = usages,
                 typeParameterResolver = typeParameterResolver,
                 typeVariables = typeVariables,
-                stubsUnitByDefault = stubsUnitByDefault,
                 children = children,
                 constructorParameters = constructorParameters,
             )
@@ -143,44 +148,19 @@ data class ProcessableType(
             return processableType
         }
 
-        fun fromResolver(resolver: Resolver, stubsUnitByDefault: Boolean): List<ProcessableType> {
-            this.stubsUnitByDefault = stubsUnitByDefault
-
+        fun fromResolver(configuration: MockativeConfiguration, resolver: Resolver): List<ProcessableType> {
             // TODO Recursively find types to mock
-            // TODO Investigate and support List and Map mocks
 
             val processableTypes = resolver.getSymbolsWithAnnotation(MOCKABLE_ANNOTATION.canonicalName)
                 .filterIsInstance<KSClassDeclaration>()
                 .mapNotNull { classDec -> classDec.containingFile?.let { classDec to it } }
                 .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
                 .groupBy({ (classDec, _) -> classDec }, { (_, usage) -> usage })
-                .map { (classDec, usages) -> fromDeclaration(classDec, usages) }
+                .map { (classDec, usages) -> fromDeclaration(configuration, classDec, usages) }
                 .flatten()
                 .distinctBy { it.mockClassName }
 
             return processableTypes
-        }
-
-        private fun resolvePropertyType(property: KSPropertyDeclaration): Pair<KSClassDeclaration, KSFile>? {
-            val resolvedType = property.type.resolve()
-            if (resolvedType.isError) {
-                log.error("Failed to resolve type of property `$property`", property)
-                return null
-            }
-
-            val declaration = resolvedType.declaration
-            if (declaration !is KSClassDeclaration) {
-                log.error("The type of the property `$property` must be a class or interface", property)
-                return null
-            }
-
-            val containingFile = property.containingFile
-            if (containingFile == null) {
-                log.error("Could not resolve the containing file of property `$property`", property)
-                return null
-            }
-
-            return declaration to containingFile
         }
 
         private fun List<ProcessableType>.flatten(): List<ProcessableType> {
