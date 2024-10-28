@@ -2,13 +2,10 @@ package io.mockative
 
 import com.google.devtools.ksp.gradle.KspAATask
 import com.google.devtools.ksp.gradle.KspExtension
-import com.google.devtools.ksp.gradle.KspTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.internal.extensions.stdlib.capitalized
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import java.io.File
 
 abstract class MockativePlugin : Plugin<Project> {
@@ -31,12 +28,6 @@ abstract class MockativePlugin : Plugin<Project> {
 
         // Configure sourceSets
         project.kotlinExtension.sourceSets.configureEach { sourceSet ->
-//            if (sourceSet.name.endsWith("Test")) {
-//                val mainSrcSet = sourceSet.name.removeSuffix("Test") + "Main"
-//                println("[MockativePlugin] Adding source directory '$mainSrcSet/kotlin' for source set '${sourceSet.name}'")
-//                val file = File(project.mockativeDir, "${mainSrcSet}/kotlin")
-//                sourceSet.kotlin.srcDir(file)
-//            }
             val file = File(project.mockativeDir, "${sourceSet.name}/kotlin")
             sourceSet.kotlin.srcDir(file)
         }
@@ -44,25 +35,12 @@ abstract class MockativePlugin : Plugin<Project> {
         // Prepare task to configure mockative
         val mockativeConfiguration = project.tasks.register("mockativeConfiguration", MockativeConfigurationTask::class.java)
         val mockativeProcessRuntime = project.tasks.register("mockativeProcessRuntime", MockativeProcessRuntimeTask::class.java)
-//        val mockativePostProcess = project.tasks.register("mockativePostProcess", MockativePostProcessTask::class.java)
 
         // Assign mockative configuration task as dependency of KSP tasks
         project.tasks.withType(KspAATask::class.java) { ksp ->
             ksp.dependsOn(mockativeConfiguration)
             ksp.dependsOn(mockativeProcessRuntime)
-
-//            val taskName = "mockativePostProcess${ksp.name.capitalized()}"
-//
-//            // TODO Optimize by passing argument to constructor
-//            val mockativePostProcess = project.tasks.register(taskName, MockativePostProcessTask::class.java)
-//
-//            ksp.finalizedBy(mockativePostProcess)
         }
-
-//        project.tasks.withType(KotlinCompilationTask::class.java) { task ->
-//            val taskName = "mockativePostProcessKsp${task.name.removePrefix("compile")}"
-//            task.mustRunAfter(taskName)
-//        }
 
         // Add `mockative-processor` as dependency of KSP configurations
         project.configurations.whenObjectAdded { configuration ->

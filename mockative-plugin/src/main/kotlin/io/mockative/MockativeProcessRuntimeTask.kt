@@ -35,7 +35,7 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
                     println("Skipping '$src' as it does not exist")
                 }
 
-                if (sourceSet.name == "jvmMain") {
+                if (sourceSet.name == "jvmMain" || sourceSet.name == "androidMain") {
                     sourceSet.dependencies {
                         implementation(kotlin("reflect"))
                         implementation("org.objenesis:objenesis:3.3")

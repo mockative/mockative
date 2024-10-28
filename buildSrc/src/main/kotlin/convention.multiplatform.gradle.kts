@@ -1,20 +1,16 @@
 @file:OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
-
 plugins {
     kotlin("multiplatform")
+    id("com.android.library")
 }
 
 kotlin {
     jvmToolchain(17)
 
-    jvm {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_1_8
-        }
-    }
+    jvm()
+
+    androidTarget()
 
     js(IR) {
         browser()
@@ -54,4 +50,14 @@ kotlin {
     }
 
     applyDefaultHierarchyTemplate()
+}
+
+android {
+    compileSdk = 33
+    namespace = "io.mockative"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }

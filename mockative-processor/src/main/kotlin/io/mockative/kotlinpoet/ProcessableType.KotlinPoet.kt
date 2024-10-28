@@ -56,6 +56,16 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
         stubsUnitByDefault = configuration.stubsUnitByDefault
     )
 
+    val any = buildMockFunSpec(
+        functionName = "any",
+        returnType = parameterizedSourceClassName,
+        mockClassName = parameterizedMockClassName,
+        typeParameter = typeParameter,
+        modifiers = modifiers,
+        functionTypeVariables = functionTypeVariables,
+        stubsUnitByDefault = configuration.stubsUnitByDefault
+    )
+
     val spy1 = buildMockFunSpec(
         functionName = "spy",
         returnType = parameterizedSourceClassName,
@@ -77,7 +87,7 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
         stubsUnitByDefault = configuration.stubsUnitByDefault,
     )
 
-    return listOf(mock, spy1, spy2)
+    return listOf(mock, spy1, spy2, any)
 }
 
 internal fun ProcessableType.buildOptInAnnotationSpec(): AnnotationSpec? {

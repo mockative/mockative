@@ -100,7 +100,7 @@ class SpyTests {
     fun givenMatchers_whenUsingThem_thenExpectCorrectBehaviour() {
         // Given
         val initialSize = spyList.size
-        every { spyList.add(any()) }
+        every { spyList.add(any("TODO")) }
             .returnsMany(false)
 
         // When

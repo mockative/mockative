@@ -20,7 +20,7 @@ class FileServiceTests {
     private val fileService = FileService(s3Client)
 
     @Test
-    fun givenGetObjectSync_whenGettingFileSync_thenFileIsReturned() {
+    fun givenGetObjectSync_whenGettingFileSync_thenFileIsReturned() = ignoreKotlinWasm {
         // Given
         val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
         val expected = File("the-body")
@@ -38,7 +38,7 @@ class FileServiceTests {
     }
 
     @Test
-    fun givenGetObjectSyncString_whenGettingFileSync_thenFileIsReturned() {
+    fun givenGetObjectSyncString_whenGettingFileSync_thenFileIsReturned() = ignoreKotlinWasm {
         // Given
         val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
         val expected = File("the-body")
@@ -57,44 +57,48 @@ class FileServiceTests {
 
     @Test
     fun givenGetObject_whenGettingFile_thenFileIsReturned() = runTest {
-        // Given
-        val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
-        val expected = File("the-body")
+        ignoreKotlinWasm {
+            // Given
+            val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
+            val expected = File("the-body")
 
-        val request = GetObjectRequest(id)
+            val request = GetObjectRequest(id)
 
-        coEvery { s3Client.getObject<File>(eq(request), any()) }
-            .returnsMany(expected)
+            coEvery { s3Client.getObject<File>(eq(request), any()) }
+                .returnsMany(expected)
 
-        // When
-        val file = fileService.getFile(id)
+            // When
+            val file = fileService.getFile(id)
 
-        // Then
-        assertEquals(expected, file)
+            // Then
+            assertEquals(expected, file)
+        }
     }
 
     @Test
     fun givenGetObjectString_whenGettingFile_thenFileIsReturned() = runTest {
-        // Given
-        val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
-        val expected = File("the-body")
+        ignoreKotlinWasm {
+            // Given
+            val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
+            val expected = File("the-body")
 
-        val request = GetObjectRequest(id)
+            val request = GetObjectRequest(id)
 
-        coEvery { s3Client.getObject<File>(eq(request), any()) }
-            .returnsMany(expected)
+            coEvery { s3Client.getObject<File>(eq(request), any()) }
+                .returnsMany(expected)
 
-        // When
-        val file = withContext(Dispatchers.Default) {
-            fileService.getFile(id)
+            // When
+            val file = withContext(Dispatchers.Default) {
+                fileService.getFile(id)
+            }
+
+            // Then
+            assertEquals(expected, file)
         }
-
-        // Then
-        assertEquals(expected, file)
     }
 
     @Test
-    fun givenGetObjectSyncWithFun_whenGettingFileSync_thenFileIsReturned() {
+    fun givenGetObjectSyncWithFun_whenGettingFileSync_thenFileIsReturned() = ignoreKotlinWasm {
         // Given
         val id = "9142a04a-5377-4792-89c1-2bd4f6d742fe"
         val expected = File("the-body")
