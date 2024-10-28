@@ -1,6 +1,5 @@
 package io.github.deprecation
 
-import io.mockative.Mock
 import io.mockative.classOf
 import io.mockative.isMock
 import io.mockative.mock
@@ -9,17 +8,9 @@ import kotlin.test.assertTrue
 
 @Suppress("DEPRECATION", "DEPRECATION_ERROR")
 class DeprecatedTypesTest {
-
-    @Mock
     private val deprecatedClassWarning = mock(classOf<DeprecatedClassWarning>())
-
-    @Mock
     private val deprecatedClassError = mock(classOf<DeprecatedClassError>())
-
-    @Mock
     private val deprecatedInterfaceWarning = mock(classOf<DeprecatedInterfaceWarning>())
-
-    @Mock
     private val deprecatedInterfaceError = mock(classOf<DeprecatedInterfaceError>())
 
     @Test
