@@ -34,6 +34,14 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
                 } else {
                     println("Skipping '$src' as it does not exist")
                 }
+
+                if (sourceSet.name == "jvmMain") {
+                    sourceSet.dependencies {
+                        implementation(kotlin("reflect"))
+                        implementation("org.objenesis:objenesis:3.3")
+                        implementation("org.javassist:javassist:3.29.2-GA")
+                    }
+                }
             }
         } else {
             println("No test tasks detected - runtime will not be copied.")

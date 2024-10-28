@@ -18,7 +18,7 @@ kotlin {
                 implementation(kotlin("reflect"))
 
                 // KSP
-                implementation("com.google.devtools.ksp:symbol-processing-api:2.0.255-SNAPSHOT")
+                implementation("com.google.devtools.ksp:symbol-processing-api:2.0.21-1.0.26")
 
                 // KotlinPoet
                 implementation("com.squareup:kotlinpoet:1.18.1")

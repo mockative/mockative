@@ -15,7 +15,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
     implementation("org.jetbrains.kotlin:kotlin-allopen:2.0.21")
 
-    implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.0.255-SNAPSHOT")
+    implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.0.21-1.0.26")
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 gradlePlugin {
