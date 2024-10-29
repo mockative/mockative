@@ -2,13 +2,9 @@ package io.mockative
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
-import java.io.File
 
 abstract class MockativeProcessRuntimeTask : DefaultTask() {
-    private val runtimeSrcDir = File(javaClass.getResource("/src").toURI())
-
     init {
         outputs.upToDateWhen { false }
     }
@@ -23,18 +19,17 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
         val testTasks = project.testTasks
         if (testTasks.isNotEmpty()) {
             println("Running test tasks '${testTasks.joinToString { it.name }}' - copying runtime from resources")
+
+            val resources = ResourceManager({}.javaClass)
+
+            val dst = project.mockativeDir.toPath()
+            println("Copying resources to '$dst'")
+            resources.copyRecursively("/src", dst)
+
             for (sourceSet in project.kotlinExtension.sourceSets) {
-                val src = File(runtimeSrcDir, sourceSet.name)
-                if (src.exists()) {
-                    val dst = File(project.mockativeDir, sourceSet.name)
-                    println("Copying '$src' to '$dst'")
-
-                    src.copyRecursively(dst, overwrite = true)
-                } else {
-                    println("Skipping '$src' as it does not exist")
-                }
-
                 if (sourceSet.name == "jvmMain" || sourceSet.name == "androidMain") {
+                    println("Adding JVM runtime dependencies to source set '${sourceSet.name}'")
+
                     sourceSet.dependencies {
                         implementation(kotlin("reflect"))
                         implementation("org.objenesis:objenesis:3.3")
@@ -47,7 +42,7 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
         }
     }
 
-    private fun println(message: String) {
-        kotlin.io.println("[MockativeProcessRuntimeTask] $message")
+    private fun println(message: Any) {
+        // kotlin.io.println("[MockativeProcessRuntimeTask] $message")
     }
 }
