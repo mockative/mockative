@@ -13,7 +13,6 @@ kotlin {
         named("jvmMain") {
             dependencies {
                 implementation(project(":mockative"))
-                implementation(project(":mockative-test"))
 
                 implementation(kotlin("reflect"))
 
