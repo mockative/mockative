@@ -19,10 +19,7 @@ Notable features include:
 
 ## Installation for Multiplatform projects
 
-Mockative uses [KSP] to generate mock classes, and as such, it requires adding the
-KSP plugin in addition to adding the runtime library and symbol processor dependencies.
-
-**build.gradle.kts**
+Add the `io.mockative` plugin to your **build.gradle.kts** file:
 
 ```kotlin
 plugins {
