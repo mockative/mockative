@@ -4,7 +4,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 import io.mockative.INVOCATION_GETTER
 import io.mockative.INVOCATION_SETTER
-import io.mockative.ANY_MOCK
+import io.mockative.MOCK_STATE
 import io.mockative.ProcessableProperty
 
 internal fun ProcessableProperty.buildPropertySpec(): PropertySpec {
@@ -30,7 +30,7 @@ private fun ProcessableProperty.buildSetter(): FunSpec {
         .build()
 
     // Mockable.invoke<Int>
-    val invocationCall = CodeBlock.of("%T.invoke<Unit>", ANY_MOCK)
+    val invocationCall = CodeBlock.of("%T.invoke<Unit>", MOCK_STATE)
 
     // Invocation.Setter("prop", value)
     val invocationConstruction = CodeBlock.of("%T(%S, %N)", INVOCATION_SETTER, name, value)
@@ -60,7 +60,7 @@ private fun ProcessableProperty.buildGetter(): FunSpec {
     val returnsUnit = if (type == UNIT) "true" else "false"
 
     // Mockable.invoke<Int>
-    val invocationCall = CodeBlock.of("%T.invoke<%T>", ANY_MOCK, type)
+    val invocationCall = CodeBlock.of("%T.invoke<%T>", MOCK_STATE, type)
 
     // Invocation.Getter("prop")
     val invocationConstruction = CodeBlock.of("%T(%S)", INVOCATION_GETTER, name)

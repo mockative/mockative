@@ -13,11 +13,11 @@ val SUPPRESS_ANNOTATION = Suppress::class.asClassName()
 val OPT_IN = ClassName("kotlin", "OptIn")
 val DEPRECATED_ANNOTATION = Deprecated::class.asClassName()
 
-val ANY_MOCK = MockState::class.asClassName()
+val MOCK_STATE = ClassName("io.mockative", "MockState")
 
-val INVOCATION_GETTER = Invocation.Getter::class.asClassName()
-val INVOCATION_SETTER = Invocation.Setter::class.asClassName()
-val INVOCATION_FUNCTION = Invocation.Function::class.asClassName()
+val INVOCATION_GETTER = ClassName("io.mockative", "Invocation", "Getter")
+val INVOCATION_SETTER = ClassName("io.mockative", "Invocation", "Setter")
+val INVOCATION_FUNCTION = ClassName("io.mockative", "Invocation", "Function")
 
 val LIST_OF = MemberName("kotlin.collections", "listOf")
 
