@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
 
-    id("com.gradle.plugin-publish") version "1.2.1"
+//    id("com.gradle.plugin-publish") version "1.2.1"
 
     id("convention.publication")
 }
@@ -41,17 +41,25 @@ tasks.whenObjectAdded {
     }
 }
 
-gradlePlugin {
-    website = "https://github.com/mockative/mockative"
-    vcsUrl = "https://github.com/mockative/mockative.git"
+//tasks.whenObjectAdded {
+//    if (this is AbstractPublishToMaven) {
+//        println("${name}: <${javaClass.name}>")
+//        dependsOn("signPluginMavenPublication")
+//        dependsOn("signMockativePluginMarkerMavenPublication")
+//    }
+//}
 
-    plugins {
-        create("mockative") {
-            id = "io.mockative"
-            displayName = "Mockative Gradle Plugin"
-            description = "Gradle Plugin for Mockative"
-            tags = listOf("testing", "mocking", "mock", "kmp", "native")
-            implementationClass = "io.mockative.MockativePlugin"
-        }
-    }
-}
+//gradlePlugin {
+//    website = "https://github.com/mockative/mockative"
+//    vcsUrl = "https://github.com/mockative/mockative.git"
+//
+//    plugins {
+//        create("mockative") {
+//            id = "io.mockative"
+//            displayName = "Mockative Gradle Plugin"
+//            description = "Gradle Plugin for Mockative"
+//            tags = listOf("testing", "mocking", "mock", "kmp", "native")
+//            implementationClass = "io.mockative.MockativePlugin"
+//        }
+//    }
+//}
