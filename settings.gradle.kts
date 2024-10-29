@@ -14,7 +14,7 @@ pluginManagement {
 
         id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 
-//        id("io.mockative") version "1.0.0-SNAPSHOT" apply false
+//        id("io.mockative") version "3.0.0-SNAPSHOT" apply false
     }
 }
 
