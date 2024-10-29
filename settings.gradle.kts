@@ -20,8 +20,11 @@ pluginManagement {
 
 rootProject.name = "mockative"
 
-if (startParameter.projectProperties.containsKey("check_publication")) {
-    include(":tools:check-publication")
+val mockativeProjects = startParameter.projectProperties["mockative.projects"]
+if (mockativeProjects != null) {
+    mockativeProjects.split(",").forEach { project ->
+        include(project)
+    }
 } else {
     include(":shared")
     include(":mockative")
