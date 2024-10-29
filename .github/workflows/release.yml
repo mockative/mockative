@@ -46,11 +46,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-
       - name: Initialize Gradle
         run: ./gradlew
 
@@ -94,11 +89,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
 
       - name: Check
         run: |
