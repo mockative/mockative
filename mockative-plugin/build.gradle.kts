@@ -1,10 +1,13 @@
 plugins {
     kotlin("jvm")
+
     id("com.gradle.plugin-publish") version "1.2.1"
+
+    id("convention.publication")
 }
 
-group = "io.mockative"
-version = "3.0.0-SNAPSHOT"
+group = findProperty("project.group") as String
+version = findProperty("project.version") as String
 
 repositories {
     mavenLocal()
