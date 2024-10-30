@@ -43,6 +43,22 @@ class MyService {
 
 The Kotlin `all-open` plugin will automatically be applied to any `class` annotated with `@Mockable`.
 
+#### Mocking External Types
+
+Sometimes we would like to mock types that are external to our module in our tests. To do so, pass a list of types 
+you'd like to mock in **any** `@Mockable` annotation in your main module. If you add the list of types to the 
+`@Mockable` annotation of a type you'd also like to mock by itself, you must specify the type itself in the list of 
+types to mock. By not specifying any types in the annotation, a mock for the annotated type itself is generated.
+
+```kotlin
+import io.mockative.Mockable
+
+@Mockable(MyService::class, Clock::class)
+class MyService {
+    // ...
+}
+```
+
 ## Testing with Mockative
 
 Obtaining an instance of a mock is as ease as calling the `<T> mock(KClass<T>)` function:

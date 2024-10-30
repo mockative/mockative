@@ -14,11 +14,11 @@ internal fun ProcessableProperty.buildPropertySpec(): PropertySpec {
         builder.receiver(receiver)
     }
 
-    if (deprecatedAnnotation != null) {
-        builder.addAnnotation(deprecatedAnnotation.toAnnotationSpec())
-    }
+    val annotations = AnnotationAggregator()
+    annotations.addAll(declaration)
 
     return builder
+        .addAnnotations(annotations.build())
         .mutable(declaration.isMutable)
         .getter(buildGetter())
         .setter(if (declaration.isMutable) { buildSetter() } else null)

@@ -20,11 +20,11 @@ internal fun ProcessableFunction.buildFunSpec(): FunSpec {
         builder.receiver(receiver)
     }
 
-    if (deprecatedAnnotation != null) {
-        builder.addAnnotation(deprecatedAnnotation.toAnnotationSpec())
-    }
+    val annotations = AnnotationAggregator()
+    annotations.addAll(declaration)
 
     builder
+        .addAnnotations(annotations.build())
         .addModifiers(modifiers)
         .returns(returnType.applySafeAnnotations())
         .addParameters(parameterSpecs)
