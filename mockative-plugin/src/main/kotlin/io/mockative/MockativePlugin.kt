@@ -9,6 +9,8 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
 abstract class MockativePlugin : Plugin<Project> {
+    private val version = "3.0.0-SNAPSHOT"
+
     override fun apply(project: Project) {
         project.pluginManager.apply("com.google.devtools.ksp")
         project.pluginManager.apply("org.jetbrains.kotlin.plugin.allopen")
@@ -45,8 +47,14 @@ abstract class MockativePlugin : Plugin<Project> {
         // Add `mockative-processor` as dependency of KSP configurations
         project.configurations.whenObjectAdded { configuration ->
             if (configuration.name != "ksp" && configuration.name.startsWith("ksp")) {
-                val dependency = project.dependencies.project(mapOf("path" to ":mockative-processor"))
-                project.dependencies.add(configuration.name, dependency)
+                project.dependencies.add(configuration.name, "io.mockative:mockative-processor:$version")
+            }
+        }
+
+        // Add `mockative` as a dependency of `commonMain`
+        project.kotlinExtension.sourceSets.getByName("commonMain") { sourceSet ->
+            sourceSet.dependencies {
+                implementation("io.mockative:mockative:$version")
             }
         }
 
