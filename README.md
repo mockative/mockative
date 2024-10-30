@@ -27,6 +27,23 @@ plugins {
 }
 ```
 
+Then add the following to your **gradle.properties** file:
+
+```properties
+#KSP
+ksp.useKSP2=true
+```
+
+If you're having the following error:
+
+> KSP2: KtInvalidLifetimeOwnerAccessException: Access to invalid KtAlwaysAccessibleLifetimeToken: PSI has changed since creation
+
+Please disable incremental processing for KSP by adding the following to your **gradle.properties** file:
+
+```properties
+ksp.incremental=false
+```
+
 ### Making types mockable
 
 To mock an interface or class with Mockative, annotate the type with the `@Mockable` annotation. This annotation
