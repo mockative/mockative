@@ -92,15 +92,3 @@ android {
         androidTestUtil("androidx.test:orchestrator:1.4.2")
     }
 }
-
-mockative {
-    optIn("kotlin.ExperimentalUnsignedTypes")
-
-    forPackage("io.github") {
-        optIn("kotlin.ExperimentalStdlibApi")
-
-        type("OptInType") {
-            optIn("kotlinx.cinterop.ExperimentalForeignApi")
-        }
-    }
-}

@@ -7,6 +7,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ksp.writeTo
+import io.mockative.kotlinpoet.AnnotationAggregator
 import io.mockative.kotlinpoet.buildMockFunSpecs
 import io.mockative.kotlinpoet.buildMockTypeSpec
 import io.mockative.kotlinpoet.fullSimpleName
@@ -22,8 +23,8 @@ class MockativeSymbolProcessor(
             val configuration = MockativeConfiguration.fromOptions(options)
             log.info("configuration: $configuration")
 
-            if (configuration.tasks.isEmpty()) {
-                log.info("No test tasks detected. No mock code is generated.")
+            if (configuration.disabled) {
+                log.info("Code generation is disabled due to plugin being disabled")
                 return emptyList()
             }
 
@@ -33,49 +34,44 @@ class MockativeSymbolProcessor(
             log.info("Found '${processableTypes.size}' processable types")
 
             // Generate Mock Classes
-            processableTypes
-                .forEach { type ->
-                    val sourceClassName = type.sourceClassName
-                    val mockClassName = type.mockClassName
+            processableTypes.forEach { type ->
+                val sourceClassName = type.sourceClassName
+                val mockClassName = type.mockClassName
 
-                    val packageName = mockClassName.packageName
-                    val fileName = mockClassName.fullSimpleName
+                val packageName = mockClassName.packageName
+                val fileName = mockClassName.fullSimpleName
 
-                    log.info("Generating mock class '$mockClassName' for '$sourceClassName'")
+                log.info("Generating mock class '$mockClassName' for '$sourceClassName'")
 
-                    val file = FileSpec.builder(packageName, fileName)
-                        .addType(type.buildMockTypeSpec())
-                        .build()
+                val file = FileSpec.builder(packageName, fileName)
+                    .addType(type.buildMockTypeSpec())
+                    .build()
 
-                    log.info("  Writing mock class '$mockClassName' to '${file.relativePath}'")
+                log.info("  Writing mock class '$mockClassName' to '${file.relativePath}'")
 
-                    file.writeTo(codeGenerator, aggregating = false)
-                }
+                file.writeTo(codeGenerator, aggregating = false)
+            }
 
             // Generate Mock Functions
-            processableTypes
-                .forEach { type ->
-                    val mockClassName = type.mockClassName
+            processableTypes.forEach { type ->
+                val mockClassName = type.mockClassName
 
-                    val reflectionName = type.sourceClassName.reflectionName()
-                    val fileName = "${reflectionName}.Mockative"
+                val reflectionName = type.sourceClassName.reflectionName()
+                val fileName = "${reflectionName}.Mockative"
 
-                    log.info("Generating function for '$mockClassName'")
+                log.info("Generating function for '$mockClassName'")
 
-                    val suppressDeprecation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-                        .addMember("%S", "DEPRECATION")
-                        .addMember("%S", "DEPRECATION_ERROR")
-                        .build()
+                val annotations = AnnotationAggregator()
 
-                    val file = FileSpec.builder("io.mockative", fileName)
-                        .addFunctions(type.buildMockFunSpecs())
-                        .addAnnotation(suppressDeprecation)
-                        .build()
+                val file = FileSpec.builder("io.mockative", fileName)
+                    .addFunctions(type.buildMockFunSpecs())
+                    .addAnnotations(annotations.build())
+                    .build()
 
-                    log.info("  Writing function for '$mockClassName' to '${file.relativePath}'")
+                log.info("  Writing function for '$mockClassName' to '${file.relativePath}'")
 
-                    file.writeTo(codeGenerator, aggregating = false)
-                }
+                file.writeTo(codeGenerator, aggregating = false)
+            }
 
             return emptyList()
         } catch (e: Throwable) {

@@ -3,6 +3,7 @@ package io.mockative
 import com.google.devtools.ksp.gradle.KspExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.testing.AbstractTestTask
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 /**
@@ -17,19 +18,9 @@ abstract class MockativeConfigurationTask : DefaultTask() {
 
     @TaskAction
     fun run() {
-        val testTasks = project.testTasks
-        if (testTasks.isNotEmpty()) {
-            val testTaskString = testTasks.joinToString(", ") { it.name }
-            println("Enabling due to test tasks detected: $testTaskString")
-
+        project.runMockative {
             val ksp = project.extensions.getByType(KspExtension::class.java)
-            ksp.arg("io.mockative:mockative:tasks", testTasks.joinToString(",") { it.name })
-        } else {
-            println("Disabling due to no test tasks detected")
+            ksp.arg("io.mockative:mockative:disabled", "false")
         }
-    }
-
-    private fun println(message: String) {
-         // kotlin.io.println("[MockativeConfigurationTask] $message")
     }
 }

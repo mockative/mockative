@@ -1,9 +1,7 @@
 package io.mockative.kotlinpoet
 
 import com.google.devtools.ksp.symbol.ClassKind
-import com.squareup.kotlinpoet.ANNOTATION
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.MemberName
@@ -13,17 +11,11 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
-import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockative.CONFIGURE
-import io.mockative.HIDDEN_FROM_OBJC_ANNOTATION
 import io.mockative.KCLASS
-import io.mockative.OPT_IN
-import io.mockative.ProcessableFunction
 import io.mockative.ProcessableType
 import io.mockative.SUPPRESS_ANNOTATION
-import io.mockative.getAnnotationsByClassName
 import io.mockative.ksp.addOriginatingKSFiles
-import io.mockative.options
 
 internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
     val suppressUnusedParameter = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
@@ -91,21 +83,6 @@ internal fun ProcessableType.buildMockFunSpecs(): List<FunSpec> {
     )
 
     return listOf(mock, spy1, spy2, any)
-}
-
-internal fun ProcessableType.buildOptInAnnotationSpec(): AnnotationSpec? {
-    val annotations = configuration.optIn.annotations(sourceClassName)
-    if (annotations.isEmpty()) {
-        return null
-    }
-
-    return AnnotationSpec.builder(OPT_IN)
-        .let { annotationSpec ->
-            annotations.fold(annotationSpec) { spec, className ->
-                spec.addMember("%T::class", className)
-            }
-        }
-        .build()
 }
 
 internal fun ProcessableType.buildMockFunSpec(
@@ -183,32 +160,14 @@ internal fun ProcessableType.buildMockTypeSpec(): TypeSpec {
         typeSpec.addSuperinterface(sourceClassName.parameterizedByAny(typeVariables))
     }
 
-    val annotations = buildList {
-        val suppressDeprecation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-            .addMember("%S", "DEPRECATION")
-            .addMember("%S", "DEPRECATION_ERROR")
-            .build()
-
-        add(suppressDeprecation)
-
-        if (declaration.getAnnotationsByClassName(HIDDEN_FROM_OBJC_ANNOTATION).any()) {
-            val hiddenFromObjCAnnotation = AnnotationSpec.builder(HIDDEN_FROM_OBJC_ANNOTATION)
-                .build()
-
-            add(hiddenFromObjCAnnotation)
-        }
-
-        val optInSpec = buildOptInAnnotationSpec()
-        if (optInSpec != null) {
-            add(optInSpec)
-        }
-    }
+    val annotations = AnnotationAggregator()
+    annotations.addAll(declaration)
 
     return typeSpec
         .primaryConstructor(constructorSpec)
         .addProperties(properties.plus(instanceInitializer))
         .addFunctions(functions)
-        .addAnnotations(annotations)
+        .addAnnotations(annotations.build())
         .addKdoc(declaration.docString?.trim() ?: "")
         .addOriginatingKSFiles(usages)
         .build()

@@ -61,14 +61,6 @@ abstract class MockativePlugin : Plugin<Project> {
         // Pass extension configuration to symbol processor through KSP `arg`s
         project.afterEvaluate {
             project.extensions.configure(KspExtension::class.java) { ksp ->
-                mockative.optIn.get().forEach { (pckg, annotations) ->
-                    if (pckg == "*") {
-                        ksp.arg("io.mockative:mockative:opt-in", annotations.joinToString(","))
-                    } else {
-                        ksp.arg("io.mockative:mockative:opt-in:$pckg", annotations.joinToString(","))
-                    }
-                }
-
                 val excludeMembers = mockative.excludeMembers.get().joinToString(",")
                 ksp.arg("io.mockative:mockative:exclude-members", excludeMembers)
 
@@ -77,6 +69,11 @@ abstract class MockativePlugin : Plugin<Project> {
 
                 val stubsUnitByDefault = mockative.stubsUnitByDefault.get()
                 ksp.arg("io.mockative:mockative:stubsUnitByDefault", "$stubsUnitByDefault")
+            }
+
+            // Add JVM dependencies to Android targets during test
+            if (project.isMockativeEnabled) {
+                project.addJVMDependencies("androidMain")
             }
         }
     }

@@ -38,14 +38,17 @@ internal fun makeValueOf(clazz: Class<*>): Any? {
 
         Modifier.isAbstract(clazz.modifiers) -> {
             val constructor = clazz.constructors[0]
-            val arguments = constructor.parameterTypes
+
+            val parameterTypes = constructor.parameterTypes
+
+            val arguments = parameterTypes
                 .map { valueOf<Any?>(it.kotlin) }
                 .toTypedArray()
 
             val proxyFactory = ProxyFactory()
             proxyFactory.superclass = clazz
             proxyFactory.isUseCache = true
-            proxyFactory.create(constructor.parameterTypes, arguments)
+            proxyFactory.create(parameterTypes, arguments)
         }
 
         clazz.isAnnotationPresent(JvmInline::class.java) -> {
