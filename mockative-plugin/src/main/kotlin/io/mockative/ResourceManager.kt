@@ -8,7 +8,7 @@ import java.util.jar.JarEntry
 
 class ResourceManager(private val clazz: Class<*>) {
     private fun println(message: Any) {
-        // kotlin.io.println("[ResourceManager] $message")
+         kotlin.io.println("[ResourceManager] $message")
     }
 
     fun copyRecursively(path: String, dst: Path) {

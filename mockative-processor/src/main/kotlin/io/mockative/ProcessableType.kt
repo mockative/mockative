@@ -1,22 +1,32 @@
 package io.mockative
 
+import com.google.devtools.ksp.getAnnotationsByType
+import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.getConstructors
+import com.google.devtools.ksp.getKotlinClassByName
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isInternal
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeVariableName
+import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.TypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toTypeVariableName
+import io.mockative.kotlinpoet.fullSimpleName
+import kotlin.reflect.KClass
 
 data class ProcessableType(
     val configuration: MockativeConfiguration,
@@ -149,14 +159,18 @@ data class ProcessableType(
         }
 
         fun fromResolver(configuration: MockativeConfiguration, resolver: Resolver): List<ProcessableType> {
-            // TODO Recursively find types to mock
-
             val processableTypes = resolver.getSymbolsWithAnnotation(MOCKABLE_ANNOTATION.canonicalName)
                 .filterIsInstance<KSClassDeclaration>()
-                .mapNotNull { classDec -> classDec.containingFile?.let { classDec to it } }
-                .filter { (classDec, _) -> classDec.classKind == ClassKind.INTERFACE || classDec.classKind == ClassKind.CLASS }
+                .flatMap { classDec ->
+                    classDec.getAnnotationsByClassName(MOCKABLE_ANNOTATION)
+                        .flatMap { mockable ->
+                            listOf(classDec to classDec.containingFile) + mockable.getValue("types", emptyList<KSType>())
+                                .mapNotNull { it.declaration as? KSClassDeclaration }
+                                .map { declaredClassDec -> declaredClassDec to classDec.containingFile }
+                        }
+                }
                 .groupBy({ (classDec, _) -> classDec }, { (_, usage) -> usage })
-                .map { (classDec, usages) -> fromDeclaration(configuration, classDec, usages) }
+                .map { (classDec, usages) -> fromDeclaration(configuration, classDec, usages.filterNotNull()) }
                 .flatten()
                 .distinctBy { it.mockClassName }
 
@@ -167,4 +181,14 @@ data class ProcessableType(
             return this + flatMap { type -> type.children.flatten() }
         }
     }
+}
+
+fun KSAnnotated.getAnnotationsByClassName(name: ClassName): Sequence<KSAnnotation> {
+    return annotations.filter { it.annotationType.toTypeName() == name }
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <T> KSAnnotation.getValue(name: String, defaultValue: T): T {
+    val argument = arguments.firstOrNull { it.name!!.asString() == name } ?: return defaultValue
+    return argument.value as T
 }

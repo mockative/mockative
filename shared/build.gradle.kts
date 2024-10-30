@@ -17,10 +17,6 @@ kotlin {
         nodejs()
     }
 
-    wasmWasi {
-        nodejs()
-    }
-
     jvm()
 
     androidTarget()
@@ -42,7 +38,7 @@ kotlin {
         commonMain.configure {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-                implementation(project(":mockative"))
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             }
         }
 

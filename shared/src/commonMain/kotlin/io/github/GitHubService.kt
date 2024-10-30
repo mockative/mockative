@@ -2,11 +2,13 @@ package io.github
 
 import io.mockative.Mockable
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 
 internal class GitHubService(
     private val api: GitHubAPI,
     private val configuration: GitHubConfiguration,
-    private val dispatchers: ApplicationDispatchers
+    private val dispatchers: ApplicationDispatchers,
+    private val clock: Clock,
 ) {
     suspend fun create(repository: Repository) {
         return withContext(dispatchers.default) {

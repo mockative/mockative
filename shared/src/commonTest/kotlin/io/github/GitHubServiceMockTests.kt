@@ -14,6 +14,7 @@ import io.mockative.once
 import io.mockative.verify
 import io.mockative.verifyNoUnmetExpectations
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,8 +27,9 @@ internal class GitHubServiceMockTests {
     val nested: GitHubService.NestedAPI = mock(classOf<GitHubService.NestedAPI>())
     val configuration: GitHubConfiguration = mock(classOf<GitHubConfiguration>())
     val function: Fun0<Unit> = mock(classOf<Fun0<Unit>>())
+    val clock: Clock = mock(classOf<Clock>())
 
-    private val service = GitHubService(github, configuration, ApplicationDispatchers.Unconfined)
+    private val service = GitHubService(github, configuration, ApplicationDispatchers.Unconfined, clock)
 
     @AfterTest
     fun validateMocks() {
