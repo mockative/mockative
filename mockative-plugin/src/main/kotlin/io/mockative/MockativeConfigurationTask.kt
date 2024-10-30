@@ -30,6 +30,6 @@ abstract class MockativeConfigurationTask : DefaultTask() {
     }
 
     private fun println(message: String) {
-         kotlin.io.println("[MockativeConfigurationTask] $message")
+         // kotlin.io.println("[MockativeConfigurationTask] $message")
     }
 }

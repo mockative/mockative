@@ -15,6 +15,7 @@ kotlin {
                 implementation(project(":mockative"))
 
                 implementation(kotlin("reflect"))
+                implementation(kotlin("stdlib"))
 
                 // KSP
                 implementation("com.google.devtools.ksp:symbol-processing-api:2.0.21-1.0.26")

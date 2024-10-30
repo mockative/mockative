@@ -164,9 +164,14 @@ data class ProcessableType(
                 .flatMap { classDec ->
                     classDec.getAnnotationsByClassName(MOCKABLE_ANNOTATION)
                         .flatMap { mockable ->
-                            listOf(classDec to classDec.containingFile) + mockable.getValue("types", emptyList<KSType>())
-                                .mapNotNull { it.declaration as? KSClassDeclaration }
-                                .map { declaredClassDec -> declaredClassDec to classDec.containingFile }
+                            val types = mockable.getValue("types", emptyList<KSType>())
+                            if (types.isEmpty()) {
+                                listOf(classDec to classDec.containingFile)
+                            } else {
+                                types
+                                    .mapNotNull { it.declaration as? KSClassDeclaration }
+                                    .map { declaredClassDec -> declaredClassDec to classDec.containingFile }
+                            }
                         }
                 }
                 .groupBy({ (classDec, _) -> classDec }, { (_, usage) -> usage })
