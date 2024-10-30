@@ -1,8 +1,9 @@
 package io.github
 
 import io.mockative.Mockable
+import kotlinx.datetime.Clock
 
-@Mockable
+@Mockable(Clock::class)
 interface GitHubConfiguration {
     var token: String
 }
