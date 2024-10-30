@@ -25,7 +25,9 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Initialize Gradle
-        run: ./gradlew
+        run: |
+          ./gradlew publishToMavenLocal \
+            -Pmockative.projects=':mockative-plugin'
 
       - name: Run tests with Gradle
         run: ./gradlew allTests
