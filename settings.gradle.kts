@@ -13,8 +13,6 @@ pluginManagement {
         id("com.google.devtools.ksp") version "2.0.21-1.0.26" apply false
 
         id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-
-//        id("io.mockative") version "3.0.0-SNAPSHOT" apply false
     }
 }
 
