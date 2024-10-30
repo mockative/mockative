@@ -27,7 +27,9 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
             project.addJVMDependencies("jvmMain")
 
             if (!project.isMockativeEnabled) {
-                project.addJVMDependencies("androidMain")
+                // Replace android implementation with stub
+                project.info("Replacing android implementation with stub")
+                resources.copyRecursively("/src/androidStubMain", dst.resolve("androidMain"))
             }
         }
     }

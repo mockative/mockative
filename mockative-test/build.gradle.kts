@@ -1,6 +1,5 @@
 plugins {
     id("convention.multiplatform")
-    id("convention.publication")
 }
 
 group = findProperty("project.group") as String

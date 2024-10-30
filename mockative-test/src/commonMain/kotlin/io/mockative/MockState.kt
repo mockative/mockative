@@ -119,7 +119,7 @@ class MockState(val instance: Any) {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "TooGenericExceptionCaught")
     internal fun <R> invoke(invocation: Invocation, returnsUnit: Boolean, spy: (() -> R)?): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)
@@ -172,7 +172,7 @@ class MockState(val instance: Any) {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "TooGenericExceptionCaught")
     internal suspend fun <R> suspend(invocation: Invocation, returnsUnit: Boolean, spy: (suspend () -> R)?): R {
         if (isRecording) {
             throw StubbingInProgressException(this, invocation)

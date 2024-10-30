@@ -14,22 +14,24 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
         for (entry in entries) {
             val entryPath = entry.name.removePrefix(resourcePath).removePrefix("/")
             val target = dst.resolve(entryPath)
-            Files.createDirectories(target)
+            Files.createDirectories(target.parent)
 
             clazz.getResourceAsStream("/${entry.name}").use {
-                project.debug("Copying ${entry.name} to $target ($entryPath)")
+                project.info("Copying ${entry.name} to $target ($entryPath)")
                 Files.copy(it, target, StandardCopyOption.REPLACE_EXISTING)
             }
         }
     }
 
     private fun jarEntries(path: String): Sequence<JarEntry> {
-        val url = clazz.getResource(path)
+        val resourcePath = path.removePrefix("/")
+        val rp = "/${resourcePath.substringBefore("/")}"
+        val url = clazz.getResource(rp)
         val jarConnection = url.openConnection() as JarURLConnection
         val jarFile = jarConnection.jarFile
         val jarEntries = jarFile.entries()
-        val resourcePath = path.removePrefix("/")
         return jarEntries.asSequence()
+            .onEach { project.info(it.name) }
             .filter { !it.isDirectory && it.name.startsWith(resourcePath) }
     }
 }
