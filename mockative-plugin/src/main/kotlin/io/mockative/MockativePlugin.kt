@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
 abstract class MockativePlugin : Plugin<Project> {
-    private val version = "3.0.0"
+    private val version = "3.0.0-SNAPSHOT"
 
     override fun apply(project: Project) {
         project.pluginManager.apply("com.google.devtools.ksp")
@@ -71,9 +71,14 @@ abstract class MockativePlugin : Plugin<Project> {
                 ksp.arg("io.mockative:mockative:stubsUnitByDefault", "$stubsUnitByDefault")
             }
 
-            // Add JVM dependencies to Android targets during test
+            // Modifying dependencies for Android targets at task action time is prohibited, so we use this deduction
+            // during configuration time to do a "best effort" of adding JVM dependencies for Android targets as needed.
             if (project.isMockativeEnabled) {
-                project.addJVMDependencies("androidMain")
+                project.addJVMDependencies("androidMain", "the Gradle property 'io.mockative.enabled=true'")
+            } else if (project.isRunningConnectedAndroidTests) {
+                project.addJVMDependencies("androidMain", "connected Android test tasks detected")
+            } else if (project.isRunningAndroidUnitTests) {
+                project.addJVMDependencies("androidMain", "Android unit test tasks detected")
             }
         }
     }

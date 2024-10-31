@@ -17,7 +17,7 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
             Files.createDirectories(target.parent)
 
             clazz.getResourceAsStream("/${entry.name}").use {
-                project.info("Copying ${entry.name} to $target ($entryPath)")
+                project.debug("Copying ${entry.name} to $target ($entryPath)")
                 Files.copy(it, target, StandardCopyOption.REPLACE_EXISTING)
             }
         }
@@ -31,7 +31,6 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
         val jarFile = jarConnection.jarFile
         val jarEntries = jarFile.entries()
         return jarEntries.asSequence()
-            .onEach { project.info(it.name) }
             .filter { !it.isDirectory && it.name.startsWith(resourcePath) }
     }
 }
