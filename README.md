@@ -82,7 +82,7 @@ Obtaining an instance of a mock is as ease as calling the `<T> mock(KClass<T>)` 
 
 ```kotlin
 class GitHubServiceTests {
-    val api = mock(classOf<GitHubAPI>())
+    val api = mock(of<GitHubAPI>())
 }
 ```
 
@@ -152,7 +152,7 @@ pass as a mock to other functions in order to stub and verify invocations on it:
 ```kotlin
 // Declare the mock function as a property in your test class
 @Mock
-val block = mock(classOf<Fun1<GetObjectResponse, File>>())
+val block = mock(of<Fun1<GetObjectResponse, File>>())
 
 // Stub the mock function
 every { block.invoke(response) }
@@ -216,14 +216,14 @@ Alternatively, you can opt out (or opt-in if you've opted out on the project lev
 
 ```kotlin
 @Mock
-val api = configure(mock(classOf<GitHubAPI>())) { stubsUnitByDefault = false }
+val api = configure(mock(of<GitHubAPI>())) { stubsUnitByDefault = false }
 ```
 
 Or as needed:
 
 ```kotlin
 @Mock
-val api = mock(classOf<GitHubAPI>())
+val api = mock(of<GitHubAPI>())
 
 @Test
 fun test() {
@@ -236,14 +236,14 @@ invocations.
 
 ## Generic Types
 
-When mocking a generic type use the `<T> classOf(): KClass<T>` function to retain the type
-arguments when passed to the `<T> mock(KClass<T>)` function. You can use the `classOf` function
+When mocking a generic type use the `<T> of(): KClass<T>` function to retain the type
+arguments when passed to the `<T> mock(KClass<T>)` function. You can use the `of` function
 regardless of whether you're mocking a generic or non-generic type.
 
 ```kotlin
 class GenericTypeTest {
     @Mock
-    val list = mock(classOf<List<String>>())
+    val list = mock(of<List<String>>())
 }
 ```
 

@@ -86,23 +86,25 @@ publishing {
     }
 }
 
-signing {
-    useInMemoryPgpKeys(
-        props.getProperty("signing.keyId"),
-        props.getProperty("signing.key"),
-        props.getProperty("signing.password"),
-    )
+if (!gradle.startParameter.taskNames.contains("publishToMavenLocal")) {
+    signing {
+        useInMemoryPgpKeys(
+            props.getProperty("signing.keyId"),
+            props.getProperty("signing.key"),
+            props.getProperty("signing.password"),
+        )
 
-    sign(publishing.publications)
-}
+        sign(publishing.publications)
+    }
 
-// Works around an issue with publishing seemingly having certain unnecessary implicit dependencies.
-// Since we're generally never publishing single targets there's no inherent downside to making
-// every publishing task (platform) depend on every signing task.
-tasks {
-    val signTasks = withType<Sign>()
+    // Works around an issue with publishing seemingly having certain unnecessary implicit dependencies.
+    // Since we're generally never publishing single targets there's no inherent downside to making
+    // every publishing task (platform) depend on every signing task.
+    tasks {
+        val signTasks = withType<Sign>()
 
-    withType<PublishToMavenRepository> {
-        dependsOn(signTasks)
+        withType<PublishToMavenRepository> {
+            dependsOn(signTasks)
+        }
     }
 }

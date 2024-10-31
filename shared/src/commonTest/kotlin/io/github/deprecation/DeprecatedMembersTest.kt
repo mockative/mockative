@@ -1,14 +1,14 @@
 package io.github.deprecation
 
-import io.mockative.classOf
+import io.mockative.of
 import io.mockative.isMock
 import io.mockative.mock
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class DeprecatedMembersTest {
-    private val classWithDeprecatedMembers = mock(classOf<ClassWithDeprecatedMembers>())
-    private val interfaceWithDeprecatedMembers = mock(classOf<InterfaceWithDeprecatedMembers>())
+    private val classWithDeprecatedMembers = mock(of<ClassWithDeprecatedMembers>())
+    private val interfaceWithDeprecatedMembers = mock(of<InterfaceWithDeprecatedMembers>())
 
     @Test
     fun classWithDeprecatedMembersTest() {

@@ -8,4 +8,4 @@ import kotlin.reflect.KClass
  *
  * This function serves as a convenient way to avoid having to add a type cast when working with generics.
  */
-inline fun <reified T : Any> classOf(): KClass<T> = T::class
+inline fun <reified T : Any> of(): KClass<T> = T::class
