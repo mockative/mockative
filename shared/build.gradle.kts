@@ -3,7 +3,7 @@ plugins {
 
     id("com.android.library")
 
-    id("io.mockative") version "3.0.0"
+    id("io.mockative") version "3.0.0-SNAPSHOT"
 }
 
 version = "1.0.0"

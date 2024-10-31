@@ -4,8 +4,10 @@ import com.android.build.gradle.internal.tasks.AndroidTestTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.VerificationTask
+import org.gradle.api.tasks.testing.AbstractTestTask
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
+import kotlin.reflect.jvm.jvmName
 
 internal fun Project.runMockative(block: () -> Unit) {
     when {
@@ -16,9 +18,6 @@ internal fun Project.runMockative(block: () -> Unit) {
         isMockativeDisabled -> {
             info("Plugin disabled by presence of the Gradle property 'io.mockative.enabled=false'")
         }
-        deviceTestTasks.isNotEmpty() -> {
-            warn("Using Mockative with Android connected tests requires setting the Gradle property 'io.mockative.enabled=true' when launching your Gradle task.")
-        }
         verificationTasks.isNotEmpty() -> {
             info("Plugin enabled by detected verification tasks: ${verificationTasks.joinToString(", ") { "'${it.name}'" }}")
             block()
@@ -26,6 +25,9 @@ internal fun Project.runMockative(block: () -> Unit) {
         isRunningConnectedAndroidTests -> {
             info("Plugin enabled by detected connected Android tests")
             block()
+        }
+        deviceTestTasks.isNotEmpty() -> {
+            warn("Using Mockative with Android connected tests requires setting the Gradle property 'io.mockative.enabled=true' when launching your Gradle task.")
         }
         else -> {
             info("Plugin disabled by lack of enabling condition")
@@ -45,11 +47,22 @@ internal fun Project.debug(message: Any?) {
     logger.debug("[MockativePlugin] $message")
 }
 
-private val Project.verificationTasks: List<Task>
+internal fun Task.toDescription(): String {
+    return "$name <${this::class.jvmName}>"
+}
+
+internal fun Iterable<Task>.toDescription(): String {
+    return joinToString { it.toDescription() }
+}
+
+internal val Project.verificationTasks: List<Task>
     get() = gradle.taskGraph.allTasks.filter { it is VerificationTask }
 
-private val Project.deviceTestTasks: List<AndroidTestTask>
-    get() = gradle.taskGraph.allTasks.filterIsInstance<AndroidTestTask>()
+internal val Project.testTasks: List<AbstractTestTask>
+    get() = gradle.taskGraph.allTasks.filterIsInstance<AbstractTestTask>()
+
+internal val Project.deviceTestTasks: List<Task>
+    get() = gradle.taskGraph.allTasks.filter { it is AndroidTestTask }
 
 internal val Project.mockativeDir: File
     get() = layout.buildDirectory.dir("generated/mockative").get().asFile
@@ -61,12 +74,17 @@ internal val Project.isMockativeEnabled: Boolean
     get() = findProperty("io.mockative.enabled") == "true"
 
 internal val Project.isRunningConnectedAndroidTests: Boolean
-    get() = gradle.startParameter.taskNames.any { it.startsWith("connected") && it.endsWith("AndroidTest") }
+    get() = gradle.startParameter.taskNames.any { it.contains(":connected") && it.endsWith("AndroidTest") }
 
-internal fun Project.addJVMDependencies(sourceSetName: String) {
+private val androidUnitTestRegex = Regex("test[A-Z][a-z][A-Za-z]*UnitTest")
+
+internal val Project.isRunningAndroidUnitTests: Boolean
+    get() = gradle.startParameter.taskNames.any { androidUnitTestRegex.matches(it) }
+
+internal fun Project.addJVMDependencies(sourceSetName: String, reason: String? = null) {
     val sourceSet = kotlinExtension.sourceSets.firstOrNull { it.name == sourceSetName } ?: return
 
-    info("Adding JVM runtime dependencies to source set '${sourceSet.name}'")
+    info("Adding JVM runtime dependencies to source set '${sourceSet.name}'${reason?.let { " as a result of $it" } ?: ""}")
 
     sourceSet.dependencies {
         implementation(kotlin("reflect"))
