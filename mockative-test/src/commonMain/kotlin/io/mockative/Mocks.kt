@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
  *
  * @param type the type to mock
  * @return an instance of the mocked type
- * @see classOf
+ * @see of
  */
 fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)
 

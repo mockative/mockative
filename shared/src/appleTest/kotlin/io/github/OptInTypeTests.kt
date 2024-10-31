@@ -1,6 +1,6 @@
 package io.github
 
-import io.mockative.classOf
+import io.mockative.of
 import io.mockative.doesNothing
 import io.mockative.every
 import io.mockative.mock
@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 
 @OptIn(ExperimentalForeignApi::class)
 class OptInTypeTests {
-    val sut = mock(classOf<OptInType>())
+    val sut = mock(of<OptInType>())
 
     @Test
     fun test() {

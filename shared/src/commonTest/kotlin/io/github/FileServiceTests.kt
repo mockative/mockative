@@ -2,7 +2,7 @@ package io.github
 
 import io.mockative.Fun1
 import io.mockative.any
-import io.mockative.classOf
+import io.mockative.of
 import io.mockative.coEvery
 import io.mockative.eq
 import io.mockative.every
@@ -14,8 +14,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FileServiceTests {
-    private val s3Client = mock(classOf<S3Client>())
-    private val block = mock(classOf<Fun1<GetObjectResponse, File>>())
+    private val s3Client = mock(of<S3Client>())
+    private val block = mock(of<Fun1<GetObjectResponse, File>>())
 
     private val fileService = FileService(s3Client)
 

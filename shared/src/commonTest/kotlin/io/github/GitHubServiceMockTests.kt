@@ -2,7 +2,7 @@ package io.github
 
 import io.mockative.Fun0
 import io.mockative.any
-import io.mockative.classOf
+import io.mockative.of
 import io.mockative.coEvery
 import io.mockative.coVerify
 import io.mockative.doesNothing
@@ -22,12 +22,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 
 internal class GitHubServiceMockTests {
-    val github: GitHubAPI = mock(classOf<GitHubAPI>())
-    val expected: ExpectedAPI = mock(classOf<ExpectedAPI>())
-    val nested: GitHubService.NestedAPI = mock(classOf<GitHubService.NestedAPI>())
-    val configuration: GitHubConfiguration = mock(classOf<GitHubConfiguration>())
-    val function: Fun0<Unit> = mock(classOf<Fun0<Unit>>())
-    val clock: Clock = mock(classOf<Clock>())
+    val github: GitHubAPI = mock(of<GitHubAPI>())
+    val expected: ExpectedAPI = mock(of<ExpectedAPI>())
+    val nested: GitHubService.NestedAPI = mock(of<GitHubService.NestedAPI>())
+    val configuration: GitHubConfiguration = mock(of<GitHubConfiguration>())
+    val function: Fun0<Unit> = mock(of<Fun0<Unit>>())
+    val clock: Clock = mock(of<Clock>())
 
     private val service = GitHubService(github, configuration, ApplicationDispatchers.Unconfined, clock)
 
