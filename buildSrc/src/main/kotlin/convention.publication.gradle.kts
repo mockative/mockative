@@ -1,8 +1,9 @@
+import com.vanniktech.maven.publish.SonatypeHost
 import java.util.*
 
 plugins {
-    `maven-publish`
     signing
+    id("com.vanniktech.maven.publish")
 }
 
 val props = Properties().apply {
@@ -26,85 +27,47 @@ val props = Properties().apply {
     loadEnv("sonatype.repository", "SONATYPE_REPOSITORY")
 }
 
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-}
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
-publishing {
-    repositories {
-        maven {
-            name = "Sonatype"
-            url = props.getProperty("sonatype.repository")
-                ?.let { uri("https://s01.oss.sonatype.org/service/local/staging/deployByRepositoryId/$it") }
-                ?: uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+    signAllPublications()
 
-            credentials {
-                username = props.getProperty("sonatype.username")
-                password = props.getProperty("sonatype.password")
+    pom {
+        name = "Mockative"
+        description = "Mocking framework for Kotlin, Kotlin/Native and Kotlin Multiplatform"
+        inceptionYear = "2021"
+        url = "http://mockative.io"
+
+        licenses {
+            license {
+                name = "MIT"
+                url = "https://github.com/mockative/mockative/LICENSE"
+                distribution = "https://github.com/mockative/mockative/LICENSE"
             }
         }
 
-        maven {
-            name = "SonatypeSnapshot"
-            url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            credentials {
-                username = props.getProperty("sonatype.username")
-                password = props.getProperty("sonatype.password")
+        developers {
+            developer {
+                id = "Nillerr"
+                name = "Nicklas Jensen"
+                email = "nicklas@mockative.io"
             }
         }
-    }
 
-    publications {
-        withType<MavenPublication> {
-            artifact(javadocJar.get())
-
-            pom {
-                name.set("Mockative")
-                description.set("Mocking framework for Kotlin, Kotlin/Native and Kotlin Multiplatform")
-                url.set("http://mockative.io")
-
-                licenses {
-                    license {
-                        name.set("MIT")
-                        url.set("https://github.com/mockative/mockative/LICENSE")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("Nillerr")
-                        name.set("Nicklas Jensen")
-                        email.set("nicklas@mockative.io")
-                    }
-                }
-
-                scm {
-                    url.set("https://github.com/mockative/mockative")
-                }
-            }
+        scm {
+            url = "https://github.com/mockative/mockative"
+            connection = "scm:git:git://github.com/mockative/mockative.git"
+            developerConnection = "scm:git:ssh://github.com/mockative/mockative.git"
         }
     }
 }
 
-if (!gradle.startParameter.taskNames.contains("publishToMavenLocal")) {
-    signing {
-        useInMemoryPgpKeys(
-            props.getProperty("signing.keyId"),
-            props.getProperty("signing.key"),
-            props.getProperty("signing.password"),
-        )
+signing {
+    useInMemoryPgpKeys(
+        props.getProperty("signing.keyId"),
+        props.getProperty("signing.key"),
+        props.getProperty("signing.password"),
+    )
 
-        sign(publishing.publications)
-    }
-
-    // Works around an issue with publishing seemingly having certain unnecessary implicit dependencies.
-    // Since we're generally never publishing single targets there's no inherent downside to making
-    // every publishing task (platform) depend on every signing task.
-    tasks {
-        val signTasks = withType<Sign>()
-
-        withType<PublishToMavenRepository> {
-            dependsOn(signTasks)
-        }
-    }
+    sign(publishing.publications)
 }
