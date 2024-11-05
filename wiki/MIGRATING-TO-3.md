@@ -16,6 +16,9 @@ Storytelling aside, these are the primary differences between Mockative 2 to Moc
  - Added the `@Mockable` annotation for types in your main source sets
  - Introduced a new `of<T>()` function to replace `classOf<T>()` which is being deprecated.
 
+> [!IMPORTANT]
+> Mockative 3 has only been tested with Kotlin 2.0.21. It may or may not work with Kotlin versions before Kotlin 2.
+
 ## Migration Guide
 
 > [!TIP]
