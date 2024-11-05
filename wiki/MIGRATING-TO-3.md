@@ -41,7 +41,8 @@ interface GitHubApi {
 
 **3. Run your tests**
 
-Before running your tests you might be facing what looks like a bunch of compilation errors. Mockative 3 adds dependencies 
+Before running your tests you might be facing what looks like a bunch of compilation errors. Mockative 3 dynamically 
+adds a dependency on a set of source files when a test task is detected. 
 
 **4. Replace usages of `classOf<T>` with `of<T>`**
 
