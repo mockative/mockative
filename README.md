@@ -44,7 +44,7 @@ Then add the following to your **gradle.properties** file:
 ksp.useKSP2=true
 ```
 
-> ![TIP]
+> [!TIP]
 > Now run your tests, which will copy a set of runtime dependencies to your generated code. These will disappear 
 > whenever you run a Gradle task that is not a test, lint of other verification task, but will reappear once you run 
 > one of them again.

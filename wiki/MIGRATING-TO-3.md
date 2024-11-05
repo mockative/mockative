@@ -18,7 +18,7 @@ Storytelling aside, these are the primary differences between Mockative 2 to Moc
 
 ## Migration Guide
 
-> ![TIP]
+> [!TIP]
 > Use search and replace to fix up most of your codebase at once
 
 To migrate from Mockative 2 to Mockative 3, these are the steps required, in order:
