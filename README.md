@@ -6,7 +6,8 @@
 
 > [!IMPORTANT]  
 > Mockative 3 now supports Kotlin 2! A new Gradle plugin has been introduced to make mocking much simpler in 
-> Mockative 3. Please take the time to read through this README if you're upgrading from Mockative 2.
+> Mockative 3. Please take the time to read through this README if you're upgrading from Mockative 2, and follow the 
+> [Migrating to Mockative 3](wiki/MIGRATING-TO-3.md) guide for a successful migration.
 
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 Notable features include:
@@ -42,6 +43,11 @@ Then add the following to your **gradle.properties** file:
 #KSP
 ksp.useKSP2=true
 ```
+
+> ![TIP]
+> Now run your tests, which will copy a set of runtime dependencies to your generated code. These will disappear 
+> whenever you run a Gradle task that is not a test, lint of other verification task, but will reappear once you run 
+> one of them again.
 
 If you're having the following error:
 
