@@ -26,6 +26,8 @@ To migrate from Mockative 2 to Mockative 3, these are the steps required, in ord
 **1. Remove `@Mock` annotation from properties in test source sets**
 
 ```diff
+-import io.mockative.Mock
+
 class GitHubServiceTests {
 -   @Mock
     val api = mock(classOf<GitHubApi>())
@@ -35,6 +37,8 @@ class GitHubServiceTests {
 **2. Annotate mockable types with `@Mockable`**
 
 ```diff
++import io.mockative.Mockable
+
 +@Mockable
 interface GitHubApi {
 ```
@@ -47,6 +51,9 @@ adds a dependency on a set of source files when a test task is detected.
 **4. Replace usages of `classOf<T>` with `of<T>`**
 
 ```diff
+-import io.mockative.classOf
++import io.mockative.of
+
 class GitHubServiceTests {
 -   val api = mock(classOf<GitHubApi>())
 +   val api = mock(of<GitHubApi>())
