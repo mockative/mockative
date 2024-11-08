@@ -5,8 +5,8 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.mockative/mockative)](https://search.maven.org/artifact/io.mockative/mockative)
 
 > [!IMPORTANT]  
-> Mockative 3 now supports Kotlin 2! A new Gradle plugin has been introduced to make mocking much simpler in 
-> Mockative 3. Please take the time to read through this README if you're upgrading from Mockative 2, and follow the 
+> Mockative 3 now supports Kotlin 2! A new Gradle plugin has been introduced to make mocking much simpler in
+> Mockative 3. Please take the time to read through this README if you're upgrading from Mockative 2, and follow the
 > [Migrating to Mockative 3](wiki/MIGRATING-TO-3.md) guide for a successful migration.
 
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
@@ -45,19 +45,24 @@ ksp.useKSP2=true
 ```
 
 > [!TIP]
-> Now run your tests, which will copy a set of runtime dependencies to your generated code. These will disappear 
-> whenever you run a Gradle task that is not a test, lint of other verification task, but will reappear once you run 
+> Now run your tests, which will copy a set of runtime dependencies to your generated code. These will disappear
+> whenever you run a Gradle task that is not a test, lint of other verification task, but will reappear once you run
 > one of them again.
 
 If you're having the following error:
 
-> KSP2: KtInvalidLifetimeOwnerAccessException: Access to invalid KtAlwaysAccessibleLifetimeToken: PSI has changed since creation
+> KSP2: KtInvalidLifetimeOwnerAccessException: Access to invalid KtAlwaysAccessibleLifetimeToken: PSI has changed since
+> creation
 
 Please disable incremental processing for KSP by adding the following to your **gradle.properties** file:
 
 ```properties
 ksp.incremental=false
 ```
+
+Mockative 3 code generation should "just work", but if you're looking for more control over when Mockative code
+generation is enabled or disabled, please
+read [Controlling generation of mocks in Mockative 3](wiki/CONTROLLING_MOCKATIVE_3.md).
 
 ### Making types mockable
 
@@ -77,9 +82,9 @@ The Kotlin `all-open` plugin will automatically be applied to any `class` annota
 
 #### Mocking External Types
 
-Sometimes we would like to mock types that are external to our module in our tests. To do so, pass a list of types 
-you'd like to mock in **any** `@Mockable` annotation in your main module. If you add the list of types to the 
-`@Mockable` annotation of a type you'd also like to mock by itself, you must specify the type itself in the list of 
+Sometimes we would like to mock types that are external to our module in our tests. To do so, pass a list of types
+you'd like to mock in **any** `@Mockable` annotation in your main module. If you add the list of types to the
+`@Mockable` annotation of a type you'd also like to mock by itself, you must specify the type itself in the list of
 types to mock. By not specifying any types in the annotation, a mock for the annotated type itself is generated.
 
 ```kotlin
@@ -196,7 +201,7 @@ The following functions are available to provide a stub implementation for every
 | `throws(throwable: Throwable)`                        | Throws the specified exception.                                                                                                                                                                                                  |
 | `throwsMany(throwable: Throwable)`                    | Throws the specified exceptions in sequence. Once the last exception in the sequence has been thrown, this stubbing will no longer match any invocation.                                                                         |
 
-In order to provide familiarity to developers coming from MockK, who prefer using infix notation, 
+In order to provide familiarity to developers coming from MockK, who prefer using infix notation,
 Mockative also supports infix notation for the `invokes`, `returns`, and `throws` functions:
 
 ```kotlin
