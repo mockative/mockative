@@ -26,6 +26,11 @@ Add the `io.mockative` plugin and dependency to your **build.gradle.kts** file:
 ```kotlin
 plugins {
     id("io.mockative") version "3.0.0"
+    repositories {
+      gradlePluginPortal()
+      google()
+      mavenCentral()
+    }
 }
 
 kotlin {
