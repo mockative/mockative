@@ -22,8 +22,12 @@ internal fun Project.runMockative(block: () -> Unit) {
             info("Plugin enabled by detected verification tasks: ${verificationTasks.joinToString(", ") { "'${it.name}'" }}")
             block()
         }
-        isRunningConnectedAndroidTests -> {
-            info("Plugin enabled by detected connected Android tests")
+        isRunningTestPrefix -> {
+            info("Plugin enabled by detected 'test' prefix task")
+            block()
+        }
+        isRunningTestSuffix -> {
+            info("Plugin enabled by detected 'Test' suffix task")
             block()
         }
         deviceTestTasks.isNotEmpty() -> {
@@ -73,13 +77,11 @@ internal val Project.isMockativeDisabled: Boolean
 internal val Project.isMockativeEnabled: Boolean
     get() = findProperty("io.mockative.enabled") == "true"
 
-internal val Project.isRunningConnectedAndroidTests: Boolean
-    get() = gradle.startParameter.taskNames.any { it.contains(":connected") && it.endsWith("AndroidTest") }
+internal val Project.isRunningTestPrefix: Boolean
+    get() = gradle.startParameter.taskNames.any { it.startsWith("test") }
 
-private val androidUnitTestRegex = Regex("test[A-Z][a-z][A-Za-z]*UnitTest")
-
-internal val Project.isRunningAndroidUnitTests: Boolean
-    get() = gradle.startParameter.taskNames.any { androidUnitTestRegex.matches(it) }
+internal val Project.isRunningTestSuffix: Boolean
+    get() = gradle.startParameter.taskNames.any { it.endsWith("Test") }
 
 internal fun Project.addJVMDependencies(sourceSetName: String, reason: String? = null) {
     val sourceSet = kotlinExtension.sourceSets.firstOrNull { it.name == sourceSetName } ?: return
