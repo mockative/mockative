@@ -2,7 +2,6 @@ package io.mockative
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import kotlin.reflect.jvm.jvmName
 
 abstract class MockativeProcessRuntimeTask : DefaultTask() {
     init {
@@ -21,8 +20,8 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
         project.info("mockativeDir: ${project.mockativeDir}")
         project.info("isMockativeEnabled: ${project.isMockativeEnabled}")
         project.info("isMockativeDisabled: ${project.isMockativeDisabled}")
-        project.info("isRunningConnectedAndroidTests: ${project.isRunningConnectedAndroidTests}")
-        project.info("isRunningAndroidUnitTests: ${project.isRunningAndroidUnitTests}")
+        project.info("isRunningTestPrefix: ${project.isRunningTestPrefix}")
+        project.info("isRunningTestSuffix: ${project.isRunningTestSuffix}")
 
         val mockativeDir = project.mockativeDir
 
@@ -44,7 +43,7 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
             // This check enables linters that perform Kotlin compilation like Detekt, by replacing the Android
             // implementation of `mock` with a stub, since the Android Gradle Plugin prohibits modifying Android
             // dependencies during a task action.
-            if (!project.isMockativeEnabled && !project.isRunningConnectedAndroidTests && project.testTasks.isEmpty()) {
+            if (!project.isMockativeEnabled && !project.isRunningTestSuffix && project.testTasks.isEmpty()) {
                 project.info("Replacing android implementation with stub because a linter is detected")
                 resources.copyRecursively("/src/androidStubMain", dst.resolve("androidMain"))
             }

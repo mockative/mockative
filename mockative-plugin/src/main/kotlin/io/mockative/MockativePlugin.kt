@@ -75,10 +75,10 @@ abstract class MockativePlugin : Plugin<Project> {
             // during configuration time to do a "best effort" of adding JVM dependencies for Android targets as needed.
             if (project.isMockativeEnabled) {
                 project.addJVMDependencies("androidMain", "the Gradle property 'io.mockative.enabled=true'")
-            } else if (project.isRunningConnectedAndroidTests) {
-                project.addJVMDependencies("androidMain", "connected Android test tasks detected")
-            } else if (project.isRunningAndroidUnitTests) {
-                project.addJVMDependencies("androidMain", "Android unit test tasks detected")
+            } else if (project.isRunningTestPrefix) {
+                project.addJVMDependencies("androidMain", "task with 'test' prefix detected")
+            } else if (project.isRunningTestSuffix) {
+                project.addJVMDependencies("androidMain", "task with 'Test' suffix detected")
             }
         }
     }
