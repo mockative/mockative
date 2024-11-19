@@ -3,7 +3,8 @@ plugins {
 
     id("com.android.library")
 
-    id("io.mockative") version "3.0.0"
+    id("io.mockative") version "3.0.1-SNAPSHOT"
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 version = "1.0.0"
@@ -90,5 +91,18 @@ android {
     dependencies {
         androidTestImplementation("androidx.test:runner:1.5.2")
         androidTestUtil("androidx.test:orchestrator:1.4.2")
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+}
+
+tasks.detekt {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        sarif.required.set(true)
+        md.required.set(true)
     }
 }

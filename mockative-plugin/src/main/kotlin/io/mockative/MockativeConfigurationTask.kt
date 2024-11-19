@@ -18,9 +18,7 @@ abstract class MockativeConfigurationTask : DefaultTask() {
 
     @TaskAction
     fun run() {
-        project.runMockative {
-            val ksp = project.extensions.getByType(KspExtension::class.java)
-            ksp.arg("io.mockative:mockative:disabled", "false")
-        }
+        val ksp = project.extensions.getByType(KspExtension::class.java)
+        ksp.arg("io.mockative:mockative:disabled", "false")
     }
 }
