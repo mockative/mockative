@@ -3,11 +3,27 @@ plugins {
 
     id("com.android.library")
 
-    id("io.mockative") version "3.0.0"
+    id("io.mockative") version "3.0.1-SNAPSHOT"
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 version = "1.0.0"
 group = "io.mockative"
+
+detekt {
+    buildUponDefaultConfig = true
+
+    source.setFrom("src/**/kotlin")
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        sarif.required.set(true)
+        md.required.set(true)
+    }
+}
 
 kotlin {
     jvmToolchain(11)

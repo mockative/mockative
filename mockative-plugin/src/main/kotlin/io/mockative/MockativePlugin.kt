@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
 abstract class MockativePlugin : Plugin<Project> {
-    private val version = "3.0.0"
+    private val version = "3.0.1-SNAPSHOT"
 
     override fun apply(project: Project) {
         project.pluginManager.apply("com.google.devtools.ksp")
@@ -79,6 +79,8 @@ abstract class MockativePlugin : Plugin<Project> {
                 project.addJVMDependencies("androidMain", "task with 'test' prefix detected")
             } else if (project.isRunningTestSuffix) {
                 project.addJVMDependencies("androidMain", "task with 'Test' suffix detected")
+            } else if (project.isRunningTestsSuffix) {
+                project.addJVMDependencies("androidMain", "task with 'Tests' suffix detected")
             }
         }
     }
