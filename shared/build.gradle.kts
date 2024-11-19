@@ -3,7 +3,7 @@ plugins {
 
     id("com.android.library")
 
-    id("io.mockative") version "3.0.1-SNAPSHOT"
+    id("io.mockative") version "3.0.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
