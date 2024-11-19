@@ -24,24 +24,27 @@ Notable features include:
 Add the `io.mockative` plugin and dependency to your **build.gradle.kts** file:
 
 ```kotlin
-pluginManagement {  
-    repositories {
-      gradlePluginPortal()
-      google()
-      mavenCentral()
-    }
-
-    plugins {
-        id("io.mockative") version "3.0.0"
-    }
+plugins {
+  id("io.mockative") version "3.0.0"
 }
-
 
 kotlin {
     commonMain {
         dependencies {
             implementation("io.mockative:mockative:3.0.0")
         }
+    }
+}
+```
+
+Make sure you specify the following plugin repositories in your **build.settings.kts** file:
+
+```kotlin
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
     }
 }
 ```
