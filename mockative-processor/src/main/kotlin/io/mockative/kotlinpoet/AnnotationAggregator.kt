@@ -12,6 +12,7 @@ class AnnotationAggregator {
         AnnotationSpec.builder(SUPPRESS_ANNOTATION)
             .addMember("%S", "DEPRECATION")
             .addMember("%S", "DEPRECATION_ERROR")
+            .addMember("%S", "all") // Suppresses all Detekt warnings
             .build()
     )
 

@@ -30,6 +30,10 @@ internal fun Project.runMockative(block: () -> Unit) {
             info("Plugin enabled by detected 'Test' suffix task")
             block()
         }
+        isRunningTestsSuffix -> {
+            info("Plugin enabled by detected 'Tests' suffix task")
+            block()
+        }
         deviceTestTasks.isNotEmpty() -> {
             warn("Using Mockative with Android connected tests requires setting the Gradle property 'io.mockative.enabled=true' when launching your Gradle task.")
         }
@@ -40,15 +44,15 @@ internal fun Project.runMockative(block: () -> Unit) {
 }
 
 internal fun Project.info(message: Any?) {
-    logger.info("[MockativePlugin] $message")
+    println("[MockativePlugin] $message")
 }
 
 internal fun Project.warn(message: Any?) {
-    logger.warn("[MockativePlugin] $message")
+    println("[MockativePlugin] $message")
 }
 
 internal fun Project.debug(message: Any?) {
-    logger.debug("[MockativePlugin] $message")
+    println("[MockativePlugin] $message")
 }
 
 internal fun Task.toDescription(): String {
@@ -82,6 +86,17 @@ internal val Project.isRunningTestPrefix: Boolean
 
 internal val Project.isRunningTestSuffix: Boolean
     get() = gradle.startParameter.taskNames.any { it.endsWith("Test") }
+
+internal val Project.isRunningTestsSuffix: Boolean
+    get() = gradle.startParameter.taskNames.any { it.endsWith("Tests") }
+
+/**
+ * This check enables linters that perform Kotlin compilation like Detekt, by replacing the Android
+ * implementation of `mock` with a stub, since the Android Gradle Plugin prohibits modifying Android
+ * dependencies during a task action.
+ */
+internal val Project.isRunningCompilingLinter: Boolean
+    get() = !project.isMockativeEnabled && !project.isRunningTestSuffix && project.testTasks.isEmpty()
 
 internal fun Project.addJVMDependencies(sourceSetName: String, reason: String? = null) {
     val sourceSet = kotlinExtension.sourceSets.firstOrNull { it.name == sourceSetName } ?: return

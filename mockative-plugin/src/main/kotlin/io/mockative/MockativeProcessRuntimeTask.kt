@@ -11,17 +11,23 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
     @TaskAction
     fun run() {
         project.info("io.mockative.enabled=${project.findProperty("io.mockative.enabled")}")
+
         project.info("gradle.startParameter.taskNames=${project.gradle.startParameter.taskNames.joinToString()}")
         project.info("gradle.taskGraph.allTasks=${project.gradle.taskGraph.allTasks.toDescription()}")
+
+        project.info("mockativeDir: ${project.mockativeDir}")
 
         project.info("verificationTasks: ${project.verificationTasks.toDescription()}")
         project.info("testTasks: ${project.testTasks.toDescription()}")
         project.info("deviceTestTasks: ${project.deviceTestTasks.toDescription()}")
-        project.info("mockativeDir: ${project.mockativeDir}")
+
         project.info("isMockativeEnabled: ${project.isMockativeEnabled}")
         project.info("isMockativeDisabled: ${project.isMockativeDisabled}")
+
         project.info("isRunningTestPrefix: ${project.isRunningTestPrefix}")
         project.info("isRunningTestSuffix: ${project.isRunningTestSuffix}")
+        project.info("isRunningTestsSuffix: ${project.isRunningTestsSuffix}")
+        project.info("isRunningCompilingLinter: ${project.isRunningCompilingLinter}")
 
         val mockativeDir = project.mockativeDir
 
@@ -43,7 +49,7 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
             // This check enables linters that perform Kotlin compilation like Detekt, by replacing the Android
             // implementation of `mock` with a stub, since the Android Gradle Plugin prohibits modifying Android
             // dependencies during a task action.
-            if (!project.isMockativeEnabled && !project.isRunningTestSuffix && project.testTasks.isEmpty()) {
+            if (project.isRunningCompilingLinter) {
                 project.info("Replacing android implementation with stub because a linter is detected")
                 resources.copyRecursively("/src/androidStubMain", dst.resolve("androidMain"))
             }
