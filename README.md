@@ -30,11 +30,12 @@ pluginManagement {
       google()
       mavenCentral()
     }
+
+    plugins {
+        id("io.mockative") version "3.0.0"
+    }
 }
 
-plugins {
-    id("io.mockative") version "3.0.0"
-}
 
 kotlin {
     commonMain {
