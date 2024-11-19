@@ -52,9 +52,17 @@ abstract class MockativePlugin : Plugin<Project> {
         }
 
         // Add `mockative` as a dependency of `commonMain`
-        project.kotlinExtension.sourceSets.getByName("commonMain") { sourceSet ->
-            sourceSet.dependencies {
-                implementation("io.mockative:mockative:$version")
+        if (project.isMultiplatform) {
+            project.kotlinExtension.sourceSets.getByName("commonMain") { sourceSet ->
+                sourceSet.dependencies {
+                    implementation("io.mockative:mockative:$version")
+                }
+            }
+        } else {
+            project.kotlinExtension.sourceSets.getByName("main") { sourceSet ->
+                sourceSet.dependencies {
+                    implementation("io.mockative:mockative:$version")
+                }
             }
         }
 

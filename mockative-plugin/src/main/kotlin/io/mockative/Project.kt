@@ -5,6 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.VerificationTask
 import org.gradle.api.tasks.testing.AbstractTestTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 import kotlin.reflect.jvm.jvmName
@@ -97,6 +98,9 @@ internal val Project.isRunningTestsSuffix: Boolean
  */
 internal val Project.isRunningCompilingLinter: Boolean
     get() = !project.isMockativeEnabled && !project.isRunningTestSuffix && project.testTasks.isEmpty()
+
+internal val Project.isMultiplatform: Boolean
+    get() = project.kotlinExtension is KotlinMultiplatformExtension
 
 internal fun Project.addJVMDependencies(sourceSetName: String, reason: String? = null) {
     val sourceSet = kotlinExtension.sourceSets.firstOrNull { it.name == sourceSetName } ?: return
