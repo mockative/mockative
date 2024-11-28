@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -e
+
+./gradlew publishToMavenLocal -Pmockative.projects=':mockative-plugin,:mockative,:mockative-processor'

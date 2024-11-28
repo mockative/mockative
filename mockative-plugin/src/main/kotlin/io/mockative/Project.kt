@@ -45,15 +45,15 @@ internal fun Project.runMockative(block: () -> Unit) {
 }
 
 internal fun Project.info(message: Any?) {
-    println("[MockativePlugin] $message")
+    logger.info("[MockativePlugin] $message")
 }
 
 internal fun Project.warn(message: Any?) {
-    println("[MockativePlugin] $message")
+    logger.warn("[MockativePlugin] $message")
 }
 
 internal fun Project.debug(message: Any?) {
-    println("[MockativePlugin] $message")
+    logger.debug("[MockativePlugin] $message")
 }
 
 internal fun Task.toDescription(): String {
