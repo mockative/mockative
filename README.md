@@ -37,6 +37,11 @@ kotlin {
 }
 ```
 
+Mockative is published to Maven Central and applies the following Gradle plugins:
+
+- `com.google.devtools.ksp`: Enables code generation of mockable implementations
+- `org.jetbrains.kotlin.plugin.allopen`: Enables mocking of classes
+
 Make sure you specify the following plugin repositories in your **build.settings.kts** file:
 
 ```kotlin
