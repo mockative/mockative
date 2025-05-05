@@ -145,10 +145,10 @@ class MockState(val instance: Any) {
 
             try {
                 val result = stub.invoke(invocation)
-                invocation.result = InvocationResult.Return(result)
+                invocation.result = io.mockative.InvocationResult.Return(result)
                 return result as R
             } catch (e: Throwable) {
-                invocation.result = InvocationResult.Exception(e)
+                invocation.result = io.mockative.InvocationResult.Exception(e)
                 throw e
             }
         }
@@ -198,10 +198,10 @@ class MockState(val instance: Any) {
 
             try {
                 val result = stub.invoke(invocation)
-                invocation.result = InvocationResult.Return(result)
+                invocation.result = io.mockative.InvocationResult.Return(result)
                 return result as R
             } catch (e: Throwable) {
-                invocation.result = InvocationResult.Exception(e)
+                invocation.result = io.mockative.InvocationResult.Exception(e)
                 throw e
             }
         }
@@ -267,14 +267,14 @@ class MockState(val instance: Any) {
          * until we re-implement in-instance state. Since test processes are short-lived this shouldn't be an issue in
          * any application.
          */
-        private val mocks = mutableMapOf<ByRef, MockState>()
+        private val mocks = mutableMapOf<io.mockative.ByRef, MockState>()
 
         internal fun mock(instance: Any): MockState {
             if (!isMock(instance)) {
                 throw ReceiverNotMockedException(instance)
             }
 
-            return mocks.getOrPut(ByRef(instance)) { MockState(instance) }
+            return mocks.getOrPut(io.mockative.ByRef(instance)) { MockState(instance) }
         }
 
         fun <R> invoke(instance: Any, invocation: Invocation, returnsUnit: Boolean, spy: (() -> R)?): R {

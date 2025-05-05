@@ -28,5 +28,5 @@ if (mockativeProjects != null) {
     include(":mockative")
     include(":mockative-processor")
     include(":mockative-plugin")
-    include(":mockative-test")
+    include(":mockative-prefab")
 }
