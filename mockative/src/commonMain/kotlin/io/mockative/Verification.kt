@@ -9,20 +9,20 @@ val Int.times: Int
 val Int.time: Int
     get() = this
 
-class Verification(private val mock: io.mockative.MockState, private val expectation: io.mockative.Expectation) {
+class Verification(private val mock: MockState, private val expectation: Expectation) {
     fun wasInvoked() {
-        mock.verify(io.mockative.RangeVerifier(expectation, atLeast = 1, atMost = null))
+        mock.verify(RangeVerifier(expectation, atLeast = 1, atMost = null))
     }
 
     fun wasInvoked(atLeast: Int? = null, atMost: Int? = null) {
-        mock.verify(io.mockative.RangeVerifier(expectation, atLeast, atMost))
+        mock.verify(RangeVerifier(expectation, atLeast, atMost))
     }
 
     fun wasInvoked(exactly: Int) {
-        mock.verify(io.mockative.ExactVerifier(expectation, exactly))
+        mock.verify(ExactVerifier(expectation, exactly))
     }
 
     fun wasNotInvoked() {
-        mock.verify(io.mockative.ExactVerifier(expectation, 0))
+        mock.verify(ExactVerifier(expectation, 0))
     }
 }
