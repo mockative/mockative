@@ -31,7 +31,7 @@ kotlin {
 }
 
 val copySourcesToResources by tasks.registering(Copy::class) {
-    from("$rootDir/mockative-test/src")
+    from("$rootDir/mockative-prefab/src")
     into("src/main/resources/src/")
 }
 

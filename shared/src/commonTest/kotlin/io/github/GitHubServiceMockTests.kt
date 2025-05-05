@@ -1,6 +1,6 @@
 package io.github
 
-import io.mockative.Fun0
+import io.mockative.prefab.shared.Fun0
 import io.mockative.any
 import io.mockative.of
 import io.mockative.coEvery
