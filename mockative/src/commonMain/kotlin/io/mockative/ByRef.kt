@@ -9,6 +9,6 @@ internal class ByRef(val value: Any) {
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is io.mockative.ByRef && value === other.value
+        return other is ByRef && value === other.value
     }
 }

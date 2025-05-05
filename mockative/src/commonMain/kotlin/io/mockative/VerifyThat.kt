@@ -8,14 +8,14 @@ fun verifyNoUnmetExpectations(receiver: Any) {
     MockState.mock(receiver).verifyNoUnmetExpectations()
 }
 
-fun <R> verify(block: () -> R): io.mockative.Verification {
+fun <R> verify(block: () -> R): Verification {
     val (mock, invocation) = MockState.record(block)
     val expectation = invocation.toExpectation()
-    return io.mockative.Verification(mock, expectation)
+    return Verification(mock, expectation)
 }
 
-suspend fun <R> coVerify(block: suspend () -> R): io.mockative.Verification {
+suspend fun <R> coVerify(block: suspend () -> R): Verification {
     val (mock, invocation) = MockState.record(block)
     val expectation = invocation.toExpectation()
-    return io.mockative.Verification(mock, expectation)
+    return Verification(mock, expectation)
 }
