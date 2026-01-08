@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 class SpyTests {
     private val realSpy = SpyClass("realSpy")
 
+    @Suppress("DEPRECATION")
     val spy = spy(classOf<SpyClass>(), realSpy)
     val spyList = spy(of<MutableList<String>>(), mutableListOf("real"))
 
