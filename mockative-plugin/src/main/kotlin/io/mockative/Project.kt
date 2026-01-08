@@ -61,7 +61,7 @@ internal fun Task.toDescription(): String {
 }
 
 internal fun Iterable<Task>.toDescription(): String {
-    return joinToString { it.toDescription() }
+    return "[${joinToString { it.toDescription() }}]"
 }
 
 internal val Project.verificationTasks: List<Task>
