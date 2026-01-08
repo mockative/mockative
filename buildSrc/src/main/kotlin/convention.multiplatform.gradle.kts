@@ -11,7 +11,8 @@ kotlin {
     jvm()
 
     androidLibrary {
-        compileSdk = 34
+        minSdk = 21
+        compileSdk = 36
         namespace = "io.mockative"
     }
 
