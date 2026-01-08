@@ -16,13 +16,14 @@ kotlin {
 
                 implementation(kotlin("reflect"))
                 implementation(kotlin("stdlib"))
+                implementation(kotlin("metadata-jvm"))
 
                 // KSP
-                implementation("com.google.devtools.ksp:symbol-processing-api:2.0.21-1.0.26")
+                implementation("com.google.devtools.ksp:symbol-processing-api:2.3.4")
 
                 // KotlinPoet
-                implementation("com.squareup:kotlinpoet:1.18.1")
-                implementation("com.squareup:kotlinpoet-ksp:1.18.1")
+                implementation("com.squareup:kotlinpoet:2.2.0")
+                implementation("com.squareup:kotlinpoet-ksp:2.2.0")
             }
 
             kotlin.srcDir("src/main/kotlin")

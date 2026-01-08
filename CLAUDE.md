@@ -162,8 +162,8 @@ Contains convention plugins for consistent configuration:
 ## Version Information
 
 - Current version: 3.0.1
-- Requires Kotlin: 2.0.21
-- Requires KSP: 2.0.21-1.0.26
+- Requires Kotlin: 2.3.0
+- Requires KSP: 2.3.0
 - Supports Android compileSdk: 33
 - Minimum Android SDK: 21
 - JVM toolchain: 11

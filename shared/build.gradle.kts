@@ -1,10 +1,12 @@
+@file:Suppress("UnstableApiUsage")
+
 plugins {
     kotlin("multiplatform")
 
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
 
-    id("io.mockative") version "3.0.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("io.mockative") version "3.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
 version = "1.0.0"

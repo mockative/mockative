@@ -7,12 +7,12 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("multiplatform") version "2.0.21" apply false
-        kotlin("plugin.allopen") version "2.0.21" apply false
+        kotlin("multiplatform") version "2.3.0" apply false
+        kotlin("plugin.allopen") version "2.3.0" apply false
 
-        id("com.google.devtools.ksp") version "2.0.21-1.0.26" apply false
+        id("com.google.devtools.ksp") version "2.3.4" apply false
 
-        id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+        id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     }
 }
 
