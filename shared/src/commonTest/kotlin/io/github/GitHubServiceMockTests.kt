@@ -14,7 +14,7 @@ import io.mockative.once
 import io.mockative.verify
 import io.mockative.verifyNoUnmetExpectations
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
