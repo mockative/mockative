@@ -1,7 +1,7 @@
 package io.github
 
 import io.mockative.Mockable
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Mockable(Clock::class, GitHubConfiguration::class)
 interface GitHubConfiguration {
