@@ -25,7 +25,7 @@ object Matchers {
     }
 
     fun dequeue(): Matcher<*> {
-        return matchers.removeFirst()
+        return matchers.removeAt(0)
     }
 
     fun clear() {
