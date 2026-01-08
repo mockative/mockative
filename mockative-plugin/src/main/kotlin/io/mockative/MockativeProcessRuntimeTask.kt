@@ -43,10 +43,7 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
             project.debug("Copying resources to '$dst'")
             resources.copyRecursively("/src", dst)
 
-            // JVM can have its dependencies modified during a task action, but Android cannot.
-            project.addJVMDependencies("jvmMain")
-
-            // This check enables linters that perform Kotlin compilation like Detekt, by replacing the Android
+            // This check enables linters that perform Kotlin compilation like Detekt, by replacing with Android
             // implementation of `mock` with a stub, since the Android Gradle Plugin prohibits modifying Android
             // dependencies during a task action.
             if (project.isRunningCompilingLinter) {

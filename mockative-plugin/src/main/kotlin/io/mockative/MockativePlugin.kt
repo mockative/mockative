@@ -66,6 +66,24 @@ abstract class MockativePlugin : Plugin<Project> {
             }
         }
 
+        // Add JVM dependencies for Android targets during configuration phase
+        // This must be done before dependency resolution in newer Gradle versions
+        if (project.isMultiplatform) {
+            project.kotlinExtension.sourceSets.configureEach { sourceSet ->
+                if (sourceSet.name == "androidMain" || sourceSet.name == "jvmMain") {
+                    project.runMockative {
+                        project.addJVMDependencies(sourceSet.name)
+
+                        sourceSet.dependencies {
+                            implementation(kotlin("reflect"))
+                            implementation("org.objenesis:objenesis:3.3")
+                            implementation("org.javassist:javassist:3.29.2-GA")
+                        }
+                    }
+                }
+            }
+        }
+
         // Pass extension configuration to symbol processor through KSP `arg`s
         project.afterEvaluate {
             project.extensions.configure(KspExtension::class.java) { ksp ->
@@ -77,18 +95,6 @@ abstract class MockativePlugin : Plugin<Project> {
 
                 val stubsUnitByDefault = mockative.stubsUnitByDefault.get()
                 ksp.arg("io.mockative:mockative:stubsUnitByDefault", "$stubsUnitByDefault")
-            }
-
-            // Modifying dependencies for Android targets at task action time is prohibited, so we use this deduction
-            // during configuration time to do a "best effort" of adding JVM dependencies for Android targets as needed.
-            if (project.isMockativeEnabled) {
-                project.addJVMDependencies("androidMain", "the Gradle property 'io.mockative.enabled=true'")
-            } else if (project.isRunningTestPrefix) {
-                project.addJVMDependencies("androidMain", "task with 'test' prefix detected")
-            } else if (project.isRunningTestSuffix) {
-                project.addJVMDependencies("androidMain", "task with 'Test' suffix detected")
-            } else if (project.isRunningTestsSuffix) {
-                project.addJVMDependencies("androidMain", "task with 'Tests' suffix detected")
             }
         }
     }
