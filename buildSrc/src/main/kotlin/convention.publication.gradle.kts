@@ -62,12 +62,13 @@ mavenPublishing {
     }
 }
 
-signing {
-    useInMemoryPgpKeys(
-        props.getProperty("signing.keyId"),
-        props.getProperty("signing.key"),
-        props.getProperty("signing.password"),
-    )
+val signingKeyId = props.getProperty("signing.keyId")
+val signingKey = props.getProperty("signing.key")
+val signingPassword = props.getProperty("signing.password")
 
-    sign(publishing.publications)
+if (signingKeyId != null && signingKey != null && signingPassword != null) {
+    signing {
+        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+        sign(publishing.publications)
+    }
 }
