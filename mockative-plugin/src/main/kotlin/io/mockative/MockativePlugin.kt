@@ -4,6 +4,8 @@ import com.google.devtools.ksp.gradle.KspAATask
 import com.google.devtools.ksp.gradle.KspExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.SourceSet
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
@@ -34,7 +36,7 @@ abstract class MockativePlugin : Plugin<Project> {
         project.kotlinExtension.sourceSets.configureEach { sourceSet ->
             val file = File(project.mockativeDir, "${sourceSet.name}/kotlin")
             sourceSet.kotlin.srcDir(file)
-            sourceSet.java.srcDir(file)
+            (sourceSet as SourceSet).java.srcDir(file)
         }
 
         // Prepare task to configure mockative
