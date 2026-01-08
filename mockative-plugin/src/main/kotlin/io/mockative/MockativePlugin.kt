@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
 abstract class MockativePlugin : Plugin<Project> {
-    private val version = "3.0.1"
+    private val version = "3.1.0"
 
     override fun apply(project: Project) {
         project.pluginManager.apply("com.google.devtools.ksp")
