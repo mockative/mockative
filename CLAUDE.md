@@ -126,7 +126,7 @@ The project consists of four main modules:
 
 ### gradle.properties
 - `ksp.useKSP2=true`: Uses KSP2 (required for Kotlin 2.0+)
-- `project.version=3.0.1`: Current version
+- `project.version=3.1.0`: Current version
 - `project.group=io.mockative`: Maven coordinates
 
 ### settings.gradle.kts
@@ -161,7 +161,7 @@ Contains convention plugins for consistent configuration:
 
 ## Version Information
 
-- Current version: 3.0.1
+- Current version: 3.1.0
 - Requires Kotlin: 2.3.0
 - Requires KSP: 2.3.0
 - Supports Android compileSdk: 33
