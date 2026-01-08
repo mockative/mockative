@@ -30,6 +30,10 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
 kotlin {
     jvmToolchain(11)
 
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     js(IR) {
         browser()
         nodejs()
@@ -39,7 +43,7 @@ kotlin {
 
     androidLibrary {
         minSdk = 21
-        compileSdk = 33
+        compileSdk = 36
         namespace = "io.mockative"
 
         // Opt-in to enable and configure host-side (unit) tests
