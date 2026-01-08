@@ -36,7 +36,7 @@ abstract class MockativePlugin : Plugin<Project> {
         project.kotlinExtension.sourceSets.configureEach { sourceSet ->
             val file = File(project.mockativeDir, "${sourceSet.name}/kotlin")
             sourceSet.kotlin.srcDir(file)
-            (sourceSet as SourceSet).java.srcDir(file)
+            sourceSet.kotlin.srcDirs(file)
         }
 
         // Prepare task to configure mockative
