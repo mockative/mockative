@@ -30,7 +30,9 @@ val props = Properties().apply {
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
-    signAllPublications()
+    if (signingKeyId != null && signingKey != null && signingPassword != null) {
+        signAllPublications()
+    }
 
     pom {
         name = "Mockative"
