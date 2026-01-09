@@ -35,8 +35,10 @@ abstract class MockativePlugin : Plugin<Project> {
         // See: https://github.com/google/ksp/issues/2730
         project.kotlinExtension.sourceSets.configureEach { sourceSet ->
             val file = File(project.mockativeDir, "${sourceSet.name}/kotlin")
-            sourceSet.kotlin.srcDir(file)
+            project.info("Configuring sourceSet '${sourceSet.name}' with kotlin source dir: $file")
             sourceSet.kotlin.srcDirs(file)
+            val kotlinSources = sourceSet.kotlin.srcDirs.get()
+            project.info("Kotlin source directories for '${sourceSet.name}': $kotlinSources")
         }
 
         // Prepare task to configure mockative
