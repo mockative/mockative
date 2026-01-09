@@ -30,4 +30,4 @@ jobs:
             -Pmockative.projects=':mockative-plugin,:mockative,:mockative-processor'
 
       - name: Run tests with Gradle
-        run: ./gradlew :shared:iosSimulatorArm64Test -Pio.mockative.enabled=true
+        run: ./gradlew allTests
