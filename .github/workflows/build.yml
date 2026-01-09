@@ -20,7 +20,6 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ~/.konan
-            ~/.m2/repository
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
@@ -31,4 +30,4 @@ jobs:
             -Pmockative.projects=':mockative-plugin,:mockative,:mockative-processor'
 
       - name: Run tests with Gradle
-        run: ./gradlew shared:iosSimulatorArm64Test
+        run: ./gradlew :shared:iosSimulatorArm64Test -Pio.mockative.enabled=true
