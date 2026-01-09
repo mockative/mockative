@@ -4,11 +4,6 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.mockative/mockative)](https://search.maven.org/artifact/io.mockative/mockative)
 
-> [!IMPORTANT]  
-> Mockative 3 now supports Kotlin 2! A new Gradle plugin has been introduced to make mocking much simpler in
-> Mockative 3. Please take the time to read through this README if you're upgrading from Mockative 2, and follow the
-> [Migrating to Mockative 3](wiki/MIGRATING-TO-3.md) guide for a successful migration.
-
 Mocking for Kotlin/Native and Kotlin Multiplatform using the Kotlin Symbol Processing API ([KSP]).
 Notable features include:
 
