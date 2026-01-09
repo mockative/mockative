@@ -31,8 +31,6 @@ abstract class MockativePlugin : Plugin<Project> {
         }
 
         // Configure sourceSets
-        // Workaround for KSP 2.3.4 regression: use java.srcDir instead of kotlin.srcDir
-        // See: https://github.com/google/ksp/issues/2730
         project.kotlinExtension.sourceSets.configureEach { sourceSet ->
             val file = File(project.mockativeDir, "${sourceSet.name}/kotlin")
             sourceSet.kotlin.srcDirs(file)
