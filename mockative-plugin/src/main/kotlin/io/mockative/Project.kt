@@ -53,7 +53,7 @@ internal fun Project.warn(message: Any?) {
 }
 
 internal fun Project.debug(message: Any?) {
-    logger.debug("[MockativePlugin] $message")
+    logger.warn("[MockativePlugin] $message")
 }
 
 internal fun Task.toDescription(): String {
