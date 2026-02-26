@@ -11,11 +11,16 @@ import java.nio.file.StandardOpenOption
 import java.util.jar.JarEntry
 
 class ResourceManager(private val project: Project, private val clazz: Class<*>) {
+
     fun copyRecursively(path: String, dst: Path) {
         val resourcePath = path.removePrefix("/")
         val entries = jarEntries(path)
         for (entry in entries) {
-            val entryPath = entry.name.removePrefix(resourcePath).removePrefix("/")
+            var entryPath = entry.name.removePrefix(resourcePath).removePrefix("/")
+            if (entryPath.contains("io/mockative")) {
+                val module = project.path.split("/").takeLast(1).joinToString("").replace(":", "")
+                entryPath = entryPath.replace("io/mockative", "io/mockative/$module")
+            }
             val target = dst.resolve(entryPath)
 
             clazz.getResourceAsStream("/${entry.name}").use {
@@ -25,6 +30,7 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
         }
     }
 
+    @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     private fun jarEntries(path: String): Sequence<JarEntry> {
         val resourcePath = path.removePrefix("/")
         val rp = "/${resourcePath.substringBefore("/")}"
@@ -41,8 +47,17 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
     // e.g. ":mockative:mockative-plugin (& tests)" -> "mockative.mockativeplugintests"
     private val projectPathAsPackage: String = project.path
         .lowercase()
-        .replace(":", ".")
+        .replace(":", "")
         .replace("[^a-z0-9.]".toRegex(), "")
+
+    private val packageNormalizer = Normalizer {
+        basename = listOf("io", "mockative")
+        moduleName = projectPathAsPackage
+        exclusions += listOf(
+            "Mockable",
+        )
+        separator = '.'
+    }
 
     // Copy the input stream to the target path, adjusting the package declaration if necessary.
     // This is being copied to each module that uses this plugin, so to ensure that there are no duplicates,
@@ -52,23 +67,40 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
             var currentPackage = ""
 
             val lines = reader.lineSequence().toList().map {
-                // Extract the package from the line if it contains a package declaration and adjust it by adding the module's path .
-                if (it.matches("^package .*$".toRegex())) {
-                    currentPackage = it.removePrefix("package ").removeSuffix(";")
-                    it + projectPathAsPackage
-                } else it
+                when {
+                    // Extract the package from the line if it contains a package declaration and adjust it by adding the module's path .
+                    it.matches("^package .*$".toRegex()) -> {
+                        currentPackage = it.removePrefix("package ").removeSuffix(";")
+                        "package ${packageNormalizer.normalize(currentPackage)}"
+                    }
+                    // Include module's path in the import statements that end with pascal case i.e. objects, classes
+                    it.startsWith("import io.mockative.") -> {
+                        val statement = it.removePrefix("import ")
+                        "import ${packageNormalizer.normalize(statement)}"
+                    }
+                    else -> it
+                }
             }
 
             // Add new package suffix to the target path if the file contains the package declaration.
             val adjustedTarget =
                 if (currentPackage.isNotEmpty() && target.parent.endsWith(currentPackage)) {
-                    target.parent.resolveSibling(currentPackage + projectPathAsPackage).resolve(target.fileName).also {
-                        project.debug("Adjusting target $target for project ${project.path}, result: $it")
-                    }
+                    target.parent
+                        .resolveSibling(currentPackage + projectPathAsPackage)
+                        .resolve(target.fileName).also {
+                            project.debug("Adjusting target $target for project ${project.path}, result: $it")
+                        }
                 } else target
 
             Files.createDirectories(adjustedTarget.parent)
-            Files.write(adjustedTarget, lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
+            Files.write(
+                adjustedTarget,
+                lines,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE
+            )
         }
     }
+
 }
