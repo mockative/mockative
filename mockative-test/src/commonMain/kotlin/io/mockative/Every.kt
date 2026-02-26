@@ -6,7 +6,7 @@ package io.mockative
  * @param block the block to be executed
  * @return a [ResultBuilder] object, which allows further configuration of the recorded invocation.
  */
-fun <R> every(block: () -> R): ResultBuilder<R> {
+internal fun <R> every(block: () -> R): ResultBuilder<R> {
     try {
         val (mock, invocation) = MockState.record(block)
         val expectation = invocation.toExpectation()
@@ -23,7 +23,7 @@ fun <R> every(block: () -> R): ResultBuilder<R> {
  * @return a [SuspendResultBuilder] object, which allows further configuration of the recorded
  * invocation.
  */
-suspend fun <R> coEvery(block: suspend () -> R): SuspendResultBuilder<R> {
+internal suspend fun <R> coEvery(block: suspend () -> R): SuspendResultBuilder<R> {
     try {
         val (mock, invocation) = MockState.record(block)
         val expectation = invocation.toExpectation()

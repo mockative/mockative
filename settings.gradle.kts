@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+        // TODO: Remove this before merge
         mavenLocal()
         google()
         gradlePluginPortal()
@@ -28,5 +29,5 @@ if (mockativeProjects != null) {
     include(":mockative")
     include(":mockative-processor")
     include(":mockative-plugin")
-    include(":mockative-prefab")
+    include(":mockative-test")
 }

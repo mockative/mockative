@@ -16,28 +16,35 @@ internal fun Project.runMockative(block: () -> Unit) {
             info("Plugin enabled by presence of the Gradle property 'io.mockative.enabled=true'")
             block()
         }
+
         isMockativeDisabled -> {
             info("Plugin disabled by presence of the Gradle property 'io.mockative.enabled=false'")
         }
+
         verificationTasks.isNotEmpty() -> {
             info("Plugin enabled by detected verification tasks: ${verificationTasks.joinToString(", ") { "'${it.name}'" }}")
             block()
         }
+
         isRunningTestPrefix -> {
             info("Plugin enabled by detected 'test' prefix task")
             block()
         }
+
         isRunningTestSuffix -> {
             info("Plugin enabled by detected 'Test' suffix task")
             block()
         }
+
         isRunningTestsSuffix -> {
             info("Plugin enabled by detected 'Tests' suffix task")
             block()
         }
+
         deviceTestTasks.isNotEmpty() -> {
             warn("Using Mockative with Android connected tests requires setting the Gradle property 'io.mockative.enabled=true' when launching your Gradle task.")
         }
+
         else -> {
             info("Plugin disabled by lack of enabling condition")
         }
@@ -112,4 +119,13 @@ internal fun Project.addJVMDependencies(sourceSetName: String, reason: String? =
         implementation("org.objenesis:objenesis:3.3")
         implementation("org.javassist:javassist:3.29.2-GA")
     }
+}
+
+internal fun Project.absoluteModuleName(): String {
+    if (parent == null || parent?.name == rootProject.name) return name
+    val prev = parent!!.absoluteModuleName()
+    val value = if(prev.isBlank())
+        ""
+    else "$prev."
+    return value + name
 }

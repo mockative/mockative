@@ -12,6 +12,7 @@ group = findProperty("project.group") as String
 version = findProperty("project.version") as String
 
 repositories {
+    // TODO: Remove this before merge
     mavenLocal()
     mavenCentral()
     gradlePluginPortal()
@@ -31,7 +32,7 @@ kotlin {
 }
 
 val copySourcesToResources by tasks.registering(Copy::class) {
-    from("$rootDir/mockative-prefab/src")
+    from("$rootDir/mockative-test/src")
     into("src/main/resources/src/")
 }
 

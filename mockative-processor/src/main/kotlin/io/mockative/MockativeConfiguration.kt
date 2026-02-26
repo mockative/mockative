@@ -8,6 +8,8 @@ data class MockativeConfiguration(
     val excludeMembers: Set<MemberName>,
     val excludeKotlinDefaultMembers: Boolean,
     val stubsUnitByDefault: Boolean,
+    val moduleName: String,
+    val isMultimodule: Boolean,
 ) {
     companion object {
         private fun Map<String, String>.splitValues(key: String, delimiter: String = ","): List<String> {
@@ -29,8 +31,11 @@ data class MockativeConfiguration(
 
             val excludeKotlinDefaultMembers = opts.getBoolean("exclude-kotlin-default-members", true)
             val stubsUnitByDefault = opts.getBoolean("stubs-unit-by-default", true)
+            val moduleName = opts.getValue("module-name")
+            val isMultimodule = opts.getBoolean("is-multimodule", false)
 
-            return MockativeConfiguration(tasks, excludeMembers, excludeKotlinDefaultMembers, stubsUnitByDefault)
+
+            return MockativeConfiguration(tasks, excludeMembers, excludeKotlinDefaultMembers, stubsUnitByDefault, moduleName, isMultimodule)
         }
     }
 }

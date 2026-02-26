@@ -12,13 +12,17 @@ import java.util.jar.JarEntry
 
 class ResourceManager(private val project: Project, private val clazz: Class<*>) {
 
+    private val extension: MockativeExtension = project.extensions.getByType(MockativeExtension::class.java)
+
     fun copyRecursively(path: String, dst: Path) {
         val resourcePath = path.removePrefix("/")
         val entries = jarEntries(path)
         for (entry in entries) {
             var entryPath = entry.name.removePrefix(resourcePath).removePrefix("/")
-            if (entryPath.contains("io/mockative")) {
-                val module = project.path.split("/").takeLast(1).joinToString("").replace(":", "")
+            if (entryPath.contains("io/mockative") && extension.isMultimodule.get()) {
+                val module = project.absoluteModuleName()
+                    .replace(".", "/")
+                    .replace("-", "_")
                 entryPath = entryPath.replace("io/mockative", "io/mockative/$module")
             }
             val target = dst.resolve(entryPath)
@@ -44,11 +48,8 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
 
     // Project path uses ":" as separator, so we need to replace it with "." to make it a valid package name.
     // Project name and path can contain some other characters that are not valid in a package name so they need to be removed.
-    // e.g. ":mockative:mockative-plugin (& tests)" -> "mockative.mockativeplugintests"
-    private val projectPathAsPackage: String = project.path
-        .lowercase()
-        .replace(":", "")
-        .replace("[^a-z0-9.]".toRegex(), "")
+    // e.g. ":mockative:mockative-plugin (& tests)" -> "mockative.mockative_plugin_tests"
+    private val projectPathAsPackage: String = project.absoluteModuleName()
 
     private val packageNormalizer = Normalizer {
         basename = listOf("io", "mockative")
@@ -57,6 +58,7 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
             "Mockable",
         )
         separator = '.'
+        isApplicable = extension.isMultimodule.get()
     }
 
     // Copy the input stream to the target path, adjusting the package declaration if necessary.
@@ -85,8 +87,13 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
             // Add new package suffix to the target path if the file contains the package declaration.
             val adjustedTarget =
                 if (currentPackage.isNotEmpty() && target.parent.endsWith(currentPackage)) {
+                    currentPackage = if (extension.isMultimodule.get())
+                        "$currentPackage$projectPathAsPackage"
+                    else
+                        currentPackage
+
                     target.parent
-                        .resolveSibling(currentPackage + projectPathAsPackage)
+                        .resolveSibling(currentPackage)
                         .resolve(target.fileName).also {
                             project.debug("Adjusting target $target for project ${project.path}, result: $it")
                         }

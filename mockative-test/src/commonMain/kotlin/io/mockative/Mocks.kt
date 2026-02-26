@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * @return an instance of the mocked type
  * @see of
  */
-fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)
+internal fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)
 
 /**
  * Checks if the specified [value] is a Mockative mock instance.
@@ -23,11 +23,11 @@ fun <T : Any> mock(type: KClass<T>): T = throw NoSuchMockException(type)
  * @param value The value to check
  * @return `true` if the [value] is a Mockative mock; `false` otherwise.
  */
-fun <T : Any> isMock(value: T): Boolean {
+internal fun <T : Any> isMock(value: T): Boolean {
     val name = value.getClassName()
     return name.endsWith("Mock")
 }
 
-fun <T : Any> spy(type: KClass<T>, @Suppress("UNUSED_PARAMETER") instance: T): T = throw NoSuchMockException(type)
+internal fun <T : Any> spy(type: KClass<T>, @Suppress("UNUSED_PARAMETER") instance: T): T = throw NoSuchMockException(type)
 
-fun <T : Any> spyOn(instance: T): T = throw NoSuchMockException(instance::class)
+internal fun <T : Any> spyOn(instance: T): T = throw NoSuchMockException(instance::class)

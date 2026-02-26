@@ -68,7 +68,7 @@ class MockativeSymbolProcessor(
 
                 val annotations = AnnotationAggregator()
 
-                val file = FileSpec.builder("io.mockative", fileName)
+                val file = FileSpec.builder(PackageResolver.Mockative.resolve(), fileName)
                     .addFunctions(type.buildMockFunSpecs())
                     .addAnnotations(annotations.build())
                     .build()

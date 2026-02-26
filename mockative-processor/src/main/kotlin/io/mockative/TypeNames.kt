@@ -14,15 +14,15 @@ val HIDDEN_FROM_OBJC_ANNOTATION = ClassName("kotlin.native", "HiddenFromObjC")
 val OPT_IN = ClassName("kotlin", "OptIn")
 val DEPRECATED_ANNOTATION = Deprecated::class.asClassName()
 
-val MOCK_STATE = ClassName("io.mockative", "MockState")
+val MOCK_STATE = ClassName(PackageResolver.Mockative.resolve(), "MockState")
 
-val INVOCATION_GETTER = ClassName("io.mockative", "Invocation", "Getter")
-val INVOCATION_SETTER = ClassName("io.mockative", "Invocation", "Setter")
-val INVOCATION_FUNCTION = ClassName("io.mockative", "Invocation", "Function")
+val INVOCATION_GETTER = ClassName(PackageResolver.Mockative.resolve(), "Invocation", "Getter")
+val INVOCATION_SETTER = ClassName(PackageResolver.Mockative.resolve(), "Invocation", "Setter")
+val INVOCATION_FUNCTION = ClassName(PackageResolver.Mockative.resolve(), "Invocation", "Function")
 
 val LIST_OF = MemberName("kotlin.collections", "listOf")
 
-val CONFIGURE = MemberName("io.mockative", "configure")
+val CONFIGURE = MemberName(PackageResolver.Mockative.resolve(), "configure")
 
 val ARRAY_LIST = ClassName("kotlin.collections", "ArrayList")
 val ARRAY_DEQUE = ClassName("kotlin.collections", "ArrayDeque")

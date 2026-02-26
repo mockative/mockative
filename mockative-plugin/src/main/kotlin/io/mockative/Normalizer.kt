@@ -20,6 +20,7 @@ class Normalizer internal constructor(
     private val basename: List<String>,
     private val moduleName: String,
     private val exclusions: List<String> = emptyList(),
+    private val isApplicable: Boolean = false,
     separator: Char,
 ) {
     private val separator: String = separator.toString()
@@ -40,7 +41,7 @@ class Normalizer internal constructor(
      * @throws IllegalArgumentException if the `statement` does not start with the `basename`.
      */
     fun normalize(statement: String): String {
-        if (exclusions.any { statement.contains(it) }) return statement
+        if (exclusions.any { statement.contains(it) } || !isApplicable) return statement
         val parts = statement.split(separator)
         require(
             parts.take(basename.size).containsAll(basename)
@@ -73,6 +74,11 @@ class NormalizerBuilder internal constructor() {
     var separator: Char? = null
 
     /**
+     * Determines whether the module name should be applied to the normalized statement or not
+     */
+    var isApplicable: Boolean = false
+
+    /**
      * Builds and returns a [Normalizer] instance.
      *
      * @throws IllegalArgumentException if the separator is not set.
@@ -84,6 +90,7 @@ class NormalizerBuilder internal constructor() {
             moduleName = moduleName,
             exclusions = exclusions,
             separator = separator!!,
+            isApplicable = isApplicable
         )
     }
 }
