@@ -1,9 +1,6 @@
 package io.mockative
 
-import com.google.devtools.ksp.getAnnotationsByType
-import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.getConstructors
-import com.google.devtools.ksp.getKotlinClassByName
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isInternal
 import com.google.devtools.ksp.isPublic
@@ -19,14 +16,11 @@ import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeVariableName
-import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.TypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toTypeVariableName
-import io.mockative.kotlinpoet.fullSimpleName
-import kotlin.reflect.KClass
 
 data class ProcessableType(
     val configuration: MockativeConfiguration,
@@ -113,11 +107,11 @@ data class ProcessableType(
                 .toTypeParameterResolver()
 
             val functions = declaration.getAllFunctions()
-                // Functions from Any are manually implemented in [Mockable]
                 .filter {
                     try {
                         it.isPublic() && !it.isConstructor() && !it.modifiers.contains(Modifier.FINAL)
                     } catch (e: IllegalStateException) {
+                        log.info("Skipping function '${it.simpleName.asString()}' in type '${declaration.simpleName.asString()}' due to: ${e.message}")
                         false
                     }
                 }
@@ -129,6 +123,7 @@ data class ProcessableType(
                     try {
                         it.isPublic()
                     } catch (e: IllegalStateException) {
+                        log.info("Skipping property '${it.simpleName.asString()}' in type '${declaration.simpleName.asString()}' due to: ${e.message}")
                         false
                     }
                 }

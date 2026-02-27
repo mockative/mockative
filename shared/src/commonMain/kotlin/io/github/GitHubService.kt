@@ -2,7 +2,7 @@ package io.github
 
 import io.mockative.Mockable
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 internal class GitHubService(
     private val api: GitHubAPI,

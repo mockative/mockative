@@ -1,10 +1,12 @@
+@file:Suppress("UnstableApiUsage")
+
 plugins {
     kotlin("multiplatform")
 
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
 
-    id("io.mockative") version "3.0.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("io.mockative") version "3.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
 version = "1.0.0"
@@ -28,6 +30,10 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
 kotlin {
     jvmToolchain(11)
 
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     js(IR) {
         browser()
         nodejs()
@@ -35,7 +41,22 @@ kotlin {
 
     jvm()
 
-    androidTarget()
+    androidLibrary {
+        minSdk = 21
+        compileSdk = 36
+        namespace = "io.mockative"
+
+        // Opt-in to enable and configure host-side (unit) tests
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
+
+        // Opt-in to enable and configure device-side (instrumented) tests
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            execution = "HOST"
+        }
+    }
 
     val iosX64 = iosX64()
     val iosArm64 = iosArm64()
@@ -51,60 +72,71 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-        commonMain.configure {
+        commonMain {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
             }
         }
 
-        commonTest.configure {
+        commonTest {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
                 implementation(kotlin("test"))
             }
         }
 
-        jvmTest.configure {
+        jvmTest {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
             }
         }
 
-        androidUnitTest.configure {
+        androidMain {
             dependencies {
-                implementation(kotlin("test-junit"))
-                implementation("junit:junit:4.13.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+            }
+        }
+
+        getByName("androidHostTest") {
+            dependencies {
+            }
+        }
+
+        getByName("androidHostTest") {
+            dependencies {
+                // implementation(kotlin("test-junit"))
+                // implementation("junit:junit:4.13.2")
             }
         }
     }
 }
 
-android {
-    compileSdk = 33
-    namespace = "io.mockative"
-
-//    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-    defaultConfig {
-        minSdk = 21
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        testInstrumentationRunnerArguments["clearPackageData"] = "true"
-
-        testOptions {
-            execution = "ANDROIDX_TEST_ORCHESTRATOR"
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    dependencies {
-        androidTestImplementation("androidx.test:runner:1.5.2")
-        androidTestUtil("androidx.test:orchestrator:1.4.2")
-    }
-}
+//android {
+//    compileSdk = 33
+//    namespace = "io.mockative"
+//
+////    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+//
+//    defaultConfig {
+//        minSdk = 21
+//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//
+//        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+//
+//        testOptions {
+//            execution = "ANDROIDX_TEST_ORCHESTRATOR"
+//        }
+//    }
+//
+//    compileOptions {
+//        sourceCompatibility = JavaVersion.VERSION_11
+//        targetCompatibility = JavaVersion.VERSION_11
+//    }
+//
+//    dependencies {
+//        androidTestImplementation("androidx.test:runner:1.5.2")
+//        androidTestUtil("androidx.test:orchestrator:1.4.2")
+//    }
+//}

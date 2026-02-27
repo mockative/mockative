@@ -4,7 +4,6 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.mockative.kotlinpoet.AnnotationAggregator
@@ -30,12 +29,18 @@ class MockativeSymbolProcessor(
 
             // Resolve the processable types
             val processableTypes = ProcessableType.fromResolver(configuration, resolver)
+                .filter { type ->
+                    when (type.sourceClassName.toString()) {
+                        "kotlin.collections.MutableList" -> false
+                        else -> true
+                    }
+                }
 
             log.info("Found '${processableTypes.size}' processable types")
 
             // Generate Mock Classes
             processableTypes.forEach { type ->
-                val sourceClassName = type.sourceClassName
+                val sourceClassName = type.sourceClassName.toString()
                 val mockClassName = type.mockClassName
 
                 val packageName = mockClassName.packageName

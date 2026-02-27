@@ -4,12 +4,14 @@ import com.google.devtools.ksp.gradle.KspAATask
 import com.google.devtools.ksp.gradle.KspExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.SourceSet
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
 abstract class MockativePlugin : Plugin<Project> {
-    private val version = "3.0.1"
+    private val version = "3.1.0"
 
     override fun apply(project: Project) {
         project.pluginManager.apply("com.google.devtools.ksp")
@@ -31,7 +33,7 @@ abstract class MockativePlugin : Plugin<Project> {
         // Configure sourceSets
         project.kotlinExtension.sourceSets.configureEach { sourceSet ->
             val file = File(project.mockativeDir, "${sourceSet.name}/kotlin")
-            sourceSet.kotlin.srcDir(file)
+            sourceSet.kotlin.srcDirs(file)
         }
 
         // Prepare task to configure mockative
@@ -66,6 +68,24 @@ abstract class MockativePlugin : Plugin<Project> {
             }
         }
 
+        // Add JVM dependencies for Android targets during configuration phase
+        // This must be done before dependency resolution in newer Gradle versions
+        if (project.isMultiplatform) {
+            project.kotlinExtension.sourceSets.configureEach { sourceSet ->
+                if (sourceSet.name == "androidMain" || sourceSet.name == "jvmMain") {
+                    project.runMockative {
+                        project.addJVMDependencies(sourceSet.name)
+
+                        sourceSet.dependencies {
+                            implementation(kotlin("reflect"))
+                            implementation("org.objenesis:objenesis:3.3")
+                            implementation("org.javassist:javassist:3.29.2-GA")
+                        }
+                    }
+                }
+            }
+        }
+
         // Pass extension configuration to symbol processor through KSP `arg`s
         project.afterEvaluate {
             project.extensions.configure(KspExtension::class.java) { ksp ->
@@ -77,18 +97,6 @@ abstract class MockativePlugin : Plugin<Project> {
 
                 val stubsUnitByDefault = mockative.stubsUnitByDefault.get()
                 ksp.arg("io.mockative:mockative:stubsUnitByDefault", "$stubsUnitByDefault")
-            }
-
-            // Modifying dependencies for Android targets at task action time is prohibited, so we use this deduction
-            // during configuration time to do a "best effort" of adding JVM dependencies for Android targets as needed.
-            if (project.isMockativeEnabled) {
-                project.addJVMDependencies("androidMain", "the Gradle property 'io.mockative.enabled=true'")
-            } else if (project.isRunningTestPrefix) {
-                project.addJVMDependencies("androidMain", "task with 'test' prefix detected")
-            } else if (project.isRunningTestSuffix) {
-                project.addJVMDependencies("androidMain", "task with 'Test' suffix detected")
-            } else if (project.isRunningTestsSuffix) {
-                project.addJVMDependencies("androidMain", "task with 'Tests' suffix detected")
             }
         }
     }

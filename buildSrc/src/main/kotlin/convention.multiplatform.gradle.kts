@@ -2,7 +2,7 @@
 
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
 }
 
 kotlin {
@@ -10,7 +10,11 @@ kotlin {
 
     jvm()
 
-    androidTarget()
+    androidLibrary {
+        minSdk = 21
+        compileSdk = 36
+        namespace = "io.mockative"
+    }
 
     js(IR) {
         browser()
@@ -50,14 +54,4 @@ kotlin {
     }
 
     applyDefaultHierarchyTemplate()
-}
-
-android {
-    compileSdk = 33
-    namespace = "io.mockative"
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 }

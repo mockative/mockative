@@ -18,12 +18,12 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
-    implementation("org.jetbrains.kotlin:kotlin-allopen:2.0.21")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.0")
+    implementation("org.jetbrains.kotlin:kotlin-allopen:2.3.0")
 
-    implementation("com.android.tools.build:gradle:8.5.2")
+    implementation("com.android.tools.build:gradle:8.12.3")
 
-    implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.0.21-1.0.26")
+    implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.3.4")
 }
 
 kotlin {
