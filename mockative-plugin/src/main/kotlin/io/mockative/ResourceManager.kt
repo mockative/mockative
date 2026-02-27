@@ -50,6 +50,7 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
     // Project name and path can contain some other characters that are not valid in a package name so they need to be removed.
     // e.g. ":mockative:mockative-plugin (& tests)" -> "mockative.mockative_plugin_tests"
     private val projectPathAsPackage: String = project.absoluteModuleName()
+        .replace("-", "_")
 
     private val packageNormalizer = Normalizer {
         basename = listOf("io", "mockative")

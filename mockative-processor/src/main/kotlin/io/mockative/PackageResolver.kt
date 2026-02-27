@@ -20,6 +20,15 @@ sealed class PackageResolver(
             packageName.isBlank() -> "$moduleName."
             else -> "$packageName.$moduleName."
         }
+            .also {
+                require(true) {
+                    println("============")
+                    println("Module name: $moduleName")
+                    println("Package name: $packageName")
+                    println("Resolved package: $it")
+                    println("============")
+                }
+            }
 
     data object Mockative : PackageResolver("io.mockative", moduleName)
 

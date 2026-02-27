@@ -75,9 +75,6 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":example:feature-one"))
-                implementation(project(":example:feature-two"))
-
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
             }
@@ -85,6 +82,7 @@ kotlin {
 
         commonTest {
             dependencies {
+                implementation("io.mockative:mockative:3.1.1-SNAPSHOT")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
                 implementation(kotlin("test"))
             }
@@ -117,30 +115,6 @@ kotlin {
     }
 }
 
-//android {
-//    compileSdk = 33
-//    namespace = "io.mockative"
-//
-////    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-//
-//    defaultConfig {
-//        minSdk = 21
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//
-//        testInstrumentationRunnerArguments["clearPackageData"] = "true"
-//
-//        testOptions {
-//            execution = "ANDROIDX_TEST_ORCHESTRATOR"
-//        }
-//    }
-//
-//    compileOptions {
-//        sourceCompatibility = JavaVersion.VERSION_11
-//        targetCompatibility = JavaVersion.VERSION_11
-//    }
-//
-//    dependencies {
-//        androidTestImplementation("androidx.test:runner:1.5.2")
-//        androidTestUtil("androidx.test:orchestrator:1.4.2")
-//    }
-//}
+mockative {
+    isMultimodule = true
+}
