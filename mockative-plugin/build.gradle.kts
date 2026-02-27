@@ -12,7 +12,6 @@ group = findProperty("project.group") as String
 version = findProperty("project.version") as String
 
 repositories {
-    // TODO: Remove this before merge
     mavenLocal()
     mavenCentral()
     gradlePluginPortal()

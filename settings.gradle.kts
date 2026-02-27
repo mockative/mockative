@@ -1,7 +1,5 @@
 pluginManagement {
     repositories {
-        // TODO: Remove this before merge
-        mavenLocal()
         google()
         gradlePluginPortal()
         mavenCentral()

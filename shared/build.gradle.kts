@@ -5,8 +5,7 @@ plugins {
 
     id("com.android.kotlin.multiplatform.library")
 
-    // TODO: Put back previous version before merge
-    id("io.mockative") version "3.1.1-SNAPSHOT"
+    id("io.mockative") version "3.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
@@ -75,8 +74,9 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":example:feature-one"))
-                implementation(project(":example:feature-two"))
+                // Uncomment when version includes multimodule handling feature
+//                implementation(project(":example:feature-one"))
+//                implementation(project(":example:feature-two"))
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")

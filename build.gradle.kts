@@ -1,7 +1,5 @@
 buildscript {
     repositories {
-        // TODO: Remove this before merge
-        mavenLocal()
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -15,8 +13,6 @@ buildscript {
 
 allprojects {
     repositories {
-        // TODO: Remove this before merge
-        mavenLocal()
         google()
         mavenCentral()
     }

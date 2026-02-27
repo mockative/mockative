@@ -5,8 +5,7 @@ plugins {
 
     id("com.android.kotlin.multiplatform.library")
 
-    // TODO: Put back previous version before merge
-    id("io.mockative") version "3.1.1-SNAPSHOT"
+    id("io.mockative") version "3.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
@@ -82,7 +81,7 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation("io.mockative:mockative:3.1.1-SNAPSHOT")
+                implementation("io.mockative:mockative:3.1.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
                 implementation(kotlin("test"))
             }
@@ -116,5 +115,6 @@ kotlin {
 }
 
 mockative {
-    isMultimodule = true
+    // Uncomment when version includes multimodule handling feature
+//    isMultimodule = true
 }
