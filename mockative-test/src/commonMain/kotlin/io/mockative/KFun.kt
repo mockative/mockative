@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.mockative
 
 // This import must be kept otherwise compilation fails when multimodule mode is activated
