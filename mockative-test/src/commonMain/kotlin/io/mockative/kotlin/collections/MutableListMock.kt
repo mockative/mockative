@@ -2,18 +2,6 @@ package io.mockative.kotlin.collections
 
 import io.mockative.Invocation
 import io.mockative.MockState
-import kotlin.Any
-import kotlin.Boolean
-import kotlin.IgnorableReturnValue
-import kotlin.Int
-import kotlin.String
-import kotlin.Suppress
-import kotlin.Unit
-import kotlin.UnsafeVariance
-import kotlin.collections.Collection
-import kotlin.collections.MutableList
-import kotlin.collections.MutableListIterator
-import kotlin.collections.listOf
 
 class MutableListMock<E>(private val spyInstance: MutableList<E>? = null) : MutableList<E> {
     override fun add(element: @UnsafeVariance E): Boolean = MockState.invoke<Boolean>(this,

@@ -38,7 +38,7 @@ object Matchers {
  * @param T The type of the parameter to match
  * @return A generated value of the specified type [T]
  */
-inline fun <reified T> any(): T {
+internal inline fun <reified T> any(): T {
     return any(valueOf<T>())
 }
 
@@ -49,7 +49,7 @@ inline fun <reified T> any(): T {
  * member being stubbed.
  * @return The [validValue]
  */
-inline fun <reified T> any(validValue: T): T {
+internal inline fun <reified T> any(validValue: T): T {
     return Matchers.enqueue(AnyMatcher(validValue))
 }
 
@@ -58,7 +58,7 @@ inline fun <reified T> any(validValue: T): T {
  * @param T The type of value to match
  * @return A generated value of the specified type [T]
  */
-inline fun <reified T : Any> instanceOf(): T {
+internal inline fun <reified T : Any> instanceOf(): T {
     return instanceOf(valueOf<T>())
 }
 
@@ -70,7 +70,7 @@ inline fun <reified T : Any> instanceOf(): T {
  * member being stubbed.
  * @return The [validValue]
  */
-inline fun <reified T : Any> instanceOf(validValue: T): T {
+internal inline fun <reified T : Any> instanceOf(validValue: T): T {
     return Matchers.enqueue(InstanceOfMatcher(validValue, T::class))
 }
 
@@ -79,7 +79,7 @@ inline fun <reified T : Any> instanceOf(validValue: T): T {
  * @param T The type of value to match
  * @return A generated value of the specified type [T]
  */
-inline fun <reified T : Any> notInstanceOf(): T {
+internal inline fun <reified T : Any> notInstanceOf(): T {
     return notInstanceOf(valueOf<T>())
 }
 
@@ -91,7 +91,7 @@ inline fun <reified T : Any> notInstanceOf(): T {
  * member being stubbed.
  * @return The [validValue]
  */
-inline fun <reified T : Any> notInstanceOf(validValue: T): T {
+internal inline fun <reified T : Any> notInstanceOf(validValue: T): T {
     return Matchers.enqueue(NotInstanceOfMatcher(validValue, T::class))
 }
 
@@ -101,7 +101,7 @@ inline fun <reified T : Any> notInstanceOf(validValue: T): T {
  * @param value The value to match.
  * @return The [value]
  */
-inline fun <reified T> eq(value: T): T {
+internal inline fun <reified T> eq(value: T): T {
     return Matchers.enqueue(EqualsMatcher(value))
 }
 
@@ -111,7 +111,7 @@ inline fun <reified T> eq(value: T): T {
  * @param value The value to match.
  * @return The [value]
  */
-inline fun <reified T> ne(value: T): T {
+internal inline fun <reified T> ne(value: T): T {
     return Matchers.enqueue(NotEqualsMatcher(value))
 }
 
@@ -122,7 +122,7 @@ inline fun <reified T> ne(value: T): T {
  * @return The first value in [values].
  * @see in
  */
-inline fun <reified T> oneOf(vararg values: T): T {
+internal inline fun <reified T> oneOf(vararg values: T): T {
     return Matchers.enqueue(OneOfMatcher(values.toList()))
 }
 
@@ -133,7 +133,7 @@ inline fun <reified T> oneOf(vararg values: T): T {
  * @return The first value in [values].
  * @see oneOf
  */
-inline fun <reified T> `in`(values: Iterable<T>): T {
+internal inline fun <reified T> `in`(values: Iterable<T>): T {
     return Matchers.enqueue(OneOfMatcher(values.toList()))
 }
 
@@ -144,7 +144,7 @@ inline fun <reified T> `in`(values: Iterable<T>): T {
  * @return The first value in [values].
  * @see notIn
  */
-inline fun <reified T> notOneOf(vararg values: T): T {
+internal inline fun <reified T> notOneOf(vararg values: T): T {
     return Matchers.enqueue(NotOneOfMatcher(values.toList()))
 }
 
@@ -155,7 +155,7 @@ inline fun <reified T> notOneOf(vararg values: T): T {
  * @return The first value in [values].
  * @see notOneOf
  */
-inline fun <reified T> notIn(values: Iterable<T>): T {
+internal inline fun <reified T> notIn(values: Iterable<T>): T {
     return Matchers.enqueue(NotOneOfMatcher(values.toList()))
 }
 
@@ -165,7 +165,7 @@ inline fun <reified T> notIn(values: Iterable<T>): T {
  * @param value The value to match values greater than.
  * @return The [value]
  */
-inline fun <reified T : Comparable<T>> gt(value: T): T {
+internal inline fun <reified T : Comparable<T>> gt(value: T): T {
     return Matchers.enqueue(ComparableMatcher(T::class, value, ">") { a, b -> a > b })
 }
 
@@ -175,7 +175,7 @@ inline fun <reified T : Comparable<T>> gt(value: T): T {
  * @param value The value to match values greater than or equal to.
  * @return The [value]
  */
-inline fun <reified T : Comparable<T>> gte(value: T): T {
+internal inline fun <reified T : Comparable<T>> gte(value: T): T {
     return Matchers.enqueue(ComparableMatcher(T::class, value, ">=") { a, b -> a >= b })
 }
 
@@ -185,7 +185,7 @@ inline fun <reified T : Comparable<T>> gte(value: T): T {
  * @param value The value to match values less than.
  * @return The [value]
  */
-inline fun <reified T : Comparable<T>> lt(value: T): T {
+internal inline fun <reified T : Comparable<T>> lt(value: T): T {
     return Matchers.enqueue(ComparableMatcher(T::class, value, "<") { a, b -> a < b })
 }
 
@@ -195,7 +195,7 @@ inline fun <reified T : Comparable<T>> lt(value: T): T {
  * @param value The value to match values less than.
  * @return The [value]
  */
-inline fun <reified T : Comparable<T>> lte(value: T): T {
+internal inline fun <reified T : Comparable<T>> lte(value: T): T {
     return Matchers.enqueue(ComparableMatcher(T::class, value, "<=") { a, b -> a <= b })
 }
 
@@ -205,7 +205,7 @@ inline fun <reified T : Comparable<T>> lte(value: T): T {
  * @param predicate The predicate to match.
  * @return A generated value of the specified type [T]
  */
-inline fun <reified T> matches(noinline predicate: (T) -> Boolean): T {
+internal inline fun <reified T> matches(noinline predicate: (T) -> Boolean): T {
     return matches(valueOf<T>(), predicate)
 }
 
@@ -217,7 +217,7 @@ inline fun <reified T> matches(noinline predicate: (T) -> Boolean): T {
  * @param predicate The predicate to match.
  * @return The [placeholder]
  */
-inline fun <reified T> matches(placeholder: T, noinline predicate: (T) -> Boolean): T {
+internal inline fun <reified T> matches(placeholder: T, noinline predicate: (T) -> Boolean): T {
     return Matchers.enqueue(PredicateMatcher(T::class, placeholder, predicate))
 }
 
@@ -227,7 +227,7 @@ inline fun <reified T> matches(placeholder: T, noinline predicate: (T) -> Boolea
  * @param predicate The predicate to match values that don't match.
  * @return A generated value of the specified type [T]
  */
-inline fun <reified T> notMatches(noinline predicate: (T) -> Boolean): T {
+internal inline fun <reified T> notMatches(noinline predicate: (T) -> Boolean): T {
     return notMatches(valueOf<T>(), predicate)
 }
 
@@ -239,6 +239,6 @@ inline fun <reified T> notMatches(noinline predicate: (T) -> Boolean): T {
  * @param predicate The predicate to match values that don't match.
  * @return The [placeholder]
  */
-inline fun <reified T> notMatches(placeholder: T, noinline predicate: (T) -> Boolean): T {
+internal inline fun <reified T> notMatches(placeholder: T, noinline predicate: (T) -> Boolean): T {
     return Matchers.enqueue(NotPredicateMatcher(T::class, placeholder, predicate))
 }

@@ -4,8 +4,6 @@ import com.google.devtools.ksp.gradle.KspAATask
 import com.google.devtools.ksp.gradle.KspExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.SourceSet
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
@@ -96,7 +94,11 @@ abstract class MockativePlugin : Plugin<Project> {
                 ksp.arg("io.mockative:mockative:exclude-kotlin-default-members", excludeKotlinDefaultMembers)
 
                 val stubsUnitByDefault = mockative.stubsUnitByDefault.get()
-                ksp.arg("io.mockative:mockative:stubsUnitByDefault", "$stubsUnitByDefault")
+                ksp.arg("io.mockative:mockative:stubs-unit-by-default", "$stubsUnitByDefault")
+
+                ksp.arg("io.mockative:mockative:module-name", project.absoluteModuleName())
+
+                ksp.arg("io.mockative:mockative:is-multimodule", "${mockative.isMultimodule.get()}")
             }
         }
     }

@@ -1,28 +1,40 @@
 package io.mockative
 
 import org.gradle.api.Project
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.net.JarURLConnection
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
 import java.util.jar.JarEntry
 
 class ResourceManager(private val project: Project, private val clazz: Class<*>) {
+
+    private val extension: MockativeExtension = project.extensions.getByType(MockativeExtension::class.java)
+
     fun copyRecursively(path: String, dst: Path) {
         val resourcePath = path.removePrefix("/")
         val entries = jarEntries(path)
         for (entry in entries) {
-            val entryPath = entry.name.removePrefix(resourcePath).removePrefix("/")
+            var entryPath = entry.name.removePrefix(resourcePath).removePrefix("/")
+            if (entryPath.contains("io/mockative") && extension.isMultimodule.get()) {
+                val module = project.absoluteModuleName()
+                    .replace(".", "/")
+                    .replace("-", "_")
+                entryPath = entryPath.replace("io/mockative", "io/mockative/$module")
+            }
             val target = dst.resolve(entryPath)
-            Files.createDirectories(target.parent)
 
             clazz.getResourceAsStream("/${entry.name}").use {
                 project.debug("Copying ${entry.name} to $target ($entryPath)")
-                Files.copy(it, target, StandardCopyOption.REPLACE_EXISTING)
+                copyAndAdjustPackage(it, target)
             }
         }
     }
 
+    @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     private fun jarEntries(path: String): Sequence<JarEntry> {
         val resourcePath = path.removePrefix("/")
         val rp = "/${resourcePath.substringBefore("/")}"
@@ -33,4 +45,70 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
         return jarEntries.asSequence()
             .filter { !it.isDirectory && it.name.startsWith(resourcePath) }
     }
+
+    // Project path uses ":" as separator, so we need to replace it with "." to make it a valid package name.
+    // Project name and path can contain some other characters that are not valid in a package name so they need to be removed.
+    // e.g. ":mockative:mockative-plugin (& tests)" -> "mockative.mockative_plugin_tests"
+    private val projectPathAsPackage: String = project.absoluteModuleName()
+        .replace("-", "_")
+
+    private val packageNormalizer = Normalizer {
+        basename = listOf("io", "mockative")
+        moduleName = projectPathAsPackage
+        exclusions += listOf(
+            "Mockable",
+        )
+        separator = '.'
+        isApplicable = extension.isMultimodule.get()
+    }
+
+    // Copy the input stream to the target path, adjusting the package declaration if necessary.
+    // This is being copied to each module that uses this plugin, so to ensure that there are no duplicates,
+    // the package of copied file is adjusted by adding the module's path.
+    private fun copyAndAdjustPackage(inputStream: InputStream, target: Path) {
+        BufferedReader(InputStreamReader(inputStream)).use { reader ->
+            var currentPackage = ""
+
+            val lines = reader.lineSequence().toList().map {
+                when {
+                    // Extract the package from the line if it contains a package declaration and adjust it by adding the module's path .
+                    it.matches("^package .*$".toRegex()) -> {
+                        currentPackage = it.removePrefix("package ").removeSuffix(";")
+                        "package ${packageNormalizer.normalize(currentPackage)}"
+                    }
+                    // Include module's path in the import statements that end with pascal case i.e. objects, classes
+                    it.startsWith("import io.mockative.") -> {
+                        val statement = it.removePrefix("import ")
+                        "import ${packageNormalizer.normalize(statement)}"
+                    }
+                    else -> it
+                }
+            }
+
+            // Add new package suffix to the target path if the file contains the package declaration.
+            val adjustedTarget =
+                if (currentPackage.isNotEmpty() && target.parent.endsWith(currentPackage)) {
+                    currentPackage = if (extension.isMultimodule.get())
+                        "$currentPackage$projectPathAsPackage"
+                    else
+                        currentPackage
+
+                    target.parent
+                        .resolveSibling(currentPackage)
+                        .resolve(target.fileName).also {
+                            project.debug("Adjusting target $target for project ${project.path}, result: $it")
+                        }
+                } else target
+
+            Files.createDirectories(adjustedTarget.parent)
+            Files.write(
+                adjustedTarget,
+                lines,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE
+            )
+        }
+    }
+
 }

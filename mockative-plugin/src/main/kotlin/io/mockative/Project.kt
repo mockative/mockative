@@ -113,3 +113,12 @@ internal fun Project.addJVMDependencies(sourceSetName: String, reason: String? =
         implementation("org.javassist:javassist:3.29.2-GA")
     }
 }
+
+internal fun Project.absoluteModuleName(): String {
+    if (parent == null || parent?.name == rootProject.name) return name
+    val prev = parent!!.absoluteModuleName()
+    val value = if(prev.isBlank())
+        ""
+    else "$prev."
+    return value + name
+}

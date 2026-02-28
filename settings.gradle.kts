@@ -25,6 +25,9 @@ if (mockativeProjects != null) {
     }
 } else {
     include(":shared")
+    include(":example")
+    include(":example:feature-one")
+    include(":example:feature-two")
     include(":mockative")
     include(":mockative-processor")
     include(":mockative-plugin")
