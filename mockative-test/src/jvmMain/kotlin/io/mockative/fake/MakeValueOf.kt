@@ -26,7 +26,7 @@ internal actual fun <T> makeValueOf(type: KClass<*>): T {
 
 internal fun makeValueOf(clazz: Class<*>): Any? {
     return when {
-        clazz.isArray -> Array.newInstance(clazz.componentType, 0)
+        clazz.isArray -> Array.newInstance(clazz.componentType!!, 0)
 
         isSealed(clazz) -> getPermittedSubclasses(clazz)
             .firstNotNullOf { runCatching { makeValueOf(it) }.getOrNull() }
