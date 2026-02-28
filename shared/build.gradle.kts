@@ -5,7 +5,7 @@ plugins {
 
     id("com.android.kotlin.multiplatform.library")
 
-    id("io.mockative") version "3.1.0"
+    id("io.mockative") version "3.2.2"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
@@ -74,9 +74,8 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                // Uncomment when version includes multimodule handling feature
-//                implementation(project(":example:feature-one"))
-//                implementation(project(":example:feature-two"))
+                implementation(project(":example:feature-one"))
+                implementation(project(":example:feature-two"))
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
