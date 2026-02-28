@@ -5,7 +5,7 @@ plugins {
 
     id("com.android.kotlin.multiplatform.library")
 
-    id("io.mockative") version "3.1.0"
+    id("io.mockative") version "3.2.2"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
@@ -81,7 +81,7 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation("io.mockative:mockative:3.1.0")
+                implementation("io.mockative:mockative:3.2.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
                 implementation(kotlin("test"))
             }
@@ -115,6 +115,5 @@ kotlin {
 }
 
 mockative {
-    // Uncomment when version includes multimodule handling feature
-//    isMultimodule = true
+    isMultimodule = true
 }
