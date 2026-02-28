@@ -10,7 +10,7 @@ plugins {
 }
 
 version = "1.0.0"
-group = "io.mockative"
+group = "com.mockative.example.feature_two"
 
 detekt {
     buildUponDefaultConfig = true
@@ -44,7 +44,7 @@ kotlin {
     androidLibrary {
         minSdk = 21
         compileSdk = 36
-        namespace = "io.mockative"
+        namespace = "com.mockative.example.feature_two"
 
         // Opt-in to enable and configure host-side (unit) tests
         withHostTest {

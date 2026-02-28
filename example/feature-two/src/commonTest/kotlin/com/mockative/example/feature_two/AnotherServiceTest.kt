@@ -1,9 +1,9 @@
-package io.mockative.example.feature_two
+package com.mockative.example.feature_two
 
-import io.mockative.coEvery
-import io.mockative.every
-import io.mockative.mock
-import io.mockative.of
+import io.mockative.example.feature_two.coEvery
+import io.mockative.example.feature_two.every
+import io.mockative.example.feature_two.mock
+import io.mockative.example.feature_two.of
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

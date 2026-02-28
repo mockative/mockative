@@ -1,8 +1,8 @@
-package io.mockative.example.feature_one
+package com.mockative.example.feature_one
 
-import io.mockative.every
-import io.mockative.mock
-import io.mockative.of
+import io.mockative.example.feature_one.every
+import io.mockative.example.feature_one.mock
+import io.mockative.example.feature_one.of
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

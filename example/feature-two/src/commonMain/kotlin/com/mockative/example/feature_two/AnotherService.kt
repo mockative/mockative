@@ -1,4 +1,4 @@
-package io.mockative.example.feature_two
+package com.mockative.example.feature_two
 
 import io.mockative.Mockable
 

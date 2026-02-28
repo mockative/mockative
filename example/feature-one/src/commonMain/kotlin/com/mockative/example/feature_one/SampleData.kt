@@ -1,4 +1,4 @@
-package io.mockative.example.feature_one
+package com.mockative.example.feature_one
 
 data class SampleData(
     val id: Int,
