@@ -19,7 +19,7 @@ kotlin {
                 implementation(kotlin("metadata-jvm"))
 
                 // KSP
-                implementation("com.google.devtools.ksp:symbol-processing-api:2.3.4")
+                implementation("com.google.devtools.ksp:symbol-processing-api:2.3.7")
 
                 // KotlinPoet
                 implementation("com.squareup:kotlinpoet:2.2.0")
