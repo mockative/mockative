@@ -10,7 +10,7 @@ pluginManagement {
         kotlin("multiplatform") version "2.3.0" apply false
         kotlin("plugin.allopen") version "2.3.0" apply false
 
-        id("com.google.devtools.ksp") version "2.3.4" apply false
+        id("com.google.devtools.ksp") version "2.3.7" apply false
 
         id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     }
