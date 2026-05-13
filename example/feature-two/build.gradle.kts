@@ -41,9 +41,9 @@ kotlin {
 
     jvm()
 
-    androidLibrary {
+    android {
         minSdk = 21
-        compileSdk = 36
+        compileSdk = 37
         namespace = "com.mockative.example.feature_two"
 
         // Opt-in to enable and configure host-side (unit) tests
