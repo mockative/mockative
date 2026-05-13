@@ -1,6 +1,7 @@
 package io.mockative
 
 import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.processing.PlatformInfo
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
@@ -13,6 +14,6 @@ class MockativeSymbolProcessorProvider : SymbolProcessorProvider {
         log = environment.logger
         options = environment.options
 
-        return MockativeSymbolProcessor(environment.codeGenerator, environment.options)
+        return MockativeSymbolProcessor(environment.codeGenerator, environment.options, environment.platforms)
     }
 }

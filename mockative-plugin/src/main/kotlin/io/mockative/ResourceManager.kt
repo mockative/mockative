@@ -14,11 +14,15 @@ class ResourceManager(private val project: Project, private val clazz: Class<*>)
 
     private val extension: MockativeExtension = project.extensions.getByType(MockativeExtension::class.java)
 
-    fun copyRecursively(path: String, dst: Path) {
+    fun copyRecursively(path: String, dst: Path, exclude: Set<String> = emptySet()) {
         val resourcePath = path.removePrefix("/")
         val entries = jarEntries(path)
         for (entry in entries) {
             var entryPath = entry.name.removePrefix(resourcePath).removePrefix("/")
+            if (exclude.any { entryPath.startsWith(it) }) {
+                project.debug("Excluding ${entry.name}")
+                continue
+            }
             if (entryPath.contains("io/mockative") && extension.isMultimodule.get()) {
                 val module = project.absoluteModuleName()
                     .replace(".", "/")

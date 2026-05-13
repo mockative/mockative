@@ -41,7 +41,12 @@ abstract class MockativeProcessRuntimeTask : DefaultTask() {
 
             val dst = mockativeDir.toPath()
             project.debug("Copying resources to '$dst'")
-            resources.copyRecursively("/src", dst)
+
+            val exclude = setOf(
+                "nativeMain/kotlin/io/mockative/fake/MakeValueOf.kt",
+            )
+
+            resources.copyRecursively("/src", dst, exclude)
 
             // This check enables linters that perform Kotlin compilation like Detekt, by replacing with Android
             // implementation of `mock` with a stub, since the Android Gradle Plugin prohibits modifying Android
