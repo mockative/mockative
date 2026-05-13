@@ -30,6 +30,7 @@ sealed class ValueOfType {
     data class Concrete(val className: ClassName) : ValueOfType()
     data class SealedLeaf(val sealedClassName: ClassName, val leafClassName: ClassName) : ValueOfType()
     data class NeedsFake(val declaration: KSClassDeclaration, val className: ClassName) : ValueOfType()
+    data class FunctionType(val arity: Int, val isSuspend: Boolean) : ValueOfType()
 }
 
 class NativeMakeValueOfGenerator(
@@ -92,6 +93,9 @@ class NativeMakeValueOfGenerator(
         return result
     }
 
+    private val functionTypePattern = Regex("""^kotlin\.Function(\d+)$""")
+    private val suspendFunctionTypePattern = Regex("""^kotlin\.coroutines\.SuspendFunction(\d+)$""")
+
     private fun collectType(
         declaration: KSClassDeclaration,
         seen: MutableSet<String>,
@@ -100,6 +104,18 @@ class NativeMakeValueOfGenerator(
         val qualifiedName = declaration.qualifiedName?.asString() ?: return
         if (qualifiedName in standardTypes) return
         if (qualifiedName in seen) return
+
+        functionTypePattern.matchEntire(qualifiedName)?.let { match ->
+            seen.add(qualifiedName)
+            result.add(ValueOfType.FunctionType(match.groupValues[1].toInt(), isSuspend = false))
+            return
+        }
+        suspendFunctionTypePattern.matchEntire(qualifiedName)?.let { match ->
+            seen.add(qualifiedName)
+            result.add(ValueOfType.FunctionType(match.groupValues[1].toInt(), isSuspend = true))
+            return
+        }
+
         if (declaration.typeParameters.isNotEmpty()) return
         seen.add(qualifiedName)
 
@@ -112,6 +128,7 @@ class NativeMakeValueOfGenerator(
                 if (leaf != null) {
                     val leafClassName = leaf.toClassName()
                     result.add(ValueOfType.SealedLeaf(className, leafClassName))
+                    collectIntermediateSealedTypes(declaration, seen, result)
                     val leafQN = leaf.qualifiedName?.asString() ?: ""
                     if (leafQN !in seen) {
                         seen.add(leafQN)
@@ -150,6 +167,32 @@ class NativeMakeValueOfGenerator(
             }
         }
         return null
+    }
+
+    private fun collectIntermediateSealedTypes(
+        declaration: KSClassDeclaration,
+        seen: MutableSet<String>,
+        result: MutableList<ValueOfType>,
+    ) {
+        for (subclass in declaration.getSealedSubclasses()) {
+            val subQN = subclass.qualifiedName?.asString() ?: continue
+            if (subQN in seen) continue
+            if (subclass.modifiers.contains(Modifier.SEALED)) {
+                val leaf = findConcreteLeaf(subclass)
+                if (leaf != null) {
+                    seen.add(subQN)
+                    result.add(ValueOfType.SealedLeaf(subclass.toClassName(), leaf.toClassName()))
+                    collectIntermediateSealedTypes(subclass, seen, result)
+                }
+            }
+        }
+    }
+
+    private fun buildFunctionLiteral(arity: Int, isSuspend: Boolean): String {
+        val params = if (arity == 0) "" else (0 until arity).joinToString(", ") { "_: Any?" } + " -> "
+        val body = "throw UnsupportedOperationException()"
+        val lambda = "{ $params$body }"
+        return if (isSuspend) "suspend $lambda" else lambda
     }
 
     private fun fakeSimpleName(className: ClassName): String {
@@ -314,6 +357,18 @@ class NativeMakeValueOfGenerator(
                         "%T::class -> kotlin.native.internal.createUninitializedInstance<%T>() as T",
                         type.className,
                         fakeClassName(type.className),
+                    )
+                }
+                is ValueOfType.FunctionType -> {
+                    val klassName = if (type.isSuspend) {
+                        ClassName("kotlin.coroutines", "SuspendFunction${type.arity}")
+                    } else {
+                        ClassName("kotlin", "Function${type.arity}")
+                    }
+                    val lambda = buildFunctionLiteral(type.arity, type.isSuspend)
+                    whenBlock.addStatement(
+                        "%T::class -> ($lambda) as T",
+                        klassName,
                     )
                 }
             }
