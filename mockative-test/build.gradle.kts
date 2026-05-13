@@ -37,13 +37,3 @@ kotlin {
         }
     }
 }
-
-//afterEvaluate {
-//    kotlin.targets["metadata"].compilations.forEach { compilation ->
-//        compilation.compileTaskProvider {
-//            compilation.compileDependencyFiles = files(
-//                compilation.compileDependencyFiles.filterNot { it.absolutePath.endsWith("klib/common/stdlib") }
-//            )
-//        }
-//    }
-//}
