@@ -10,8 +10,20 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.Modifier
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STAR
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
+import com.squareup.kotlinpoet.ksp.writeTo
 
 sealed class ValueOfType {
     data class Concrete(val className: ClassName) : ValueOfType()
@@ -40,6 +52,10 @@ class NativeMakeValueOfGenerator(
 
     private val fakePackage = "${PackageResolver.Mockative.resolve()}fake.generated"
     private val makeValueOfPackage = "${PackageResolver.Mockative.resolve()}fake"
+
+    private val valueOfMember = ClassName(makeValueOfPackage, "valueOf")
+    private val valueCreationNotSupportedException =
+        ClassName(PackageResolver.Mockative.resolve().removeSuffix("."), "ValueCreationNotSupportedException")
 
     fun generate() {
         val valueOfTypes = collectValueOfTypes()
@@ -139,142 +155,165 @@ class NativeMakeValueOfGenerator(
         return "Fake__${className.simpleNames.joinToString("_")}"
     }
 
+    private fun fakeClassName(className: ClassName): ClassName {
+        return ClassName(fakePackage, fakeSimpleName(className))
+    }
+
     private fun generateFakeClass(fake: ValueOfType.NeedsFake) {
         val declaration = fake.declaration
         val className = fake.className
-        val simpleName = fakeSimpleName(className)
+        val fakeName = fakeSimpleName(className)
 
-        val sb = StringBuilder()
-        sb.appendLine("@file:Suppress(\"INVISIBLE_MEMBER\", \"INVISIBLE_REFERENCE\")")
-        sb.appendLine()
-        sb.appendLine("package $fakePackage")
-        sb.appendLine()
-        sb.appendLine("import ${className.canonicalName}")
-        sb.appendLine("import ${makeValueOfPackage}.valueOf")
-        sb.appendLine()
+        val suppressAnnotation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+            .addMember("%S", "INVISIBLE_MEMBER")
+            .addMember("%S", "INVISIBLE_REFERENCE")
+            .build()
+
+        val typeSpecBuilder = TypeSpec.classBuilder(fakeName)
+            .addModifiers(KModifier.INTERNAL)
 
         if (declaration.classKind == ClassKind.INTERFACE) {
-            sb.appendLine("internal class $simpleName : ${className.simpleName} {")
+            typeSpecBuilder.addSuperinterface(className)
         } else {
-            sb.appendLine("internal class $simpleName : ${className.simpleName}() {")
+            typeSpecBuilder.superclass(className)
         }
 
         for (func in declaration.getDeclaredFunctions()) {
             if (!func.isAbstract) continue
-            appendFakeFunction(sb, func)
+            typeSpecBuilder.addFunction(buildFakeFunction(func))
         }
 
         for (prop in declaration.getDeclaredProperties()) {
             if (!prop.isAbstract()) continue
-            appendFakeProperty(sb, prop)
+            typeSpecBuilder.addProperty(buildFakeProperty(prop))
         }
 
-        sb.appendLine("}")
+        val fileSpec = FileSpec.builder(fakePackage, fakeName)
+            .addAnnotation(suppressAnnotation)
+            .addType(typeSpecBuilder.build())
+            .build()
 
-        val file = codeGenerator.createNewFile(
-            dependencies = Dependencies(aggregating = false),
-            packageName = fakePackage,
-            fileName = simpleName,
-        )
-        file.write(sb.toString().toByteArray())
-        file.close()
+        fileSpec.writeTo(codeGenerator, Dependencies(aggregating = false))
     }
 
-    private fun appendFakeFunction(sb: StringBuilder, func: KSFunctionDeclaration) {
+    private fun buildFakeFunction(func: KSFunctionDeclaration): FunSpec {
         val name = func.simpleName.asString()
         val returnType = func.returnType?.resolve()
         val returnTypeName = returnType?.declaration?.qualifiedName?.asString() ?: "kotlin.Unit"
         val isSuspend = func.modifiers.contains(Modifier.SUSPEND)
 
-        val params = func.parameters.joinToString(", ") { param ->
+        val builder = FunSpec.builder(name)
+            .addModifiers(KModifier.OVERRIDE)
+
+        if (isSuspend) {
+            builder.addModifiers(KModifier.SUSPEND)
+        }
+
+        for (param in func.parameters) {
             val paramName = param.name?.asString() ?: "_"
-            val paramType = param.type.resolve().declaration.qualifiedName?.asString() ?: "Any"
-            val nullable = if (param.type.resolve().isMarkedNullable) "?" else ""
-            "$paramName: $paramType$nullable"
+            val paramType = param.type.toTypeName()
+            builder.addParameter(paramName, paramType)
         }
 
-        val suspendModifier = if (isSuspend) "suspend " else ""
-        val nullable = if (returnType?.isMarkedNullable == true) "?" else ""
-
-        if (returnTypeName == "kotlin.Unit") {
-            sb.appendLine("    override ${suspendModifier}fun $name($params) {}")
-        } else {
-            sb.appendLine("    @Suppress(\"UNCHECKED_CAST\")")
-            sb.appendLine("    override ${suspendModifier}fun $name($params): $returnTypeName$nullable = valueOf<$returnTypeName$nullable>() as $returnTypeName$nullable")
+        if (returnTypeName != "kotlin.Unit") {
+            val resolvedReturnType = func.returnType!!.toTypeName()
+            builder.returns(resolvedReturnType)
+            builder.addAnnotation(
+                AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+                    .addMember("%S", "UNCHECKED_CAST")
+                    .build()
+            )
+            builder.addStatement(
+                "return valueOf<%T>() as %T",
+                resolvedReturnType,
+                resolvedReturnType,
+            )
         }
+
+        return builder.build()
     }
 
-    private fun appendFakeProperty(sb: StringBuilder, prop: KSPropertyDeclaration) {
+    private fun buildFakeProperty(prop: KSPropertyDeclaration): PropertySpec {
         val name = prop.simpleName.asString()
-        val type = prop.type.resolve()
-        val typeName = type.declaration.qualifiedName?.asString() ?: "Any"
-        val nullable = if (type.isMarkedNullable) "?" else ""
-        sb.appendLine("    @Suppress(\"UNCHECKED_CAST\")")
-        sb.appendLine("    override val $name: $typeName$nullable get() = valueOf<$typeName$nullable>() as $typeName$nullable")
+        val typeName = prop.type.toTypeName()
+
+        return PropertySpec.builder(name, typeName)
+            .addModifiers(KModifier.OVERRIDE)
+            .addAnnotation(
+                AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+                    .addMember("%S", "UNCHECKED_CAST")
+                    .build()
+            )
+            .getter(
+                FunSpec.getterBuilder()
+                    .addStatement("return valueOf<%T>() as %T", typeName, typeName)
+                    .build()
+            )
+            .build()
     }
 
     private fun generateMakeValueOf(valueOfTypes: List<ValueOfType>) {
-        val sb = StringBuilder()
-        sb.appendLine("@file:Suppress(\"INVISIBLE_MEMBER\", \"INVISIBLE_REFERENCE\")")
-        sb.appendLine()
-        sb.appendLine("package $makeValueOfPackage")
-        sb.appendLine()
-        sb.appendLine("import kotlin.reflect.KClass")
+        val suppressAnnotation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+            .addMember("%S", "INVISIBLE_MEMBER")
+            .addMember("%S", "INVISIBLE_REFERENCE")
+            .build()
 
-        // Import all types referenced in the when block
-        val imports = mutableSetOf<String>()
-        for (type in valueOfTypes) {
-            when (type) {
-                is ValueOfType.Concrete -> imports.add(type.className.canonicalName)
-                is ValueOfType.SealedLeaf -> {
-                    imports.add(type.sealedClassName.canonicalName)
-                    imports.add(type.leafClassName.canonicalName)
-                }
-                is ValueOfType.NeedsFake -> {
-                    imports.add(type.className.canonicalName)
-                    imports.add("$fakePackage.${fakeSimpleName(type.className)}")
-                }
-            }
-        }
-        for (import in imports.sorted()) {
-            sb.appendLine("import $import")
-        }
+        val funBuilder = FunSpec.builder("makeValueOf")
+            .addModifiers(KModifier.INTERNAL, KModifier.ACTUAL)
+            .addTypeVariable(TypeVariableName("T"))
+            .addParameter("type", KCLASS.parameterizedBy(STAR))
+            .returns(TypeVariableName("T"))
+            .addAnnotation(
+                AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+                    .addMember("%S", "UNCHECKED_CAST")
+                    .build()
+            )
+            .addAnnotation(
+                AnnotationSpec.builder(OPT_IN)
+                    .addMember("kotlin.native.internal.InternalForKotlinNative::class")
+                    .build()
+            )
 
-        sb.appendLine()
-        sb.appendLine("@Suppress(\"UNCHECKED_CAST\")")
-        sb.appendLine("@OptIn(kotlin.native.internal.InternalForKotlinNative::class)")
-        sb.appendLine("internal actual fun <T> makeValueOf(type: KClass<*>): T {")
-        sb.appendLine("    return when (type) {")
+        val whenBlock = CodeBlock.builder()
+            .beginControlFlow("return when (type)")
 
         for (type in valueOfTypes) {
             when (type) {
                 is ValueOfType.Concrete -> {
-                    val simple = type.className.simpleName
-                    sb.appendLine("        ${simple}::class -> kotlin.native.internal.createUninitializedInstance<${simple}>() as T")
+                    whenBlock.addStatement(
+                        "%T::class -> kotlin.native.internal.createUninitializedInstance<%T>() as T",
+                        type.className,
+                        type.className,
+                    )
                 }
                 is ValueOfType.SealedLeaf -> {
-                    val sealedSimple = type.sealedClassName.simpleName
-                    val leafSimple = type.leafClassName.simpleName
-                    sb.appendLine("        ${sealedSimple}::class -> kotlin.native.internal.createUninitializedInstance<${leafSimple}>() as T")
+                    whenBlock.addStatement(
+                        "%T::class -> kotlin.native.internal.createUninitializedInstance<%T>() as T",
+                        type.sealedClassName,
+                        type.leafClassName,
+                    )
                 }
                 is ValueOfType.NeedsFake -> {
-                    val simple = type.className.simpleName
-                    val fakeName = fakeSimpleName(type.className)
-                    sb.appendLine("        ${simple}::class -> kotlin.native.internal.createUninitializedInstance<${fakeName}>() as T")
+                    whenBlock.addStatement(
+                        "%T::class -> kotlin.native.internal.createUninitializedInstance<%T>() as T",
+                        type.className,
+                        fakeClassName(type.className),
+                    )
                 }
             }
         }
 
-        sb.appendLine("        else -> throw ${PackageResolver.Mockative.resolve()}ValueCreationNotSupportedException(type)")
-        sb.appendLine("    }")
-        sb.appendLine("}")
+        whenBlock.addStatement("else -> throw %T(type)", valueCreationNotSupportedException)
+        whenBlock.endControlFlow()
 
-        val file = codeGenerator.createNewFile(
-            dependencies = Dependencies(aggregating = true),
-            packageName = makeValueOfPackage,
-            fileName = "MakeValueOf",
-        )
-        file.write(sb.toString().toByteArray())
-        file.close()
+        funBuilder.addCode(whenBlock.build())
+
+        val fileSpec = FileSpec.builder(makeValueOfPackage, "MakeValueOf")
+            .addAnnotation(suppressAnnotation)
+            .addFunction(funBuilder.build())
+            .build()
+
+        fileSpec.writeTo(codeGenerator, Dependencies(aggregating = true))
     }
 }
+
