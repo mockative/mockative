@@ -12,7 +12,7 @@ kotlin {
         jvmMain.configure {
             dependencies {
                 implementation(kotlin("reflect"))
-                implementation("org.objenesis:objenesis:3.3")
+                implementation("org.objenesis:objenesis:3.5")
                 implementation("org.javassist:javassist:3.29.2-GA")
             }
         }
@@ -20,7 +20,7 @@ kotlin {
         androidMain.configure {
             dependencies {
                 implementation(kotlin("reflect"))
-                implementation("org.objenesis:objenesis:3.3")
+                implementation("org.objenesis:objenesis:3.5")
                 implementation("org.javassist:javassist:3.29.2-GA")
             }
         }
