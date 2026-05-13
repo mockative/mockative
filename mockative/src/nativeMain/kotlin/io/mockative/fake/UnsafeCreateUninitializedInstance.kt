@@ -16,6 +16,7 @@ import kotlin.native.internal.createUninitializedInstance
  */
 @InternalMockativeApi
 @OptIn(InternalForKotlinNative::class)
+@Suppress("unused")
 inline fun <reified T> unsafeCreateUninitializedInstance(): T {
     return createUninitializedInstance()
 }
