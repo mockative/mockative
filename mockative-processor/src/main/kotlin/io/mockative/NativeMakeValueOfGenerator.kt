@@ -59,6 +59,8 @@ class NativeMakeValueOfGenerator(
     private val valueCreationNotSupportedException =
         ClassName(PackageResolver.Mockative.resolve().removeSuffix("."), "ValueCreationNotSupportedException")
 
+    private val unsafeCreateMember = MemberName("io.mockative.fake", "unsafeCreateUninitializedInstance")
+
     fun generate() {
         val valueOfTypes = collectValueOfTypes()
         val fakeTypes = valueOfTypes.filterIsInstance<ValueOfType.NeedsFake>()
@@ -208,11 +210,6 @@ class NativeMakeValueOfGenerator(
         val className = fake.className
         val fakeName = fakeSimpleName(className)
 
-        val suppressAnnotation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-            .addMember("%S", "INVISIBLE_MEMBER")
-            .addMember("%S", "INVISIBLE_REFERENCE")
-            .build()
-
         val typeSpecBuilder = TypeSpec.classBuilder(fakeName)
             .addModifiers(KModifier.INTERNAL)
 
@@ -247,7 +244,6 @@ class NativeMakeValueOfGenerator(
         }
 
         val fileSpec = FileSpec.builder(fakePackage, fakeName)
-            .addAnnotation(suppressAnnotation)
             .addType(typeSpecBuilder.build())
             .build()
 
@@ -312,11 +308,6 @@ class NativeMakeValueOfGenerator(
     }
 
     private fun generateMakeValueOf(valueOfTypes: List<ValueOfType>) {
-        val suppressAnnotation = AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-            .addMember("%S", "INVISIBLE_MEMBER")
-            .addMember("%S", "INVISIBLE_REFERENCE")
-            .build()
-
         val funBuilder = FunSpec.builder("makeValueOf")
             .addModifiers(KModifier.INTERNAL, KModifier.ACTUAL)
             .addTypeVariable(TypeVariableName("T"))
@@ -327,11 +318,6 @@ class NativeMakeValueOfGenerator(
                     .addMember("%S", "UNCHECKED_CAST")
                     .build()
             )
-            .addAnnotation(
-                AnnotationSpec.builder(OPT_IN)
-                    .addMember("kotlin.native.internal.InternalForKotlinNative::class")
-                    .build()
-            )
 
         val whenBlock = CodeBlock.builder()
             .beginControlFlow("return when (type)")
@@ -340,22 +326,25 @@ class NativeMakeValueOfGenerator(
             when (type) {
                 is ValueOfType.Concrete -> {
                     whenBlock.addStatement(
-                        "%T::class -> kotlin.native.internal.createUninitializedInstance<%T>() as T",
+                        "%T::class -> %M<%T>() as T",
                         type.className,
+                        unsafeCreateMember,
                         type.className,
                     )
                 }
                 is ValueOfType.SealedLeaf -> {
                     whenBlock.addStatement(
-                        "%T::class -> kotlin.native.internal.createUninitializedInstance<%T>() as T",
+                        "%T::class -> %M<%T>() as T",
                         type.sealedClassName,
+                        unsafeCreateMember,
                         type.leafClassName,
                     )
                 }
                 is ValueOfType.NeedsFake -> {
                     whenBlock.addStatement(
-                        "%T::class -> kotlin.native.internal.createUninitializedInstance<%T>() as T",
+                        "%T::class -> %M<%T>() as T",
                         type.className,
+                        unsafeCreateMember,
                         fakeClassName(type.className),
                     )
                 }
@@ -380,7 +369,6 @@ class NativeMakeValueOfGenerator(
         funBuilder.addCode(whenBlock.build())
 
         val fileSpec = FileSpec.builder(makeValueOfPackage, "MakeValueOf")
-            .addAnnotation(suppressAnnotation)
             .addFunction(funBuilder.build())
             .build()
 
