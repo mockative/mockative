@@ -41,9 +41,9 @@ kotlin {
 
     jvm()
 
-    androidLibrary {
+    android {
         minSdk = 21
-        compileSdk = 36
+        compileSdk = 37
         namespace = "com.mockative.example.feature_two"
 
         // Opt-in to enable and configure host-side (unit) tests
@@ -74,15 +74,15 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
             }
         }
 
         commonTest {
             dependencies {
                 implementation("io.mockative:mockative:3.2.3")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
                 implementation(kotlin("test"))
             }
         }
@@ -96,19 +96,7 @@ kotlin {
 
         androidMain {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-            }
-        }
-
-        getByName("androidHostTest") {
-            dependencies {
-            }
-        }
-
-        getByName("androidHostTest") {
-            dependencies {
-                // implementation(kotlin("test-junit"))
-                // implementation("junit:junit:4.13.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
             }
         }
     }

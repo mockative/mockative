@@ -1,6 +1,8 @@
 package io.mockative
 
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.NativePlatformInfo
+import com.google.devtools.ksp.processing.PlatformInfo
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
@@ -14,7 +16,10 @@ import io.mockative.kotlinpoet.fullSimpleName
 class MockativeSymbolProcessor(
     private val codeGenerator: CodeGenerator,
     private val options: Map<String, String>,
+    private val platforms: List<PlatformInfo>,
 ) : SymbolProcessor {
+    private var hasGeneratedNativeMakeValueOf = false
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         try {
             log.info("options: $options")
@@ -76,6 +81,15 @@ class MockativeSymbolProcessor(
                 log.info("  Writing function for '$mockClassName' to '${file.relativePath}'")
 
                 file.writeTo(codeGenerator, aggregating = false)
+            }
+
+            // Generate native-specific makeValueOf (only for main source sets with @Mockable types)
+            val isNative = platforms.any { it is NativePlatformInfo }
+            if (isNative && !hasGeneratedNativeMakeValueOf && processableTypes.isNotEmpty()) {
+                log.info("Generating native makeValueOf for platform: ${platforms.map { it.platformName }}")
+                val generator = NativeMakeValueOfGenerator(codeGenerator, configuration, processableTypes)
+                generator.generate()
+                hasGeneratedNativeMakeValueOf = true
             }
 
             return emptyList()

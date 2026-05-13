@@ -41,9 +41,9 @@ kotlin {
 
     jvm()
 
-    androidLibrary {
+    android {
         minSdk = 21
-        compileSdk = 36
+        compileSdk = 37
         namespace = "io.mockative"
 
         // Opt-in to enable and configure host-side (unit) tests
@@ -77,14 +77,14 @@ kotlin {
                 implementation(project(":example:feature-one"))
                 implementation(project(":example:feature-two"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
             }
         }
 
         commonTest {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
                 implementation(kotlin("test"))
             }
         }
@@ -98,48 +98,8 @@ kotlin {
 
         androidMain {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-            }
-        }
-
-        getByName("androidHostTest") {
-            dependencies {
-            }
-        }
-
-        getByName("androidHostTest") {
-            dependencies {
-                // implementation(kotlin("test-junit"))
-                // implementation("junit:junit:4.13.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
             }
         }
     }
 }
-
-//android {
-//    compileSdk = 33
-//    namespace = "io.mockative"
-//
-////    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-//
-//    defaultConfig {
-//        minSdk = 21
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//
-//        testInstrumentationRunnerArguments["clearPackageData"] = "true"
-//
-//        testOptions {
-//            execution = "ANDROIDX_TEST_ORCHESTRATOR"
-//        }
-//    }
-//
-//    compileOptions {
-//        sourceCompatibility = JavaVersion.VERSION_11
-//        targetCompatibility = JavaVersion.VERSION_11
-//    }
-//
-//    dependencies {
-//        androidTestImplementation("androidx.test:runner:1.5.2")
-//        androidTestUtil("androidx.test:orchestrator:1.4.2")
-//    }
-//}
