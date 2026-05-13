@@ -308,6 +308,8 @@ class NativeMakeValueOfGenerator(
     }
 
     private fun generateMakeValueOf(valueOfTypes: List<ValueOfType>) {
+        val internalMockativeApi = ClassName("io.mockative", "InternalMockativeApi")
+
         val funBuilder = FunSpec.builder("makeValueOf")
             .addModifiers(KModifier.INTERNAL, KModifier.ACTUAL)
             .addTypeVariable(TypeVariableName("T"))
@@ -316,6 +318,11 @@ class NativeMakeValueOfGenerator(
             .addAnnotation(
                 AnnotationSpec.builder(SUPPRESS_ANNOTATION)
                     .addMember("%S", "UNCHECKED_CAST")
+                    .build()
+            )
+            .addAnnotation(
+                AnnotationSpec.builder(OPT_IN)
+                    .addMember("%T::class", internalMockativeApi)
                     .build()
             )
 
