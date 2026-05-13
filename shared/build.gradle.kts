@@ -115,31 +115,3 @@ kotlin {
         }
     }
 }
-
-//android {
-//    compileSdk = 33
-//    namespace = "io.mockative"
-//
-////    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-//
-//    defaultConfig {
-//        minSdk = 21
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//
-//        testInstrumentationRunnerArguments["clearPackageData"] = "true"
-//
-//        testOptions {
-//            execution = "ANDROIDX_TEST_ORCHESTRATOR"
-//        }
-//    }
-//
-//    compileOptions {
-//        sourceCompatibility = JavaVersion.VERSION_11
-//        targetCompatibility = JavaVersion.VERSION_11
-//    }
-//
-//    dependencies {
-//        androidTestImplementation("androidx.test:runner:1.5.2")
-//        androidTestUtil("androidx.test:orchestrator:1.4.2")
-//    }
-//}
