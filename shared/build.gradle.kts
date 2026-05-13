@@ -101,17 +101,5 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
             }
         }
-
-        getByName("androidHostTest") {
-            dependencies {
-            }
-        }
-
-        getByName("androidHostTest") {
-            dependencies {
-                // implementation(kotlin("test-junit"))
-                // implementation("junit:junit:4.13.2")
-            }
-        }
     }
 }
