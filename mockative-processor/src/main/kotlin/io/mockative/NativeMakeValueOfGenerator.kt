@@ -16,6 +16,7 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.STAR
@@ -53,7 +54,7 @@ class NativeMakeValueOfGenerator(
     private val fakePackage = "${PackageResolver.Mockative.resolve()}fake.generated"
     private val makeValueOfPackage = "${PackageResolver.Mockative.resolve()}fake"
 
-    private val valueOfMember = ClassName(makeValueOfPackage, "valueOf")
+    private val valueOfMember = MemberName(makeValueOfPackage, "valueOf")
     private val valueCreationNotSupportedException =
         ClassName(PackageResolver.Mockative.resolve().removeSuffix("."), "ValueCreationNotSupportedException")
 
@@ -176,6 +177,20 @@ class NativeMakeValueOfGenerator(
             typeSpecBuilder.addSuperinterface(className)
         } else {
             typeSpecBuilder.superclass(className)
+            val primaryConstructor = declaration.primaryConstructor
+            if (primaryConstructor != null && primaryConstructor.parameters.isNotEmpty()) {
+                val codeArgs = mutableListOf<Any>()
+                val formatParts = primaryConstructor.parameters.map { param ->
+                    val paramType = param.type.toTypeName()
+                    codeArgs.add(valueOfMember)
+                    codeArgs.add(paramType)
+                    codeArgs.add(paramType)
+                    "%M<%T>() as %T"
+                }
+                typeSpecBuilder.addSuperclassConstructorParameter(
+                    CodeBlock.of(formatParts.joinToString(", "), *codeArgs.toTypedArray())
+                )
+            }
         }
 
         for (func in declaration.getDeclaredFunctions()) {
@@ -224,7 +239,8 @@ class NativeMakeValueOfGenerator(
                     .build()
             )
             builder.addStatement(
-                "return valueOf<%T>() as %T",
+                "return %M<%T>() as %T",
+                valueOfMember,
                 resolvedReturnType,
                 resolvedReturnType,
             )
@@ -246,7 +262,7 @@ class NativeMakeValueOfGenerator(
             )
             .getter(
                 FunSpec.getterBuilder()
-                    .addStatement("return valueOf<%T>() as %T", typeName, typeName)
+                    .addStatement("return %M<%T>() as %T", valueOfMember, typeName, typeName)
                     .build()
             )
             .build()
