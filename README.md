@@ -20,13 +20,13 @@ Add the `io.mockative` plugin and dependency to your **build.gradle.kts** file:
 
 ```kotlin
 plugins {
-  id("io.mockative") version "3.2.3"
+  id("io.mockative") version "3.3.0"
 }
 
 kotlin {
     commonMain {
         dependencies {
-            implementation("io.mockative:mockative:3.2.3")
+            implementation("io.mockative:mockative:3.3.0")
         }
     }
 }
