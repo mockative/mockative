@@ -79,3 +79,16 @@ interface ValueOfGapService {
     fun acceptNullableEnum(color: Color?)
     fun acceptNullableInterface(value: NonMockableInterface?)
 }
+
+// Interface with function-level type parameters (like CoroutineContext.get)
+interface TypeParameterizedMethods {
+    fun <T> genericFunction(value: T): T
+    fun <K, V> multiGenericFunction(key: K, value: V): Map<K, V>
+}
+
+// Service that takes TypeParameterizedMethods as a parameter,
+// forcing the processor to generate a Fake__ class for it on Native.
+@Mockable
+interface GenericMethodService {
+    fun acceptGenericMethods(handler: TypeParameterizedMethods)
+}
