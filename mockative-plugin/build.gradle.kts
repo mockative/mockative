@@ -28,6 +28,21 @@ kotlin {
     jvmToolchain(11)
 }
 
+val generateVersionProperties by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/mockative-version")
+    val projectVersion = project.version.toString()
+    outputs.dir(outputDir)
+    doLast {
+        val file = outputDir.get().file("mockative-version.properties").asFile
+        file.parentFile.mkdirs()
+        file.writeText("version=$projectVersion\n")
+    }
+}
+
+sourceSets.main {
+    resources.srcDir(generateVersionProperties.map { it.outputs.files.singleFile })
+}
+
 val copySourcesToResources by tasks.registering(Copy::class) {
     from("$rootDir/mockative-test/src")
     into("src/main/resources/src/")
