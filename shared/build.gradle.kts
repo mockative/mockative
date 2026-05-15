@@ -5,7 +5,7 @@ plugins {
 
     id("com.android.kotlin.multiplatform.library")
 
-    id("io.mockative") version "3.3.1-SNAPSHOT"
+    id("io.mockative") version "3.3.1"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
