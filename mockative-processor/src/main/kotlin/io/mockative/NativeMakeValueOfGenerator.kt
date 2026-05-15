@@ -1,7 +1,5 @@
 package io.mockative
 
-import com.google.devtools.ksp.getDeclaredFunctions
-import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
@@ -23,6 +21,7 @@ import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 
@@ -209,9 +208,26 @@ class NativeMakeValueOfGenerator(
         val declaration = fake.declaration
         val className = fake.className
         val fakeName = fakeSimpleName(className)
+        val classTypeParamResolver = declaration.typeParameters.toTypeParameterResolver()
+
+        val optInAnnotations = collectOptInAnnotations(declaration)
 
         val typeSpecBuilder = TypeSpec.classBuilder(fakeName)
             .addModifiers(KModifier.INTERNAL)
+            .addAnnotation(
+                AnnotationSpec.builder(SUPPRESS_ANNOTATION)
+                    .addMember("%S", "DEPRECATION")
+                    .addMember("%S", "OVERRIDE_DEPRECATION")
+                    .build()
+            )
+
+        if (optInAnnotations.isNotEmpty()) {
+            val optInBuilder = AnnotationSpec.builder(OPT_IN)
+            for (annotation in optInAnnotations) {
+                optInBuilder.addMember("%T::class", annotation)
+            }
+            typeSpecBuilder.addAnnotation(optInBuilder.build())
+        }
 
         if (declaration.classKind == ClassKind.INTERFACE) {
             typeSpecBuilder.addSuperinterface(className)
@@ -221,11 +237,8 @@ class NativeMakeValueOfGenerator(
             if (primaryConstructor != null && primaryConstructor.parameters.isNotEmpty()) {
                 val codeArgs = mutableListOf<Any>()
                 val formatParts = primaryConstructor.parameters.map { param ->
-                    val paramType = param.type.toTypeName()
                     codeArgs.add(valueOfMember)
-                    codeArgs.add(paramType)
-                    codeArgs.add(paramType)
-                    "%M<%T>() as %T"
+                    "%M()"
                 }
                 typeSpecBuilder.addSuperclassConstructorParameter(
                     CodeBlock.of(formatParts.joinToString(", "), *codeArgs.toTypedArray())
@@ -233,14 +246,22 @@ class NativeMakeValueOfGenerator(
             }
         }
 
-        for (func in declaration.getDeclaredFunctions()) {
+        val seenFunctions = mutableSetOf<String>()
+        val seenProperties = mutableSetOf<String>()
+
+        for (func in declaration.getAllFunctions()) {
             if (!func.isAbstract) continue
-            typeSpecBuilder.addFunction(buildFakeFunction(func))
+            val signature = buildFunctionSignature(func)
+            if (!seenFunctions.add(signature)) continue
+            val built = buildFakeFunction(func, classTypeParamResolver) ?: continue
+            typeSpecBuilder.addFunction(built)
         }
 
-        for (prop in declaration.getDeclaredProperties()) {
+        for (prop in declaration.getAllProperties()) {
             if (!prop.isAbstract()) continue
-            typeSpecBuilder.addProperty(buildFakeProperty(prop))
+            if (!seenProperties.add(prop.simpleName.asString())) continue
+            val built = buildFakeProperty(prop, classTypeParamResolver) ?: continue
+            typeSpecBuilder.addProperty(built)
         }
 
         val fileSpec = FileSpec.builder(fakePackage, fakeName)
@@ -250,14 +271,82 @@ class NativeMakeValueOfGenerator(
         fileSpec.writeTo(codeGenerator, Dependencies(aggregating = false))
     }
 
-    private fun buildFakeFunction(func: KSFunctionDeclaration): FunSpec {
+    private fun collectOptInAnnotations(declaration: KSClassDeclaration): Set<ClassName> {
+        val result = mutableSetOf<ClassName>()
+        fun collectFrom(decl: KSClassDeclaration) {
+            for (annotation in decl.annotations) {
+                val annotationType = annotation.annotationType.resolve().declaration as? KSClassDeclaration ?: continue
+                val isOptIn = annotationType.annotations.any {
+                    val name = it.annotationType.resolve().declaration.qualifiedName?.asString()
+                    name == "kotlin.RequiresOptIn" || name == "kotlin.OptIn"
+                }
+                if (isOptIn) {
+                    result.add(annotationType.toClassName())
+                }
+            }
+            for (func in decl.getAllFunctions()) {
+                for (annotation in func.annotations) {
+                    val annotationType = annotation.annotationType.resolve().declaration as? KSClassDeclaration ?: continue
+                    val isOptIn = annotationType.annotations.any {
+                        val name = it.annotationType.resolve().declaration.qualifiedName?.asString()
+                        name == "kotlin.RequiresOptIn" || name == "kotlin.OptIn"
+                    }
+                    if (isOptIn) {
+                        result.add(annotationType.toClassName())
+                    }
+                }
+            }
+            for (prop in decl.getAllProperties()) {
+                for (annotation in prop.annotations) {
+                    val annotationType = annotation.annotationType.resolve().declaration as? KSClassDeclaration ?: continue
+                    val isOptIn = annotationType.annotations.any {
+                        val name = it.annotationType.resolve().declaration.qualifiedName?.asString()
+                        name == "kotlin.RequiresOptIn" || name == "kotlin.OptIn"
+                    }
+                    if (isOptIn) {
+                        result.add(annotationType.toClassName())
+                    }
+                }
+            }
+        }
+        collectFrom(declaration)
+        return result
+    }
+
+    private fun buildFunctionSignature(func: KSFunctionDeclaration): String {
+        val name = func.simpleName.asString()
+        val params = func.parameters.joinToString(",") { p ->
+            p.type.resolve().declaration.qualifiedName?.asString() ?: "_"
+        }
+        return "$name($params)"
+    }
+
+    private fun buildFakeFunction(
+        func: KSFunctionDeclaration,
+        parentResolver: com.squareup.kotlinpoet.ksp.TypeParameterResolver,
+    ): FunSpec? {
         val name = func.simpleName.asString()
         val returnType = func.returnType?.resolve()
         val returnTypeName = returnType?.declaration?.qualifiedName?.asString() ?: "kotlin.Unit"
         val isSuspend = func.modifiers.contains(Modifier.SUSPEND)
 
+        val funcResolver = try {
+            func.typeParameters.toTypeParameterResolver(parentResolver)
+        } catch (_: Exception) {
+            return null
+        }
+
         val builder = FunSpec.builder(name)
             .addModifiers(KModifier.OVERRIDE)
+
+        for (typeParam in func.typeParameters) {
+            val bounds = typeParam.bounds.mapNotNull { bound ->
+                try { bound.toTypeName(funcResolver) } catch (_: Exception) { null }
+            }.toList()
+            builder.addTypeVariable(
+                TypeVariableName(typeParam.name.asString(), bounds)
+            )
+        }
 
         if (isSuspend) {
             builder.addModifiers(KModifier.SUSPEND)
@@ -265,43 +354,56 @@ class NativeMakeValueOfGenerator(
 
         for (param in func.parameters) {
             val paramName = param.name?.asString() ?: "_"
-            val paramType = param.type.toTypeName()
+            val paramType = try {
+                param.type.toTypeName(funcResolver)
+            } catch (_: Exception) {
+                return null
+            }
             builder.addParameter(paramName, paramType)
         }
 
         if (returnTypeName != "kotlin.Unit") {
-            val resolvedReturnType = func.returnType!!.toTypeName()
+            val resolvedReturnType = try {
+                func.returnType!!.toTypeName(funcResolver)
+            } catch (_: Exception) {
+                return null
+            }
             builder.returns(resolvedReturnType)
-            builder.addAnnotation(
-                AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-                    .addMember("%S", "UNCHECKED_CAST")
-                    .build()
-            )
-            builder.addStatement(
-                "return %M<%T>() as %T",
-                valueOfMember,
-                resolvedReturnType,
-                resolvedReturnType,
-            )
         }
+
+        builder.addStatement(
+            "throw %T(%S)",
+            ClassName("kotlin", "NotImplementedError"),
+            "Mockative: Fake implementation of '${name}' should not be called. " +
+                "This is a stub used during mock creation. If you see this, " +
+                "the mock may not be configured correctly.",
+        )
 
         return builder.build()
     }
 
-    private fun buildFakeProperty(prop: KSPropertyDeclaration): PropertySpec {
+    private fun buildFakeProperty(
+        prop: KSPropertyDeclaration,
+        parentResolver: com.squareup.kotlinpoet.ksp.TypeParameterResolver,
+    ): PropertySpec? {
         val name = prop.simpleName.asString()
-        val typeName = prop.type.toTypeName()
+        val typeName = try {
+            prop.type.toTypeName(parentResolver)
+        } catch (_: Exception) {
+            return null
+        }
 
         return PropertySpec.builder(name, typeName)
             .addModifiers(KModifier.OVERRIDE)
-            .addAnnotation(
-                AnnotationSpec.builder(SUPPRESS_ANNOTATION)
-                    .addMember("%S", "UNCHECKED_CAST")
-                    .build()
-            )
             .getter(
                 FunSpec.getterBuilder()
-                    .addStatement("return %M<%T>() as %T", valueOfMember, typeName, typeName)
+                    .addStatement(
+                        "throw %T(%S)",
+                        ClassName("kotlin", "NotImplementedError"),
+                        "Mockative: Fake implementation of '${name}' should not be called. " +
+                            "This is a stub used during mock creation. If you see this, " +
+                            "the mock may not be configured correctly.",
+                    )
                     .build()
             )
             .build()

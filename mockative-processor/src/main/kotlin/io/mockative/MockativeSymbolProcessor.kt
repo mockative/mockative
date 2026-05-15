@@ -85,6 +85,7 @@ class MockativeSymbolProcessor(
 
             // Generate native-specific makeValueOf (only for main source sets with @Mockable types)
             val isNative = platforms.any { it is NativePlatformInfo }
+            log.info("platforms: ${platforms.map { it.platformName }}, isNative=$isNative, processableTypes=${processableTypes.size}")
             if (isNative && !hasGeneratedNativeMakeValueOf && processableTypes.isNotEmpty()) {
                 log.info("Generating native makeValueOf for platform: ${platforms.map { it.platformName }}")
                 val generator = NativeMakeValueOfGenerator(codeGenerator, configuration, processableTypes)
