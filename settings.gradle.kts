@@ -7,8 +7,8 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("multiplatform") version "2.3.0" apply false
-        kotlin("plugin.allopen") version "2.3.0" apply false
+        kotlin("multiplatform") version "2.3.20" apply false
+        kotlin("plugin.allopen") version "2.3.20" apply false
 
         id("com.google.devtools.ksp") version "2.3.7" apply false
 
