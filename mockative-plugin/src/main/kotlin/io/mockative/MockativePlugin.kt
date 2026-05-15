@@ -9,7 +9,13 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.io.File
 
 abstract class MockativePlugin : Plugin<Project> {
-    private val version = "3.2.3"
+    private val version: String by lazy {
+        val props = java.util.Properties()
+        MockativePlugin::class.java.classLoader
+            .getResourceAsStream("mockative-version.properties")
+            ?.use { props.load(it) }
+        props.getProperty("version") ?: error("Mockative plugin version not found in mockative-version.properties")
+    }
 
     override fun apply(project: Project) {
         project.pluginManager.apply("com.google.devtools.ksp")
