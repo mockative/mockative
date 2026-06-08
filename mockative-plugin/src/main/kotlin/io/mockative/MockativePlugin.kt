@@ -52,7 +52,7 @@ abstract class MockativePlugin : Plugin<Project> {
 
         // Add `mockative-processor` as dependency of KSP configurations
         project.configurations.whenObjectAdded { configuration ->
-            if (configuration.name != "ksp" && configuration.name.startsWith("ksp")) {
+            if (configuration.name != "ksp" && configuration.name.startsWith("ksp") && !configuration.name.contains("Metadata")) {
                 project.dependencies.add(configuration.name, "io.mockative:mockative-processor:$version")
             }
         }
