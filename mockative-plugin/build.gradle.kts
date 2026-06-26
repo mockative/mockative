@@ -31,6 +31,7 @@ kotlin {
 val generateVersionProperties by tasks.registering {
     val outputDir = layout.buildDirectory.dir("generated/mockative-version")
     val projectVersion = project.version.toString()
+    inputs.property("version", projectVersion)
     outputs.dir(outputDir)
     doLast {
         val file = outputDir.get().file("mockative-version.properties").asFile
